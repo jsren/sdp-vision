@@ -11,10 +11,10 @@ import sys
 OUR_NAME = "Team E"
 
 ROBOT_DESCRIPTIONS = {
-    'Team E': {'main_colour':'blue', 'side_colour':'green'},
+    #'Team E': {'main_colour':'blue', 'side_colour':'green'},
     'Team 0': {'main_colour':'yellow', 'side_colour':'green'},
     'Team 1': {'main_colour':'blue', 'side_colour':'pink'},
-    'Team 2': {'main_colour':'yellow', 'side_colour':'pink'}
+    #'Team 2': {'main_colour':'yellow', 'side_colour':'pink'}
 }
 
 class VisionLauncher(object):

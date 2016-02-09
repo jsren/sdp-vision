@@ -5,6 +5,7 @@ import warnings
 from findHSV import CalibrationGUI
 #import matplotlib.pyplot as plt
 from scipy.cluster.vq import kmeans
+from math import degrees, atan2
 
 # Turn off warnings for PolynomialFit
 warnings.simplefilter('ignore', np.RankWarning)
@@ -17,9 +18,9 @@ Center = namedtuple('Center', 'x y')
 NUMBER_OF_MAIN_CIRCLES_PER_COLOR = 4
 NUMBER_OF_SIDE_CIRCLES_PER_COLOR = 16
 
-ROBOT_DISTANCE = 50
+ROBOT_DISTANCE = 40
 
-INIT_STEPS = 20
+INITDISPLACEMENT = 0.0
 
 
 class Tracker(object):
@@ -329,15 +330,14 @@ class CircleTracker(Tracker):
 
                     for (color, subcircs) in circles.iteritems():
                         if color not in self.side_colors: continue
-                        if color != "pink": print color, len(subcircs)
 
                         for circle in subcircs:
                             # Convert contour into circle
                             (x0, y0), _ = cv2.minEnclosingCircle(circle)
 
                             d2 = ((x0-cl[0])**2 + (y0-cl[1])**2)
-                            if d2 < 50 ** 2:
-                                print "[INFO] Circle distances: " + str(d2**0.5), color
+                            # if d2 < 50 ** 2:
+                            #     print "[INFO] Circle distances: " + str(d2**0.5), color
                             if (x0-cl[0])**2 + (y0-cl[1])**2 < ROBOT_DISTANCE**2:
                                 near_circles[color].append(circle)
 
@@ -544,7 +544,7 @@ class RobotInstance(object):
     _present = False
 
     def __init__(self, name, m_color, s_color):
-        self.queue_size = 5
+        self.queue_size = 3
         self.x = list()
         self.y = list()
         self.main_color = m_color
@@ -553,6 +553,7 @@ class RobotInstance(object):
         self.side_x = list()
         self.side_y = list()
         self.age = 0
+        self.angle = list()
 
     def update(self, x, y, m_color, s_color, side_x, side_y):
         if self.main_color == m_color and self.side_color == s_color:
@@ -560,6 +561,7 @@ class RobotInstance(object):
             self.y.insert(0, y); self.y = self.y[:self.queue_size]
             self.side_y.insert(0, side_y); self.side_y = self.side_y[:self.queue_size]
             self.side_x.insert(0, side_x); self.side_x = self.side_x[:self.queue_size]
+            self.angle.insert(0, self.get_robot_heading()); self.angle = self.angle[:self.queue_size]
             self._present = True
             self.age = 30
             return True
@@ -575,8 +577,40 @@ class RobotInstance(object):
     def get_coordinates(self):
         return np.median(self.x), np.median(self.y), np.median(self.side_x), np.median(self.side_y)
 
+    def angleOfLine(self, point1, point2):
+        return -degrees(atan2(point1[1]-point2[1], point2[0]-point1[0]))
+
+
+    def get_robot_heading(self):
+        # Get angle between points
+        x, y, sx, sy = self.get_coordinates()
+        angle = self.angleOfLine(np.array([x, y]),
+                                 np.array([sx, sy]))
+
+        return angle
+
+        # # TODO: Confirm this?
+        # if angle >=0 and angle <= 180 + INITDISPLACEMENT:
+        #     angle -= INITDISPLACEMENT
+        # elif angle > -180 and angle <= INITDISPLACEMENT:
+        #     angle -= INITDISPLACEMENT
+        # elif angle > INITDISPLACEMENT and angle < 0:
+        #     angle -= -INITDISPLACEMENT
+        #
+        # if angle <= 180 and angle > 180 + INITDISPLACEMENT:
+        #     angle -= INITDISPLACEMENT + 360
+        #
+        # return angle
+
+    def get_angle(self):
+        return np.median(self.angle)
+
     def reset(self):
         self.x = list()
         self.y = list()
         self.side_x = list()
         self.side_y = list()
+
+
+
+

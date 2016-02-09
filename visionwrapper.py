@@ -113,8 +113,8 @@ class VisionWrapper:
             if not r.is_present(): continue
             clx, cly, x, y = r.get_coordinates()
             if r.age >0:
-                print r.main_color, r.side_color
                 cv2.imshow('frame2', cv2.circle(self.frame, (int(clx), int(cly)), 20, BGR_COMMON['black'], 2, 0))
+                print r.name, r.get_angle()
 
 
 
