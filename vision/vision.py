@@ -142,11 +142,11 @@ class Vision:
         video0_old = {}
         
         #if pitch == 'pitch0':
-        #attributes = ["bright", "contrast", "color", "hue"]
-        #video0_new = {"bright": 23296, "contrast": 26384, "color": 65408, "hue": 38072}
+        attributes = ["bright", "contrast", "color", "hue"]
+        video0_new = {"bright": 23296, "contrast": 26384, "color": 65408, "hue": 38072}
         #else:
-        attributes = ["bright", "contrast", "color", "hue", "Red Balance", "Blue Balance"]
-        video0_new = {"bright": 211, "contrast": 127, "color": 74, "hue": 23,"Red Balance": 17, "Blue Balance" : -8}
+        #attributes = ["bright", "contrast", "color", "hue", "Red Balance", "Blue Balance"]
+        #video0_new = {"bright": 211, "contrast": 127, "color": 74, "hue": 23,"Red Balance": 17, "Blue Balance" : -8}
 
         for attr in attributes:
             p = subprocess.Popen(["v4lctl", "show", attr], stdout=subprocess.PIPE)

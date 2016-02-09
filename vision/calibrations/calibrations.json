@@ -38,7 +38,7 @@
                 "contrast": 0.0
             }, 
             "yellow": {
-               "erode": 0.0, 
+                "erode": 0.0, 
                 "min": [
                     30.0, 
                     145.0, 
@@ -91,24 +91,6 @@
                 "open": 0.0, 
                 "contrast": 0.0
             }, 
-            "dot": {
-                "erode": 0.0, 
-                "min": [
-                    0.0, 
-                    0.0, 
-                    3.0
-                ], 
-                "max": [
-                    360.0, 
-                    255.0, 
-                    91.0
-                ], 
-                "highpass": 0.0, 
-                "blur": 0, 
-                "close": 0.0, 
-                "open": 0.0, 
-                "contrast": 0.0
-            }, 
             "red": {
                 "erode": 0.0, 
                 "min": [
@@ -126,7 +108,25 @@
                 "close": 0.0, 
                 "open": 0.0, 
                 "contrast": 1.0
-            } 
+            }, 
+            "dot": {
+                "erode": 0.0, 
+                "min": [
+                    0.0, 
+                    0.0, 
+                    3.0
+                ], 
+                "max": [
+                    360.0, 
+                    255.0, 
+                    91.0
+                ], 
+                "highpass": 0.0, 
+                "blur": 0, 
+                "close": 0.0, 
+                "open": 0.0, 
+                "contrast": 0.0
+            }
         }, 
         "PITCH1": {
             "blue": {
@@ -218,24 +218,6 @@
                 "open": 0.0, 
                 "contrast": 1.0
             }, 
-            "dot": {
-                "erode": 0.0, 
-                "min": [
-                    23.0, 
-                    0.0, 
-                    149.0
-                ], 
-                "max": [
-                    51.0, 
-                    56.0, 
-                    249.0
-                ], 
-                "highpass": 0.0, 
-                "blur": 0, 
-                "close": 0.0, 
-                "open": 0.0, 
-                "contrast": 100.0
-            }, 
             "red": {
                 "erode": 0.0, 
                 "min": [
@@ -253,6 +235,24 @@
                 "close": 0.0, 
                 "open": 0.0, 
                 "contrast": 0.0
+            }, 
+            "dot": {
+                "erode": 0.0, 
+                "min": [
+                    23.0, 
+                    0.0, 
+                    149.0
+                ], 
+                "max": [
+                    51.0, 
+                    56.0, 
+                    249.0
+                ], 
+                "highpass": 0.0, 
+                "blur": 0, 
+                "close": 0.0, 
+                "open": 0.0, 
+                "contrast": 100.0
             }
         }
     }

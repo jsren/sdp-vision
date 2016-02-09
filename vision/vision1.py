@@ -1,6 +1,5 @@
 import cv2
 import tools
-from tracker import RobotTracker
 from tracker1 import CircleTracker, BallTracker
 from multiprocessing import Process, Queue
 from collections import namedtuple
@@ -25,8 +24,6 @@ class Vision:
 
     def __init__(self,
                  pitch,
-                 color,
-                 our_side,
                  frame_shape,
                  frame_center,
                  calibration):
@@ -38,13 +35,10 @@ class Vision:
             [string] color      color of our robot
             [string] our_side   our side
         """
+        self.pitch = pitch
 
         self.v4l_settings()
-        #self.GUI = GUI(calibration=calibration, pitch=pitch, launch=self)
 
-        self.pitch = pitch
-        self.color = color
-        self.our_side = our_side
         self.frame_center = frame_center
 
         height, width, channels = frame_shape
@@ -52,85 +46,14 @@ class Vision:
         # Find the zone division
         self.zones = zones = self._get_zones(width, height)
 
-        opponent_color = self._get_opponent_color(color)
 
-
-        if our_side == 'left':
-            self.us = [
-                RobotTracker(
-                    color=color,
-                    crop=zones[0],
-                    offset=zones[0][0],
-                    pitch=pitch,
-                    name='Our Defender',
-                    calibration=calibration),   # defender
-                RobotTracker(
-                    color=color,
-                    crop=zones[2],
-                    offset=zones[2][0],
-                    pitch=pitch,
-                    name='Our Attacker',
-                    calibration=calibration)   # attacker
-            ]
-
-            self.opponents = [
-                RobotTracker(
-                    color=opponent_color,
-                    crop=zones[3],
-                    offset=zones[3][0],
-                    pitch=pitch,
-                    name='Their Defender',
-                    calibration=calibration),
-                RobotTracker(
-                    color=opponent_color,
-                    crop=zones[1],
-                    offset=zones[1][0],
-                    pitch=pitch,
-                    name='Their Attacker',
-                    calibration=calibration)
-
-            ]
-        else:
-            self.us = [
-                RobotTracker(
-                    color=color,
-                    crop=zones[3],
-                    offset=zones[3][0],
-                    pitch=pitch,
-                    name='Our Defender',
-                    calibration=calibration),
-                RobotTracker(
-                    color=color,
-                    crop=zones[1],
-                    offset=zones[1][0],
-                    pitch=pitch,
-                    name='Our Attacker',
-                    calibration=calibration)
-            ]
-
-            self.opponents = [
-                RobotTracker(
-                    color=opponent_color,
-                    crop=zones[0],
-                    offset=zones[0][0],
-                    pitch=pitch,
-                    name='Their Defender',
-                    calibration=calibration),   # defender
-                RobotTracker(
-                    color=opponent_color,
-                    crop=zones[2],
-                    offset=zones[2][0],
-                    pitch=pitch,
-                    name='Their Attacker',
-                    calibration=calibration)
-            ]
 
         # Set up trackers
         self.ball_tracker = BallTracker(
            (0, width, 0, height), 0, pitch, calibration)
 
         self.circle_tracker = CircleTracker(
-            ['yellow', 'blue'], ['green', 'pink'], (0, width, 0, height), pitch, calibration, 20)
+            ['yellow', 'blue'], ['green', 'pink'], (0, width, 0, height), pitch, calibration)
 
 
 
@@ -139,11 +62,13 @@ class Vision:
         # it would be nice to reset settings after executing the program..
         video0_old = {}
         # for faraway room
-        attributes = ["bright", "contrast", "color", "hue"]
-        video0_new = {"bright": 23296, "contrast": 28384, "color": 65408, "hue": 38072}
+        if self.pitch == 1:
+            attributes = ["bright", "contrast", "color", "hue"]
+            video0_new = {"bright": 23296, "contrast": 28384, "color": 65408, "hue": 38072}
         # for closest room
-        # attributes = ["bright", "contrast", "color", "hue", "Red Balance", "Blue Balance"]
-        # video0_new = {"bright": 211, "contrast": 127, "color": 84, "hue": 23,"Red Balance": 5, "Blue Balance" : 0}
+        elif self.pitch == 0:
+            attributes = ["bright", "contrast", "color", "hue", "Red Balance", "Blue Balance"]
+            video0_new = {"bright": 211, "contrast": 127, "color": 84, "hue": 23,"Red Balance": 5, "Blue Balance" : 0}
 
         for attr in attributes:
             p = subprocess.Popen(["v4lctl", "show", attr], stdout=subprocess.PIPE)
@@ -178,7 +103,8 @@ class Vision:
     def _get_opponent_color(self, our_color):
         return (TEAM_COLORS - set([our_color])).pop()
 
-    def locate(self, frame):
+
+    def locate1(self, frame):
         """
         Find objects on the pitch using multiprocessing.
 
@@ -187,32 +113,48 @@ class Vision:
         """
         # Run trackers as processes
         positions = self._run_trackers(frame)
-        # Correct for perspective
-        positions = self.get_adjusted_positions(positions)
 
-        # Wrap list of positions into a dictionary
-        keys = ['our_defender',
-                'our_attacker',
-                'their_defender',
-                'their_attacker',
-                'ball']
-        regular_positions = dict()
-        for i, key in enumerate(keys):
-            regular_positions[key] = positions[i]
+        regular_positions = positions[0]
+        regular_positions.update(positions[1])
 
-        # Error check we got a frame
-        height, width, channels = frame.shape if frame is not None \
-            else (None, None, None)
+        return regular_positions
 
-        model_positions = {
-            'our_attacker': self.to_info(positions[1], height),
-            'their_attacker': self.to_info(positions[3], height),
-            'our_defender': self.to_info(positions[0], height),
-            'their_defender': self.to_info(positions[2], height),
-            'ball': self.to_info(positions[4], height)
-        }
 
-        return model_positions, regular_positions
+    # def locate(self, frame):
+    #     """
+    #     Find objects on the pitch using multiprocessing.
+    #
+    #     Returns:
+    #         [5-tuple] Location of the robots and the ball
+    #     """
+    #     # Run trackers as processes
+    #     positions = self._run_trackers(frame)
+    #     # Correct for perspective
+    #     positions = self.get_adjusted_positions(positions)
+    #
+    #     # Wrap list of positions into a dictionary
+    #     keys = ['our_defender',
+    #             'our_attacker',
+    #             'their_defender',
+    #             'their_attacker',
+    #             'ball']
+    #     regular_positions = dict()
+    #     for i, key in enumerate(keys):
+    #         regular_positions[key] = positions[i]
+    #
+    #     # Error check we got a frame
+    #     height, width, channels = frame.shape if frame is not None \
+    #         else (None, None, None)
+    #
+    #     model_positions = {
+    #         'our_attacker': self.to_info(positions[1], height),
+    #         'their_attacker': self.to_info(positions[3], height),
+    #         'our_defender': self.to_info(positions[0], height),
+    #         'their_defender': self.to_info(positions[2], height),
+    #         'ball': self.to_info(positions[4], height)
+    #     }
+    #
+    #     return model_positions, regular_positions
 
     def get_adjusted_point(self, point):
         """
@@ -401,69 +343,83 @@ class Camera(object):
 
 
 
-camera = Camera()
-camera.start_capture()
-
-frame0 = camera.get_frame()
-frame1 =  cv2.GaussianBlur(frame0, (9, 9), 0)
-cv2.imwrite("blurred.jpg", frame1 );
-
-vision = Vision(0, "yellow", "right", frame0.shape,
-                camera.get_adjusted_center(frame0),
-                tools.get_colors(0))
-
-height, width, channels = frame0.shape
-#print height, width, channels
-
-x_ball_prev = 0
-y_ball_prev = 0
-while True:
-    frame0 = camera.get_frame()
-   
-    # This code creates a small red circle around the ball while tracking
-    frame0 = frame0[25:465, 45:600]
-    positions = vision._run_trackers(frame0)
-    cv2.imwrite("reshaped.jpg", frame0) 
-
-    if positions[0] is None or positions[1] is None :
-        pass
-    else:
-        x_ball = positions[0]['x']
-        y_ball = positions[0]['y']
-        # BGR colors in tuples
-        cv2.imshow('frame2', cv2.circle(frame0, (int(x_ball), int(y_ball)), 8, (0, 0, 255), 2, 0))
-        #print "ball corrdinates.  x:", x_ball, ", y:", y_ball
-        #commenting out the print statements makes the camera feed run smoother
-
-        #  cv2.imshow('frame2', cv2.arrowedLine(frame0, (int(x_ball_prev), int(y_ball_prev)), 
-        #         (int(x_ball+(10*(x_ball-x_ball_prev))), int(y_ball+(10*(y_ball-y_ball_prev)))), (0, 255, 0), 3, 10))
-
-        x_ball_prev = x_ball
-        y_ball_prev = y_ball
-        if 'circles' in positions[1].keys():
-            for color in positions[1]['circles'].keys():
-                for crc in positions[1]['circles'][color]:
-                    (x, y), radius = cv2.minEnclosingCircle(crc)
-                    cv2.imshow('frame2', cv2.circle(frame0, (int(x), int(y)), int(radius), BGR_COMMON[color], 2, 0))
-
-        if 'robots' in positions[1].keys():
-            for robot_name in positions[1]['robots'].keys():
-                robot = positions[1]['robots'][robot_name]
-                cv2.imshow('frame2', cv2.circle(frame0, (int(robot['x']), int(robot['y'])), 16, (255, 0, 0), 2, 0))
-
-        '''
-        for i in xrange(len(positions)):
-            if i != 5:
-                print "position:", positions[i]
-            else:
-                for x in positions[i]['coordinates']:
-                    print "circle position:", x
-        print "--- --- --- --- ---"
-        '''
-
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
-
-
-camera.stop_capture()
-cv2.destroyAllWindows()
+# camera = Camera()
+# camera.start_capture()
+#
+# frame0 = camera.get_frame()
+# frame1 =  cv2.GaussianBlur(frame0, (9, 9), 0)
+# cv2.imwrite("blurred.jpg", frame1 );
+#
+# vision = Vision(1, frame0.shape,
+#                 camera.get_adjusted_center(frame0),
+#                 tools.get_colors(0))
+#
+# height, width, channels = frame0.shape
+# #print height, width, channels
+#
+# x_ball_prev = 0
+# y_ball_prev = 0
+#
+# while True:
+#     frame0 = camera.get_frame()
+#
+#     # This code creates a small red circle around the ball while tracking
+#     frame0 = frame0[25:465, 45:600]
+#     positions = vision._run_trackers(frame0)
+#     cv2.imwrite("reshaped.jpg", frame0)
+#
+#     if positions[0] is None or positions[1] is None :
+#         pass
+#     else:
+#         x_ball = positions[0]['x']
+#         y_ball = positions[0]['y']
+#         # BGR colors in tuples
+#         cv2.imshow('frame2', cv2.circle(frame0, (int(x_ball), int(y_ball)), 8, (0, 0, 255), 2, 0))
+#         #print "ball corrdinates.  x:", x_ball, ", y:", y_ball
+#         #commenting out the print statements makes the camera feed run smoother
+#
+#         cv2.imshow('frame2', cv2.arrowedLine(frame0, (int(x_ball_prev), int(y_ball_prev)),
+#                  (int(x_ball+(10*(x_ball-x_ball_prev))), int(y_ball+(10*(y_ball-y_ball_prev)))), (0, 255, 0), 3, 10))
+#
+#
+#         x_ball_prev = x_ball
+#         y_ball_prev = y_ball
+#         if 'circles' in positions[1].keys():
+#             for color in positions[1]['circles'].keys():
+#                 for crc in positions[1]['circles'][color]:
+#                     (x, y), radius = cv2.minEnclosingCircle(crc)
+#                     #cv2.imshow('frame2', cv2.circle(frame0, (int(x), int(y)), int(radius), BGR_COMMON[color], 2, 0))
+#                     cv2.imshow('frame2', cv2.circle(frame0, (int(x), int(y)), int(radius), (255, 0, 0), 2, 0))
+#         '''
+#         if 'robots' in positions[1].keys():
+#             for robot_name in positions[1]['robots'].keys():
+#                 robot = positions[1]['robots'][robot_name]
+#                 cv2.imshow('frame2', cv2.circle(frame0, (int(robot['x']), int(robot['y'])), 16, (255, 0, 0), 2, 0))
+#
+#         if 'clusters' in positions[1].keys():
+#             for cl in positions[1]['clusters']:
+#                 cv2.imshow('frame2', cv2.circle(frame0, (int(cl[0]), int(cl[1])), 20, BGR_COMMON['white'], 2, 0))
+#
+#         if 'robot_coords' in positions[0].keys():
+#             for robot in positions[0]['robot_coords']:
+#                 pass
+#                 #print robot
+#         '''
+#
+#
+#         '''
+#         for i in xrange(len(positions)):
+#             if i != 5:
+#                 print "position:", positions[i]
+#             else:
+#                 for x in positions[i]['coordinates']:
+#                     print "circle position:", x
+#         print "--- --- --- --- ---"
+#         '''
+#
+#         if cv2.waitKey(1) & 0xFF == ord('q'):
+#             break
+#
+#
+# camera.stop_capture()
+# cv2.destroyAllWindows()

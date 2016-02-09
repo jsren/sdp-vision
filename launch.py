@@ -168,5 +168,6 @@ if __name__ == '__main__':
     else:
         print "Role must be 'attack' or 'defend'"
         sys.exit()
+    print args.pitch
     c = Main(pitch=int(args.pitch), color=args.color, our_side=args.side, comm_port=args.comms,
              quick=args.quick, is_attacker=is_attacker)

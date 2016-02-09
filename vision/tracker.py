@@ -3,7 +3,7 @@ import numpy as np
 from collections import namedtuple
 import warnings
 from findHSV import CalibrationGUI
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 
 # Turn off warnings for PolynomialFit
 warnings.simplefilter('ignore', np.RankWarning)
@@ -48,8 +48,8 @@ class Tracker(object):
                 # print adjustments['blur']
 
                 frame =  cv2.GaussianBlur(frame, (9, 9), 0)
-                plt.imshow(frame)
-                plt.show()
+                #plt.imshow(frame)
+                #plt.show()
 
 
             hp = adjustments.get('highpass')

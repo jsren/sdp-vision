@@ -47,15 +47,13 @@ class VisionWrapper:
         # Set up vision
         self.calibration = tools.get_colors(pitch)
         self.vision = Vision(
-            pitch=pitch, color=color, our_side=our_side,
-            frame_shape=self.frame.shape, frame_center=center_point,
-            calibration=self.calibration)
+            pitch=pitch, frame_shape=self.frame.shape,
+            frame_center=center_point, calibration=self.calibration)
 
         # Set up preprocessing and postprocessing
-       # self.postprocessing = Postprocessing()
+        # self.postprocessing = Postprocessing()
         self.preprocessing = Preprocessing()
 
-        self.color = color
         self.side = our_side
 
         self.frameQueue = []
@@ -100,9 +98,9 @@ class VisionWrapper:
 
         # Find object positions
         # model_positions have their y coordinate inverted
-        #self.model_positions, self.regular_positions = self.vision.locate(self.frame)
+        # self.model_positions, self.regular_positions = self.vision.locate(self.frame)
         self.regular_positions = self.vision.locate1(self.frame)
-        #self.model_positions = self.postprocessing.analyze(self.model_positions)
+        # self.model_positions = self.postprocessing.analyze(self.model_positions)
 
         if self.regular_positions['robot_coords']:
             for r_data in self.regular_positions['robot_coords']:

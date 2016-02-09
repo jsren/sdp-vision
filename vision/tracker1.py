@@ -3,8 +3,8 @@ import numpy as np
 from collections import namedtuple
 import warnings
 from findHSV import CalibrationGUI
-import matplotlib.pyplot as plt
-from scipy.cluster.vq import vq, kmeans, whiten
+#import matplotlib.pyplot as plt
+from scipy.cluster.vq import kmeans
 
 # Turn off warnings for PolynomialFit
 warnings.simplefilter('ignore', np.RankWarning)
@@ -17,7 +17,9 @@ Center = namedtuple('Center', 'x y')
 NUMBER_OF_MAIN_CIRCLES_PER_COLOR = 4
 NUMBER_OF_SIDE_CIRCLES_PER_COLOR = 16
 
-ROBOT_DISTANCE = 20
+ROBOT_DISTANCE = 50
+
+INIT_STEPS = 20
 
 
 class Tracker(object):
@@ -52,8 +54,8 @@ class Tracker(object):
                 # print adjustments['blur']
 
                 frame =  cv2.GaussianBlur(frame, (9, 9), 0)
-                plt.imshow(frame)
-                plt.show()
+                #plt.imshow(frame)
+                #plt.show()
 
 
             hp = adjustments.get('highpass')
@@ -69,6 +71,7 @@ class Tracker(object):
             frame_hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
             # Create a mask
+
             frame_mask = cv2.inRange(frame_hsv,
                                      adjustments['min'],
                                      adjustments['max'])
@@ -213,8 +216,7 @@ class CircleTracker(Tracker):
                  side_colors,
                  crop,
                  pitch,
-                 calibration,
-                 initialization_steps):
+                 calibration):
         """
         Tracks all circles of given colors and calls k-nn to find the robots. Maps each one into a different set,
         allowing the calling function to perform identification.
@@ -223,7 +225,6 @@ class CircleTracker(Tracker):
         :param crop         [(left-min, right-max, top-min, bot-max)] - crop coordinates
         :param pitch:       int - pitch number from [0, 1]
         :param calibration: dict - dictionary of calibration values
-        :param initialization_steps:    int, number of find frames to use for finding precise coordinates of robots
         """
 
         self.main_colors = main_colors
@@ -232,8 +233,7 @@ class CircleTracker(Tracker):
         self.crop = crop
         self.pitch = pitch
         self.calibration = calibration
-        self.initialization_steps = initialization_steps
-
+        self.robots = []
 
 
     def find_all_circles(self, frame):
@@ -243,73 +243,133 @@ class CircleTracker(Tracker):
         :return:        {color:[circles]}
         """
         circles = dict()
-        for color in self.colors:
-            circles[color] = []
+        for color in set(self.colors):
+            # Get all circles of the given colour
             contours, hierarchy, mask = self.get_contours(frame.copy(), self.crop, self.calibration[color], '')
 
             circles[color] = contours
 
             # Get only the required number of colors.
-            #if color in self.main_colors:
-            #    circles[color] = self.get_n_largest_contours(
-            #        NUMBER_OF_MAIN_CIRCLES_PER_COLOR, circles[color])
+            if color in self.main_colors:
+                circles[color] = self.get_n_largest_contours(
+                    NUMBER_OF_MAIN_CIRCLES_PER_COLOR, circles[color])
 
-            #if color in self.side_colors:
-            #    circles[color] = self.get_n_largest_contours(
-            #        NUMBER_OF_SIDE_CIRCLES_PER_COLOR, circles[color])
+            elif color in self.side_colors:
+                circles[color] = self.get_n_largest_contours(
+                    NUMBER_OF_SIDE_CIRCLES_PER_COLOR, circles[color])
 
         return circles
 
 
-    def find_color_clusters(self, circles_of_one_color, k=None, iter=20):
+    def initialize_robots(self, frame):
+        circles = self.find_all_circles(frame)
+        
+        clusters = []
+        # Use k-means to find cluster centres for main colors
+        for m_color in self.main_colors:
+
+            cls = self.find_color_clusters(circles[m_color], 1)
+            if cls.any() and len(cls) == 1: # and np.linalg.norm(cls[0] - cls[1]) > 20:
+                cls.append(m_color)
+                clusters.append(cls)
+
+        for c in xrange(len(clusters)):
+            x = clusters[c][0]
+            y = clusters[c][1]
+            m_color = clusters[c][2]
+            self.robots[c] = RobotInstance(x, y, m_color)
+
+
+
+
+
+    def find_color_clusters(self, circles_of_one_color, k, iter=20):
         """
         Returns k cluster centres of one color
         :param frame:   Current camera frame
         :param circles: [circles]
         :param k:       int, number of cluster centres
         :param iter:    int, number of times to iterate k-means
-        :return:    [(x,y)]
+        :return:    [[(x,y)]] - coordinates of found centres
         """
-        circles = np.array([])
+        circles = []
         for crc in circles_of_one_color:
             (x, y), radius = cv2.minEnclosingCircle(crc)
             circles.append((x, y))
+        circles = np.array(circles)
 
-        # Must be called before k-means for some reason
-        whitened = whiten(circles)
+        try:
+            return kmeans(circles, k, iter=iter)[0]
+        except ValueError:
+            return np.array([])
 
-        if not k:
-            # Calculates number of centroids if k is not specified
-            k = np.array((whitened[0], whitened[2]))
-
-        return kmeans(whitened, k)
 
 
     def find(self, frame, queue):
         # Array of contours found.
         circles = self.find_all_circles(frame)
 
-        '''
-        if self.initialization_steps > 0:
-            # Use k-means to find cluster centres for main colors
-            for m_color in self.main_colors:
-                clusters = self.find_color_clusters(circles[m_color])
+
+        # Use k-means to find cluster centres for main colors
+        circle_results = []
+        for m_color in self.main_colors:
+            clusters = []
+
+            
+            cls = self.find_color_clusters(circles[m_color], 2)
+            if cls.any() and len(cls) == 2 and np.linalg.norm(cls[0] - cls[1]) > ROBOT_DISTANCE:
+                #clusters.append(cls)
+                #queue.put({
+                #    "clusters":cls
+                #})
+
+                # For each cluster, find near circles
+                for cl in cls:
+                    near_circles = { k : [] for k in self.side_colors }
+
+                    for (color, subcircs) in circles.iteritems():
+                        if color not in self.side_colors: continue
+                        if color != "pink": print color, len(subcircs)
+
+                        for circle in subcircs:
+                            # Convert contour into circle
+                            (x0, y0), _ = cv2.minEnclosingCircle(circle)
+
+                            d2 = ((x0-cl[0])**2 + (y0-cl[1])**2)
+                            if d2 < 50 ** 2:
+                                print "[INFO] Circle distances: " + str(d2**0.5), color
+                            if (x0-cl[0])**2 + (y0-cl[1])**2 < ROBOT_DISTANCE**2:
+                                near_circles[color].append(circle)
 
 
+                    # Find the significant side circle
+                    if len(near_circles[self.side_colors[0]]) == 0 or len(near_circles[self.side_colors[1]]) == 0:
+                        continue
+                    if len(near_circles[self.side_colors[0]]) > len(near_circles[self.side_colors[1]]):
+                        significant_circle = self.get_largest_contour(near_circles[self.side_colors[1]])
+                        s_color = self.side_colors[1]
+                    else:
+                        significant_circle = self.get_largest_contour(near_circles[self.side_colors[0]])
+                        s_color = self.side_colors[0]
+
+                    (x, y), radius = cv2.minEnclosingCircle(significant_circle)
+                    circle_results.append({'clx': cl[0], 'cly': cl[1], 'x': x, 'y':y, 'main_color': m_color, 'side_color': s_color})
+
+        queue.put(dict(robot_coords=circle_results))
 
 
-        # Use one of the two:
+        #queue.put({
+        #    "clusters":clusters
+        #})
+
+
 
         # 1) returns the most relevant circles found.
-        queue.put({
-            "clusters":clusters
-        })
+        # queue.put({
+        #     "circles":circles
+        # })
 
-        '''
 
-        queue.put({
-            "circles":circles
-        })
         # 2) Returns the calculated robot positions.
 
         # Declare robot colors. side1_count must always be 1 circle
@@ -330,7 +390,7 @@ class CircleTracker(Tracker):
         '''
 
 
-
+    '''
 
     def dist_sq(self, a, b):
         """
@@ -408,6 +468,8 @@ class CircleTracker(Tracker):
                     
         return found_robots
 
+    '''
+
 
 class BallTracker(Tracker):
     """
@@ -478,26 +540,43 @@ class BallTracker(Tracker):
         queue.put(None)
         pass
 
-
 class RobotInstance(object):
-    def __init__(self,
-                 x,
-                 y,
-                 main_color):
-        self.x = x
-        self.y = y
-        self.main_color = main_color
+    _present = False
 
+    def __init__(self, name, m_color, s_color):
+        self.queue_size = 5
+        self.x = list()
+        self.y = list()
+        self.main_color = m_color
+        self.side_color = s_color
+        self.name = name
+        self.side_x = list()
+        self.side_y = list()
+        self.age = 0
 
-    # noinspection PyAttributeOutsideInit
-    def initialize(self,
-                   single_color,
-                   single_circles,
-                   multi_color,
-                   multi_circles):
-        self.single_color = single_color
-        self.single_circles = single_circles
-        self.multi_color = multi_color
-        self.multi_circles = multi_circles
+    def update(self, x, y, m_color, s_color, side_x, side_y):
+        if self.main_color == m_color and self.side_color == s_color:
+            self.x.insert(0, x); self.x = self.x[:self.queue_size]
+            self.y.insert(0, y); self.y = self.y[:self.queue_size]
+            self.side_y.insert(0, side_y); self.side_y = self.side_y[:self.queue_size]
+            self.side_x.insert(0, side_x); self.side_x = self.side_x[:self.queue_size]
+            self._present = True
+            self.age = 30
+            return True
+        else:
+            self.age -= 1
+            if self.age == 0:
+                self.reset()
+            return False
 
+    def is_present(self):
+        return self._present
 
+    def get_coordinates(self):
+        return np.median(self.x), np.median(self.y), np.median(self.side_x), np.median(self.side_y)
+
+    def reset(self):
+        self.x = list()
+        self.y = list()
+        self.side_x = list()
+        self.side_y = list()
