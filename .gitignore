@@ -1,0 +1,15 @@
+.idea/workspace.xml
+
+*~
+
+# TODO: if using external libs without src,
+# add exceptions
+*.pyc
+*/*.pyc
+__pycache__/
+
+# Installer logs 
+pip-log.txt 
+pip-delete-this-directory.txt 
+
+!.gitignore
