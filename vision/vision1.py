@@ -62,13 +62,13 @@ class Vision:
         # it would be nice to reset settings after executing the program..
         video0_old = {}
         # for faraway room
-        if self.pitch == 1:
-            attributes = ["bright", "contrast", "color", "hue"]
-            video0_new = {"bright": 23296, "contrast": 28384, "color": 65408, "hue": 38072}
+        #if self.pitch == 1:
+        attributes = ["bright", "contrast", "color", "hue"]
+        video0_new = {"bright": 23296, "contrast": 28384, "color": 65408, "hue": 38072}
         # for closest room
-        elif self.pitch == 0:
-            attributes = ["bright", "contrast", "color", "hue", "Red Balance", "Blue Balance"]
-            video0_new = {"bright": 211, "contrast": 127, "color": 84, "hue": 23,"Red Balance": 5, "Blue Balance" : 0}
+        #elif self.pitch == 0:
+        #    attributes = ["bright", "contrast", "color", "hue", "Red Balance", "Blue Balance"]
+        #    video0_new = {"bright": 211, "contrast": 127, "color": 84, "hue": 23,"Red Balance": 5, "Blue Balance" : 0}
 
         for attr in attributes:
             p = subprocess.Popen(["v4lctl", "show", attr], stdout=subprocess.PIPE)
@@ -114,7 +114,7 @@ class Vision:
         # Run trackers as processes
         positions = self._run_trackers(frame)
 
-        regular_positions = positions[0]
+        regular_positions = positions[0] if positions[0] is not None else dict()
         regular_positions.update(positions[1])
 
         return regular_positions

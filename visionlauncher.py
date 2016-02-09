@@ -48,7 +48,7 @@ class VisionLauncher(object):
         timer = time.clock()
         try:
             key = 255
-            while key != ord('q'):  # the 'q' key
+            while waitKey(1) & 0xFF != ord('q'):  # the 'q' key
 
                 # update the vision system with the next frame
                 self.visionwrap.update()
@@ -79,5 +79,5 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    vision_launcher = VisionLauncher(int(args.pitch))
+    vision_launcher = VisionLauncher(0)#int(args.pitch))
     vision_launcher.launch_vision()
