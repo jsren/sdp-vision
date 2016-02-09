@@ -1,9 +1,11 @@
-from vision.vision import Vision, Camera
+from vision.vision1 import Vision, Camera
 import vision.tools as tools
 from postprocessing import Postprocessing
 from preprocessing.preprocessing import Preprocessing
+from vision.tracker1 import RobotInstance
 import cv2
 from copy import deepcopy
+from vision.colors import *
 
 class VisionWrapper:
     """
@@ -11,7 +13,7 @@ class VisionWrapper:
 
     """
 
-    def __init__(self, pitch, color, our_side, video_port=0):
+    def __init__(self, pitch, our_side, robot_details):
         """
         Entry point for the SDP system.
 
@@ -33,13 +35,11 @@ class VisionWrapper:
             regular_positions
         """
         assert pitch in [0, 1]
-        assert color in ['yellow', 'blue']
-        assert our_side in ['left', 'right']
 
         self.pitch = pitch
 
         # Set up camera for frames
-        self.camera = Camera(port=video_port, pitch=pitch)
+        self.camera = Camera(port=0, pitch=pitch)
         self.camera.start_capture()
         self.frame = self.camera.get_frame()
         center_point = self.camera.get_adjusted_center(self.frame)
@@ -60,6 +60,30 @@ class VisionWrapper:
 
         self.frameQueue = []
 
+        # Initialize robots
+
+        self.ball = []
+        self.robots = []
+        for r_name in robot_details.keys():
+            self.robots.append(RobotInstance(r_name,
+                                             robot_details[r_name]['main_colour'],
+                                             robot_details[r_name]['side_colour']))
+
+    def get_robot_position(self, robot_name):
+        for r in self.robots:
+            if r.name == robot_name:
+                return r.x, r.y
+
+    def get_circle_position(self, robot_name):
+        for r in self.robots:
+            if r.name == robot_name:
+                return r.side_x, r.side_y
+
+    def get_ball_position(self):
+        if self.regular_positions['ball']:
+            return self.regular_positions['ball']['x'], self.regular_positions['ball']['y']
+
+
 
     def update(self):
         """
@@ -76,8 +100,25 @@ class VisionWrapper:
 
         # Find object positions
         # model_positions have their y coordinate inverted
-        self.model_positions, self.regular_positions = self.vision.locate(self.frame)
+        #self.model_positions, self.regular_positions = self.vision.locate(self.frame)
+        self.regular_positions = self.vision.locate1(self.frame)
         #self.model_positions = self.postprocessing.analyze(self.model_positions)
+
+        if self.regular_positions['robot_coords']:
+            for r_data in self.regular_positions['robot_coords']:
+                for robot in self.robots:
+                    if robot.update(r_data['clx'], r_data['cly'],
+                                    r_data['main_color'], r_data['side_color'], r_data['x'], r_data['y']):
+                        break
+
+        for r in self.robots:
+            if not r.is_present(): continue
+            clx, cly, x, y = r.get_coordinates()
+            if r.age >0:
+                print r.main_color, r.side_color
+                cv2.imshow('frame2', cv2.circle(self.frame, (int(clx), int(cly)), 20, BGR_COMMON['black'], 2, 0))
+
+
 
         #self.model_positions = self.averagePositions(3, self.model_positions)
 
@@ -137,19 +178,3 @@ class VisionWrapper:
 
     def saveCalibrations(self):
         tools.save_colors(self.vision.pitch, self.calibration)
-
-
-'''
-vision = VisionWrapper(0, "blue", "left", 0)
-while True:
-    vision.update()  # get the new frame
-    frame0 = vision.frame  # use that new frame
-
-    # Display the resulting frame
-    cv2.imshow('frame', frame0)
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
-
-vision.camera.stop_capture()
-cv2.destroyAllWindows()
-'''
