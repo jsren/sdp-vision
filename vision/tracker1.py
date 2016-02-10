@@ -518,7 +518,6 @@ class BallTracker(Tracker):
                                                           self.crop,
                                                           color,
                                                           'BALL')
-
             if len(contours) <= 0:
                 #print 'No ball found.'
                 pass
@@ -599,6 +598,9 @@ class RobotInstance(object):
         self.y = list()
         self.side_x = list()
         self.side_y = list()
+
+    def __str__(self):
+        return "Robot '%s' at (%s,%s)"%(self.name, self.x, self.y)
 
     @staticmethod
     def px_to_cm(px):

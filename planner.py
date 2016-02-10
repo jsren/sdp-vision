@@ -73,16 +73,16 @@ def valueInRange(x, center, range):
     return (x >= center - range) and (x <= center + range)
 
 
-def angleOfLine(self, point1, point2):
+def angleOfLine(point1, point2):
     point2 = list(point2-point1)
     return degrees(atan2(point2[1], point2[0]))
 
 
 def get_robot_heading(self):
     # Get angle between points
-    x, y, sx, sy = self.get_coordinates()
-    angle = self.angleOfLine(np.array([x, y]),
-                             np.array([sx, sy]))
+
+    angle = angleOfLine(self.get_robot_midpoint(),
+                        self.get_side_circle())
     # Correct for marker offset
     return angle + INITDISPLACEMENT + 90
 

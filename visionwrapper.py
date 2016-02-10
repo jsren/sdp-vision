@@ -8,6 +8,7 @@ from copy import deepcopy
 from vision.colors import *
 from vision.tracker1 import ROBOT_DISTANCE
 from math import radians, cos, sin
+import numpy as np
 
 x_ball_prev = 0
 y_ball_prev = 0
@@ -80,12 +81,12 @@ class VisionWrapper:
     def get_robot_position(self, robot_name):
         for r in self.robots:
             if r.name == robot_name:
-                return r.x, r.y
+                return np.array(r.x, r.y)
 
     def get_circle_position(self, robot_name):
         for r in self.robots:
             if r.name == robot_name:
-                return r.side_x, r.side_y
+                return np.array(r.side_x, r.side_y)
 
     def get_ball_position(self):
         if self.regular_positions['ball']:
@@ -118,6 +119,10 @@ class VisionWrapper:
         # self.model_positions, self.regular_positions = self.vision.locate(self.frame)
         self.regular_positions = self.vision.locate1(self.frame)
         # self.model_positions = self.postprocessing.analyze(self.model_positions)
+
+        # Draw at least something
+        cv2.imshow('frame2', cv2.putText(self.frame, "TEAM E", (10, 20), cv2.FONT_HERSHEY_COMPLEX, 0.3, (255, 255, 255)))
+
 
         if self.regular_positions['robot_coords']:
             for r_data in self.regular_positions['robot_coords']:

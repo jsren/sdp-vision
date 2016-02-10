@@ -25,7 +25,6 @@ class StupidTitException(Exception):
         Exception.__init__(self, msg)
 
 class VisionLauncher(object):
-
     def __init__(self, pitch):
         self.visionwrap = None
         self.pitch      = pitch
@@ -33,8 +32,16 @@ class VisionLauncher(object):
         self._cv        = threading.Condition()
         self._thread    = threading.currentThread().getName()
 
+        import signal
+        for sig in (signal.SIGABRT, signal.SIGILL,
+                    signal.SIGINT, signal.SIGSEGV, signal.SIGTERM):
+            signal.signal(sig, self._atexit)
+
+
     def launch_vision(self):
+        print "[INFO] Configuring vision"
         self.visionwrap = VisionWrapper(self.pitch, OUR_NAME, ROBOT_DESCRIPTIONS)
+        print "[INFO] Beginning vision loop"
         self.control_loop()
 
     def get_robot_midpoint(self, robot_name=OUR_NAME):
@@ -73,6 +80,12 @@ class VisionLauncher(object):
             self.visionwrap.camera.stop_capture()
             tools.save_colors(self.pitch, self.visionwrap.calibration)
 
+    def _atexit(self, *args):
+        try:
+            self.visionwrap.camera.stop_capture()
+            print "[INFO] Releasing camera"
+        except:
+            pass
 
 if __name__ == '__main__':
     import argparse
@@ -91,16 +104,13 @@ if __name__ == '__main__':
     # Create planner
     planner = Planner(vision_launcher, {'their_goal': goals[args.goal]})
 
-    vision_launcher.launch_vision()
-
-    if args.plan == 1:
+    if args.plan == '1':
         planner.begin_task1()
-    elif args.plan == 3:
+    elif args.plan == '3':
         planner.begin_task3()
     else:
         raise StupidTitException("Incorrect task number.")
 
-
-
+    vision_launcher.launch_vision()
 
 
