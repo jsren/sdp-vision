@@ -70,13 +70,18 @@ class Vision:
         attributes = ["bright", "contrast", "color", "hue", "Red Balance", "Blue Balance"]
         video0_new = {"bright": 130, "contrast": 70, "color": 100 , "hue": 0,"Red Balance": 0, "Blue Balance" : 5}
 
+        unknowns = []
         for attr in attributes:
-            p = subprocess.Popen(["v4lctl", "show", attr], stdout=subprocess.PIPE)
-            output, err = p.communicate()
-            video0_old[attr] = int(output[len(attr)+1:])
-            if video0_old[attr] != video0_new[attr]:
-                p = subprocess.Popen(["v4lctl", "setattr", attr, str(video0_new[attr])], stdout=subprocess.PIPE)
-                output, err = p.communicate()
+            output, err = subprocess.Popen(["v4lctl", "show", attr],
+                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+            if not output.strip():
+                print "[WARNING] Unknown video attribute '"+attr+"'"
+                unknowns.append(attr)
+            else:
+                video0_old[attr] = int(output[len(attr)+1:])
+                if video0_old[attr] != video0_new[attr]:
+                    p = subprocess.Popen(["v4lctl", "setattr", attr, str(video0_new[attr])], stdout=subprocess.PIPE)
+                    output, _ = p.communicate()
 
         # will only output restore file if any value was different.
         # this also prevents from resetting the file on each run
@@ -88,6 +93,7 @@ class Vision:
             f.write('#!/bin/sh\n')
             f.write('echo \"restoring v4lctl settings to previous values\"\n')
             for attr in attributes:
+                if attr in unknowns: continue
                 f.write("v4lctl setattr " + attr + ' ' + str(video0_old[attr]) + "\n")
                 f.write('echo \"setting ' + attr +' to ' + str(video0_old[attr]) + '"\n')
             f.write('echo \"v4lctl values restored\"')

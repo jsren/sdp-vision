@@ -67,7 +67,8 @@ class VisionLauncher(object):
 
                 if not self._started:
                     self._started = True
-                    self._cv.notifyAll()
+                    with self._cv:
+                        self._cv.notifyAll()
         finally:
             self.visionwrap.camera.stop_capture()
             tools.save_colors(self.pitch, self.visionwrap.calibration)
@@ -86,10 +87,11 @@ if __name__ == '__main__':
 
     # TODO: Need to configure for pitch
     vision_launcher = VisionLauncher(int(args.pitch))
-    vision_launcher.launch_vision()
 
-    # Launch planner
+    # Create planner
     planner = Planner(vision_launcher, {'their_goal': goals[args.goal]})
+
+    vision_launcher.launch_vision()
 
     if args.plan == 1:
         planner.begin_task1()
