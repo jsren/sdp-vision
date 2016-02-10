@@ -41,7 +41,7 @@ class DummySerial(object):
     def read(self): return [0]
 
 try:
-    ser = serial.Serial('/dev/tty.usbserial', 115200, timeout=0.1)
+    ser = serial.Serial('/dev/ttyACM0', 115200, timeout=0.1)
 except:
     print "[WARNING] Cannot open port: reverting to dummy serial"
     ser = DummySerial()
@@ -108,7 +108,8 @@ def rotateVector(vector, angle):
 def orientRobot(current, target):
     d = target - current
     if not isnan(d):
-        ser.write("(0,0,"+str(int(d))+")")
+        ser.write("(0,0,"+str(int(d))+")\n")
+        ser.flush()
         _sim_update_robotrot(d)
 
 
@@ -116,11 +117,13 @@ def sendCommand(cmd, timeout=0.1):
     while True:
         ser.timeout = timeout
         ser.write(cmd+'\n')
+        ser.flush()
         bytes = ser.read()
 
         # Probably a timeout
         if len(bytes) == 0:
             ser.write("cancel\n")
+            ser.flush()
             return ser.read()
 
         # Success, end loop
@@ -150,10 +153,14 @@ class Planner:
 
         self.vision.wait_for_start()
 
+        ser.write("remote\n")
+        ser.flush()
+
+
         #TODO: ensure that we are facing always the same direction -THE VALUE IS 0
         # Reset robot rotation
         robot_heading = self.vision.get_robot_heading()
-        while not valueInRange(robot_heading, 0, 6.0):
+        while not valueInRange(robot_heading, 0, 6.0) and False:
             orientRobot(robot_heading, 0)
             ser.timeout = 1
             s = ser.read()
@@ -183,7 +190,7 @@ class Planner:
             # Ball outside grabbers, close by, grabbers open
             elif ball_dist <= OPEN_DISTANCE and facing_ball and grabbersOpen:
                 dy = ball_dist * 0.8
-                ser.write("(" + str(int(px_to_cm(0, dy)[1])) + ",0,0)")
+                ser.write("(" + str(int(px_to_cm(0, dy)[1])) + ",0,0)\n")
                 _sim_update_robotpos(np.array([0, dy]))
 
             elif ball_dist <= OPEN_DISTANCE and facing_ball and not grabbersOpen:
@@ -199,7 +206,7 @@ class Planner:
                     dx = (ballpos - midpoint)[0]
                     #dx += ROBOT_SIZE[0] / (2. if dx < 0 else -2.)
                     if not isnan(dx):
-                        ser.write("(0,"+str(int(px_to_cm(dx, 0)[0]))+",0)")
+                        ser.write("(0,"+str(int(px_to_cm(dx, 0)[0]))+",0)\n")
                         _sim_update_robotpos(np.array([dx, 0]))
 
                 # Adjust to be within 'opening' range of ball
@@ -207,21 +214,22 @@ class Planner:
                     dy = (ballpos - midpoint)[1] - OPEN_DISTANCE
                     dy += ROBOT_SIZE[1] / (2. if dy < 0 else -2.)
 
-                    ser.write("(" + str(int(px_to_cm(0, dy)[1])) + ",0,0)")
+                    ser.write("(" + str(int(px_to_cm(0, dy)[1])) + ",0,0)\n")
                     _sim_update_robotpos(np.array([0, dy]))
 
 
             # checks what arduino is doing
-            ser.timeout = 3
+            ser.flush()
+            ser.timeout = 10
             s = ser.read()
+            print s
             while len(s) < 1:
-                if s[0] == 255: break # Cancelled
-
                 ball_dist = np.linalg.norm(self.vision.get_ball_position()
                                            - self.vision.get_robot_midpoint())
 
                 if ball_dist >= lastEuclideanDistance + 5:
                     ser.write("cancel\n")
+                    ser.flush()
                 else:
                     lastEuclideanDistance = ball_dist
                 s = ser.read()
@@ -235,6 +243,9 @@ class Planner:
 
     def task3(self):
         self.vision.wait_for_start()
+
+        ser.write("remote\n")
+        ser.flush()
 
         while True:
             midpoint      = self.vision.get_robot_midpoint()
@@ -257,7 +268,7 @@ if __name__ == "__main__":
 
     _robotpos  = np.array([10.0, 10.0])
     _circlepos = np.array([10.0, 12.5])
-    _ballpos   = np.array([50.0, 20.0])
+    _ballpos   = np.array([50.0, 50.0])
 
     pitch = {
         #'pitch_width' : 250,
@@ -268,6 +279,7 @@ if __name__ == "__main__":
 
     # Initiate remote control on robot
     ser.write("remote\n")
+    ser.flush()
 
     planner = Planner(DummyVision(), pitch)
     print "[INFO] Beginning task 1 simulation"
