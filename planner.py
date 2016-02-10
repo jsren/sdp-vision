@@ -37,7 +37,6 @@ except:
     ser = DummySerial()
 # ==============================================================
 
-# 379, 439
 class DummyVision(object):
     def get_robot_midpoint(self):
         return _robotpos
@@ -45,7 +44,8 @@ class DummyVision(object):
         return _circlepos
     def get_ball_pos(self):
         return _ballpos
-
+    def wait_for_start(self):
+        pass
 
 if __name__ == "__main__":
     _ballpos   = None
@@ -136,6 +136,8 @@ class Planner:
         global lastEuclideanDistance
         grabbersOpen = False
 
+        self.vision.wait_for_start()
+
         #TODO: ensure that we are facing always the same direction -THE VALUE IS 0
         # Reset robot rotation
         robot_heading = self.vision.get_robot_heading()
@@ -220,6 +222,8 @@ class Planner:
         return t
 
     def task3(self):
+        self.vision.wait_for_start()
+
         while True:
             midpoint      = self.vision.get_robot_midpoint()
             robot_heading = self.vision.get_robot_heading()

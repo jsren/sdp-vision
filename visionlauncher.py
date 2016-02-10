@@ -1,14 +1,17 @@
+import threading
 import vision.tools as tools
+import numpy as np
+
 from cv2 import waitKey
-import warnings
-import time
 from visionwrapper import VisionWrapper
-# from Control.dict_control import Controller
-# from Utility.CommandDict import CommandDict
-import traceback
-import sys
+
 
 OUR_NAME = "Team E"
+
+goals = {
+    'right': np.array([568.0, 232.5]),
+    'left' : np.array([5.5, 226.0])
+}
 
 ROBOT_DESCRIPTIONS = {
     #'blue + green': {'main_colour':'blue', 'side_colour':'green'},
@@ -17,17 +20,22 @@ ROBOT_DESCRIPTIONS = {
     #'yellow + pink': {'main_colour':'yellow', 'side_colour':'pink'}
 }
 
+class StupidTitException(Exception):
+    def __init__(self, msg):
+        Exception.__init__(self, msg)
+
 class VisionLauncher(object):
 
     def __init__(self, pitch):
         self.visionwrap = None
-        self.pitch = pitch
+        self.pitch      = pitch
+        self._started   = False
+        self._cv        = threading.Condition()
+        self._thread    = threading.currentThread().getName()
 
     def launch_vision(self):
         self.visionwrap = VisionWrapper(self.pitch, OUR_NAME, ROBOT_DESCRIPTIONS)
-
         self.control_loop()
-
 
     def get_robot_midpoint(self, robot_name=OUR_NAME):
         return self.visionwrap.get_robot_position(robot_name)
@@ -35,6 +43,14 @@ class VisionLauncher(object):
     def get_side_circle(self, robot_name=OUR_NAME):
         return self.visionwrap.get_circle_position(robot_name)
 
+    def wait_for_start(self, timeout=None):
+        if not self._started:
+            if threading.currentThread().getName() == self._thread:
+                raise StupidTitException("You cannot wait for the vision "
+                                         "to start running on the same thread!")
+            else:
+                with self._cv:
+                    self._cv.wait(timeout)
 
     def control_loop(self):
         """
@@ -44,39 +60,18 @@ class VisionLauncher(object):
         gets the actions for the robots to perform;  passes it to the robot
         controllers before finally updating the GUI.
         """
-        counter = 1L
-        timer = time.clock()
         try:
-            key = 255
             while waitKey(1) & 0xFF != ord('q'):  # the 'q' key
-
                 # update the vision system with the next frame
                 self.visionwrap.update()
-                pre_options = self.visionwrap.preprocessing.options
 
-                # Find appropriate action
-                # command = self.planner.update(self.vision.model_positions)
-                # self.controller.update(command)
-
-                fps = float(counter) / (time.clock() - timer)
-
-                # Draw vision content and actions
-
-                counter += 1
-
-        except Exception as e:
-            print(e.message)
-            traceback.print_exc(file=sys.stdout)
+                if not self._started:
+                    self._started = True
+                    self._cv.notifyAll()
         finally:
             self.visionwrap.camera.stop_capture()
             tools.save_colors(self.pitch, self.visionwrap.calibration)
 
-
-import numpy as np
-goals = {
-    'right': np.array([568.0, 232.5]),
-    'left': np.array([5.5, 226.0])
-}
 
 if __name__ == '__main__':
     import argparse
@@ -101,9 +96,7 @@ if __name__ == '__main__':
     elif args.plan == 3:
         planner.begin_task3()
     else:
-        class StupidTitException(Exception):
-            def __init__(self): super("Incorrect task, you insufferable douche canoe.")
-        raise StupidTitException()
+        raise StupidTitException("Incorrect task number.")
 
 
 
