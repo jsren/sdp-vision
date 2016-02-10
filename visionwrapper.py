@@ -162,7 +162,7 @@ class VisionWrapper:
 
                 counter = 0
             cv2.imshow('frame2', cv2.arrowedLine(self.frame, (int(x_ball_prev_prev), int(y_ball_prev_prev)),
-                (abs(int(x_ball+(5*(x_ball_prev-x_ball_prev_prev)))), abs(int(y_ball+(5*(y_ball_prev-y_ball_prev_prev))))), (0, 255, 0), 3, 10))
+                (abs(int(x_ball+(2*(x_ball_prev-x_ball_prev_prev)))), abs(int(y_ball+(2*(y_ball_prev-y_ball_prev_prev))))), (0, 255, 0), 3, 10))
                 #print r.name, r.get_angle()
 
 

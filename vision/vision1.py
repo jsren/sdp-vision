@@ -68,7 +68,7 @@ class Vision:
         # for closest room
         #elif self.pitch == 0:
         attributes = ["bright", "contrast", "color", "hue", "Red Balance", "Blue Balance"]
-        video0_new = {"bright": 211, "contrast": 127, "color": 84, "hue": 23,"Red Balance": 5, "Blue Balance" : 0}
+        video0_new = {"bright": 130, "contrast": 70, "color": 100 , "hue": 0,"Red Balance": 0, "Blue Balance" : 5}
 
         for attr in attributes:
             p = subprocess.Popen(["v4lctl", "show", attr], stdout=subprocess.PIPE)

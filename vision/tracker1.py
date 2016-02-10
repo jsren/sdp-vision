@@ -18,7 +18,7 @@ Center = namedtuple('Center', 'x y')
 NUMBER_OF_MAIN_CIRCLES_PER_COLOR = 2
 NUMBER_OF_SIDE_CIRCLES_PER_COLOR = 16
 
-ROBOT_DISTANCE = 20
+ROBOT_DISTANCE = 30
 
 INITDISPLACEMENT = 34.509
 
@@ -589,7 +589,7 @@ class RobotInstance(object):
         angle = self.angleOfLine(np.array([x, y]),
                                  np.array([sx, sy]))
         # Correct for marker offset
-        return angle + INITDISPLACEMENT + 90
+        return angle + INITDISPLACEMENT + 110
 
     def get_angle(self):
         return np.median(self.angle)
