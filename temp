@@ -6,8 +6,6 @@ from vision.tracker1 import RobotInstance
 import cv2
 from copy import deepcopy
 from vision.colors import *
-from vision.tracker1 import ROBOT_DISTANCE
-from math import radians, cos, sin
 
 x_ball_prev = 0
 y_ball_prev = 0
@@ -88,8 +86,9 @@ class VisionWrapper:
                 return r.side_x, r.side_y
 
     def get_ball_position(self):
-        if self.regular_positions['ball']:
-            return self.regular_positions['ball']['x'], self.regular_positions['ball']['y']
+        if self.regular_positions['x']:
+            #print self.regular_positions['ball']['x'], self.regular_positions['ball']['y']
+            return self.regular_positions['x'], self.regular_positions['y']
 
 
 
@@ -97,6 +96,7 @@ class VisionWrapper:
         """
         Gets this frame's positions from the vision system.
         """
+
         global x_ball_prev
         global y_ball_prev
         global y_ball_prev_prev
@@ -117,34 +117,28 @@ class VisionWrapper:
         # model_positions have their y coordinate inverted
         # self.model_positions, self.regular_positions = self.vision.locate(self.frame)
         self.regular_positions = self.vision.locate1(self.frame)
+        #print self.regular_positions['x'], " x position ", self.regular_positions['y'], " y position"
+
         # self.model_positions = self.postprocessing.analyze(self.model_positions)
 
         if self.regular_positions['robot_coords']:
             for r_data in self.regular_positions['robot_coords']:
                 for robot in self.robots:
-                    if robot.update(r_data['clx'], r_data['cly'],
-                                    r_data['main_color'], r_data['side_color'], r_data['x'], r_data['y']):
-                        break
+                    robot.update(r_data['clx'], r_data['cly'],
+                                    r_data['main_color'], r_data['side_color'], r_data['x'], r_data['y'])
+
+        cv2.imshow('frame2', self.frame)
 
         for r in self.robots:
             if not r.is_present(): continue
             clx, cly, x, y = r.get_coordinates()
             if r.age >0:
-                # Draw robot circles
-                cv2.imshow('frame2', cv2.circle(self.frame, (int(clx), int(cly)), ROBOT_DISTANCE, BGR_COMMON['black'], 2, 0))
+                print r.main_color, r.side_color, r.age
+                cv2.imshow('frame2', cv2.circle(self.frame, (int(clx), int(cly)), 20, BGR_COMMON['black'], 2, 0))
 
-                # Draw Names
-                cv2.imshow('frame2', cv2.putText(self.frame, r.name, (int(clx)-15, int(cly)+40), cv2.FONT_HERSHEY_COMPLEX, 0.45, (100, 150, 200)))
-
-                cv2.imshow('frame2', cv2.putText(self.frame, str(int(r.get_angle())), (int(clx)-15, int(cly)+30),
-                                                 cv2.FONT_HERSHEY_COMPLEX, 0.45, (100, 150, 200)))
-
-                # Draw
-                angle = r.get_angle()
-                new_x = clx + 30 * cos(radians(angle))
-                new_y = cly + 30 * sin(radians(angle))
-                cv2.imshow('frame2', cv2.line(self.frame, (int(clx), int(cly)),
-                                                     (int(new_x), int(new_y)), (200, 150, 50), 3, 0))
+        if 'x' in self.regular_positions.keys():
+             cv2.imshow('frame2', cv2.circle(self.frame, (int(self.regular_positions['x']), 
+                    int(self.regular_positions['y'])), 8, (0, 0, 255), 2, 0))
 
         counter += 1
         if 'x' in self.regular_positions.keys():
@@ -163,7 +157,7 @@ class VisionWrapper:
                 counter = 0
             cv2.imshow('frame2', cv2.arrowedLine(self.frame, (int(x_ball_prev_prev), int(y_ball_prev_prev)),
                 (abs(int(x_ball+(5*(x_ball_prev-x_ball_prev_prev)))), abs(int(y_ball+(5*(y_ball_prev-y_ball_prev_prev))))), (0, 255, 0), 3, 10))
-                #print r.name, r.get_angle()
+             
 
 
 
