@@ -80,18 +80,18 @@ class VisionWrapper:
 
     def get_robot_position(self, robot_name):
         for r in self.robots:
-            if r.name == robot_name:
-                return np.array(r.x, r.y)
+            if r.name == robot_name and r.is_present():
+                return np.array(r.get_coordinates()[:2])
 
     def get_circle_position(self, robot_name):
         for r in self.robots:
-            if r.name == robot_name:
-                return np.array(r.side_x, r.side_y)
+            if r.name == robot_name and r.is_present():
+                return np.array(r.get_coordinates()[2:4])
 
     def get_ball_position(self):
         if self.regular_positions['ball']:
-            return self.regular_positions['ball']['x'], self.regular_positions['ball']['y']
-
+            return np.array([self.regular_positions['ball']['x'],
+                             self.regular_positions['ball']['y']])
 
 
     def update(self):

@@ -27,7 +27,7 @@ assert OPEN_DISTANCE - GRABBER_LENGTH >= BALL_SIZE
 # ==============================================================
 class DummySerial(object):
     timeout = 0
-    def write(self, x): pass
+    def write(self, x): print "[CMD] '%s'"%x
     def read(self): return [0]
 
 try:
@@ -74,7 +74,7 @@ def valueInRange(x, center, range):
 
 
 def angleOfLine(point1, point2):
-    point2 = list(point2-point1)
+    point2 = point2 - point1
     return degrees(atan2(point2[1], point2[0]))
 
 
@@ -96,7 +96,7 @@ def rotateVector(vector, angle):
 
 def orientRobot(current, target):
     d = target - current
-    ser.write("(0,0,"+str(d)+")")
+    ser.write("(0,0,"+str(int(d))+")")
     _sim_update_robotrot(d)
 
 
@@ -171,7 +171,7 @@ class Planner:
             # Ball outside grabbers, close by, grabbers open
             elif ball_dist <= OPEN_DISTANCE and facing_ball and grabbersOpen:
                 dy = ball_dist * 0.8
-                ser.write("(" + str(dy) + ",0,0)")
+                ser.write("(" + str(int(dy)) + ",0,0)")
                 _sim_update_robotpos(np.array([0, dy]))
 
             elif ball_dist <= OPEN_DISTANCE and facing_ball and not grabbersOpen:
@@ -185,9 +185,9 @@ class Planner:
                 # Adjust to be within x-range of ball
                 if not valueInRange(midpoint[0], ballpos[0], 0.5*(ROBOT_SIZE - BALL_SIZE)):
                     dx = (ballpos - midpoint)[0]
-                    dx += ROBOT_SIZE / (2. if dx < 0 else -2.)
+                    #dx += ROBOT_SIZE / (2. if dx < 0 else -2.)
 
-                    ser.write("(0,"+str(dx)+"0)")
+                    ser.write("(0,"+str(int(dx))+",0)")
                     _sim_update_robotpos(np.array([dx, 0]))
 
                 # Adjust to be within 'opening' range of ball
@@ -195,7 +195,7 @@ class Planner:
                     dy = (ballpos - midpoint)[1] - OPEN_DISTANCE
                     dy += ROBOT_SIZE / (2. if dy < 0 else -2.)
 
-                    ser.write("(" + str(dy) + ",0,0)")
+                    ser.write("(" + str(int(dy)) + ",0,0)")
                     _sim_update_robotpos(np.array([0, dy]))
 
 
@@ -235,7 +235,7 @@ class Planner:
             distance = 150 # TODO: Get power
 
             if sendCommand("open", timeout=1) == 255: continue
-            if sendCommand("->"+str(distance), timeout=1) == 255: continue
+            if sendCommand("->"+str(int(distance)), timeout=1) == 255: continue
             return
 
 

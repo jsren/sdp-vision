@@ -6,7 +6,7 @@ from cv2 import waitKey
 from visionwrapper import VisionWrapper
 
 
-OUR_NAME = "Team E"
+OUR_NAME = "blue + green"
 
 goals = {
     'right': np.array([568.0, 232.5]),
@@ -19,6 +19,8 @@ ROBOT_DESCRIPTIONS = {
     'blue + pink': {'main_colour':'blue', 'side_colour':'pink'},
     'yellow + pink': {'main_colour':'yellow', 'side_colour':'pink'}
 }
+
+assert OUR_NAME in ROBOT_DESCRIPTIONS
 
 class StupidTitException(Exception):
     def __init__(self, msg):
@@ -72,7 +74,8 @@ class VisionLauncher(object):
                 # update the vision system with the next frame
                 self.visionwrap.update()
 
-                if not self._started:
+                # Wait until robot detected
+                if not self._started and self.get_robot_midpoint() is not None:
                     self._started = True
                     with self._cv:
                         self._cv.notifyAll()
@@ -112,5 +115,6 @@ if __name__ == '__main__':
         raise StupidTitException("Incorrect task number.")
 
     vision_launcher.launch_vision()
+    exit()
 
 
