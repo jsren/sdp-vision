@@ -11,10 +11,10 @@ import sys
 OUR_NAME = "Team E"
 
 ROBOT_DESCRIPTIONS = {
-    #'Team E': {'main_colour':'blue', 'side_colour':'green'},
-    'Team 0': {'main_colour':'yellow', 'side_colour':'green'},
-    'Team 1': {'main_colour':'blue', 'side_colour':'pink'},
-    #'Team 2': {'main_colour':'yellow', 'side_colour':'pink'}
+    'blue + green': {'main_colour':'blue', 'side_colour':'green'},
+    #'yellow + green': {'main_colour':'yellow', 'side_colour':'green'},
+    'blue + pink': {'main_colour':'blue', 'side_colour':'pink'},
+    'yellow + pink': {'main_colour':'yellow', 'side_colour':'pink'}
 }
 
 class VisionLauncher(object):
@@ -33,7 +33,7 @@ class VisionLauncher(object):
         return self.visionwrap.get_robot_position(robot_name)
 
     def get_side_circle(self, robot_name=OUR_NAME):
-        return self.visionwrap.get_circle_position(robot_name=robot_name)
+        return self.visionwrap.get_circle_position(robot_name)
 
 
     def control_loop(self):
@@ -71,13 +71,41 @@ class VisionLauncher(object):
             self.visionwrap.camera.stop_capture()
             tools.save_colors(self.pitch, self.visionwrap.calibration)
 
+
+import numpy as np
+goals = {
+    'right': np.array([568.0, 232.5]),
+    'left': np.array([5.5, 226.0])
+}
+
 if __name__ == '__main__':
     import argparse
+    from planner import Planner
+
     parser = argparse.ArgumentParser()
     parser.add_argument("pitch", help="[0] Pitch next to door, [1] Pitch farther from the door")
-    parser.add_argument("plan", help="NOT USED AT THE MOMENT - input for the planner")
+    parser.add_argument("plan", help="Task no. to execute.")
+    parser.add_argument("goal", help="Which goal to target - one of (left, right)")
 
     args = parser.parse_args()
 
-    vision_launcher = VisionLauncher(0)#int(args.pitch))
+    # TODO: Need to configure for pitch
+    vision_launcher = VisionLauncher(int(args.pitch))
     vision_launcher.launch_vision()
+
+    # Launch planner
+    planner = Planner(vision_launcher, {'their_goal': goals[args.goal]})
+
+    if args.plan == 1:
+        planner.begin_task1()
+    elif args.plan == 3:
+        planner.begin_task3()
+    else:
+        class StupidTitException(Exception):
+            def __init__(self): super("Incorrect task, you insufferable douche canoe.")
+        raise StupidTitException()
+
+
+
+
+

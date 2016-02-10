@@ -6,6 +6,8 @@ from vision.tracker1 import RobotInstance
 import cv2
 from copy import deepcopy
 from vision.colors import *
+from vision.tracker1 import ROBOT_DISTANCE
+from math import radians, cos, sin
 
 class VisionWrapper:
     """
@@ -113,8 +115,22 @@ class VisionWrapper:
             if not r.is_present(): continue
             clx, cly, x, y = r.get_coordinates()
             if r.age >0:
-                cv2.imshow('frame2', cv2.circle(self.frame, (int(clx), int(cly)), 20, BGR_COMMON['black'], 2, 0))
-                print r.name, r.get_angle()
+                # Draw robot circles
+                cv2.imshow('frame2', cv2.circle(self.frame, (int(clx), int(cly)), ROBOT_DISTANCE, BGR_COMMON['black'], 2, 0))
+
+                # Draw Names
+                cv2.imshow('frame2', cv2.putText(self.frame, r.name, (int(clx)-15, int(cly)+40), cv2.FONT_HERSHEY_COMPLEX, 0.45, (100, 150, 200)))
+
+                cv2.imshow('frame2', cv2.putText(self.frame, str(int(r.get_angle())), (int(clx)-15, int(cly)+30),
+                                                 cv2.FONT_HERSHEY_COMPLEX, 0.45, (100, 150, 200)))
+
+                # Draw
+                angle = r.get_angle()
+                new_x = clx + 30 * cos(radians(angle))
+                new_y = cly + 30 * sin(radians(angle))
+                cv2.imshow('frame2', cv2.line(self.frame, (int(clx), int(cly)),
+                                                     (int(new_x), int(new_y)), (200, 150, 50), 3, 0))
+                #print r.name, r.get_angle()
 
 
 

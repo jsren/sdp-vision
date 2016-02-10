@@ -15,12 +15,12 @@ warnings.simplefilter('ignore', RuntimeWarning)
 BoundingBox = namedtuple('BoundingBox', 'x y width height')
 Center = namedtuple('Center', 'x y')
 
-NUMBER_OF_MAIN_CIRCLES_PER_COLOR = 4
+NUMBER_OF_MAIN_CIRCLES_PER_COLOR = 2
 NUMBER_OF_SIDE_CIRCLES_PER_COLOR = 16
 
-ROBOT_DISTANCE = 40
+ROBOT_DISTANCE = 20
 
-INITDISPLACEMENT = 0.0
+INITDISPLACEMENT = 34.509
 
 
 class Tracker(object):
@@ -543,8 +543,9 @@ class BallTracker(Tracker):
 class RobotInstance(object):
     _present = False
 
+
     def __init__(self, name, m_color, s_color):
-        self.queue_size = 3
+        self.queue_size = 4
         self.x = list()
         self.y = list()
         self.main_color = m_color
@@ -578,7 +579,8 @@ class RobotInstance(object):
         return np.median(self.x), np.median(self.y), np.median(self.side_x), np.median(self.side_y)
 
     def angleOfLine(self, point1, point2):
-        return -degrees(atan2(point1[1]-point2[1], point2[0]-point1[0]))
+        point2 = list(point2-point1)
+        return degrees(atan2(point2[1], point2[0]))
 
 
     def get_robot_heading(self):
@@ -586,21 +588,8 @@ class RobotInstance(object):
         x, y, sx, sy = self.get_coordinates()
         angle = self.angleOfLine(np.array([x, y]),
                                  np.array([sx, sy]))
-
-        return angle
-
-        # # TODO: Confirm this?
-        # if angle >=0 and angle <= 180 + INITDISPLACEMENT:
-        #     angle -= INITDISPLACEMENT
-        # elif angle > -180 and angle <= INITDISPLACEMENT:
-        #     angle -= INITDISPLACEMENT
-        # elif angle > INITDISPLACEMENT and angle < 0:
-        #     angle -= -INITDISPLACEMENT
-        #
-        # if angle <= 180 and angle > 180 + INITDISPLACEMENT:
-        #     angle -= INITDISPLACEMENT + 360
-        #
-        # return angle
+        # Correct for marker offset
+        return angle + INITDISPLACEMENT + 90
 
     def get_angle(self):
         return np.median(self.angle)
@@ -610,6 +599,15 @@ class RobotInstance(object):
         self.y = list()
         self.side_x = list()
         self.side_y = list()
+
+    @staticmethod
+    def px_to_cm(px):
+        return np.array([px[0] * (128.0/260),
+                         px[1] * (128.0/270)])
+    @staticmethod
+    def cm_to_px(cm):
+        return np.array([cm[0] * (260/128.0),
+                         cm[1] * (270/128.0)])
 
 
 
