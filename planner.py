@@ -1,25 +1,33 @@
 import new
 import serial
 import numpy as np
+import time
 
-from math import degrees, atan2
+from math import degrees, atan2, isnan
 from threading import Thread
 
+def px_to_cm(px, py):
+    return np.array([px * (128.0/260),
+                     py * (128.0/270)])
+def cm_to_px(cmx, cmy):
+    return np.array([cmx * (260/128.0),
+                     cmy * (270/128.0)])
+
 # TODO: DELETE THIS SHIT
-BALL_SIZE             = 5.2
-ROBOT_SIZE            = 20.0
-INITDISPLACEMENT      = 0.0
-GRABBER_LENGTH        = 8.0
+BALL_SIZE             = cm_to_px(5.2, 5.2)
+ROBOT_SIZE            = cm_to_px(20.0, 20.0)
+INITDISPLACEMENT      = 34.5
+GRABBER_LENGTH        = cm_to_px(0, 8.0)[1]
 visionInformation     = list()
 lastEuclideanDistance = 0.0
 
 # TODO: DISTANCE OF THE ROBOT FROM THE BALL AND THE SPIN
-CLOSE_DISTANCE = GRABBER_LENGTH * 0.8 - BALL_SIZE/2
-OPEN_DISTANCE  = GRABBER_LENGTH + BALL_SIZE + 1
+CLOSE_DISTANCE = GRABBER_LENGTH * 0.8 - BALL_SIZE[1]/2
+OPEN_DISTANCE  = GRABBER_LENGTH + BALL_SIZE[1] + 1
 
 # TODO: Disable on release
 assert CLOSE_DISTANCE <= GRABBER_LENGTH
-assert OPEN_DISTANCE - GRABBER_LENGTH >= BALL_SIZE
+assert OPEN_DISTANCE - GRABBER_LENGTH >= BALL_SIZE[1]
 
 
 # ==============================================================
@@ -27,7 +35,9 @@ assert OPEN_DISTANCE - GRABBER_LENGTH >= BALL_SIZE
 # ==============================================================
 class DummySerial(object):
     timeout = 0
-    def write(self, x): print "[CMD] '%s'"%x
+    def write(self, x):
+        print "[CMD] '%s'"%x
+        time.sleep(1)
     def read(self): return [0]
 
 try:
@@ -42,7 +52,7 @@ class DummyVision(object):
         return _robotpos
     def get_side_circle(self):
         return _circlepos
-    def get_ball_pos(self):
+    def get_ball_position(self):
         return _ballpos
     def wait_for_start(self):
         pass
@@ -65,6 +75,7 @@ if __name__ == "__main__":
 else:
     def _sim_update_robotpos(nparray_delta): pass
     def _sim_update_robotrot(degree_delta): pass
+
 
 
 # Negative center not applicable
@@ -96,8 +107,9 @@ def rotateVector(vector, angle):
 
 def orientRobot(current, target):
     d = target - current
-    ser.write("(0,0,"+str(int(d))+")")
-    _sim_update_robotrot(d)
+    if not isnan(d):
+        ser.write("(0,0,"+str(int(d))+")")
+        _sim_update_robotrot(d)
 
 
 def sendCommand(cmd, timeout=0.1):
@@ -153,7 +165,7 @@ class Planner:
         complete = False
         while not complete:
             #TODO: Get the output from vision system.
-            ballpos  = self.vision.get_ball_pos()
+            ballpos  = self.vision.get_ball_position()
             midpoint = self.vision.get_robot_midpoint()
 
             robot_heading = self.vision.get_robot_heading()
@@ -161,7 +173,7 @@ class Planner:
 
             # TODO: Check threshold
             facing_ball = valueInRange(robot_heading, angle_to_ball, 5)
-            ball_dist   = np.linalg.norm(ballpos - midpoint) - ROBOT_SIZE/2.0
+            ball_dist   = np.linalg.norm(ballpos - (midpoint + np.array([0, (ROBOT_SIZE/2)[1]])))
 
             # Ball inside grabbers, grabbers open
             if ball_dist <= CLOSE_DISTANCE and facing_ball and grabbersOpen:
@@ -171,7 +183,7 @@ class Planner:
             # Ball outside grabbers, close by, grabbers open
             elif ball_dist <= OPEN_DISTANCE and facing_ball and grabbersOpen:
                 dy = ball_dist * 0.8
-                ser.write("(" + str(int(dy)) + ",0,0)")
+                ser.write("(" + str(int(px_to_cm(0, dy)[1])) + ",0,0)")
                 _sim_update_robotpos(np.array([0, dy]))
 
             elif ball_dist <= OPEN_DISTANCE and facing_ball and not grabbersOpen:
@@ -183,19 +195,19 @@ class Planner:
 
             else:
                 # Adjust to be within x-range of ball
-                if not valueInRange(midpoint[0], ballpos[0], 0.5*(ROBOT_SIZE - BALL_SIZE)):
+                if not valueInRange(midpoint[0], ballpos[0], 0.5*(ROBOT_SIZE[0] - BALL_SIZE[0])):
                     dx = (ballpos - midpoint)[0]
-                    #dx += ROBOT_SIZE / (2. if dx < 0 else -2.)
-
-                    ser.write("(0,"+str(int(dx))+",0)")
-                    _sim_update_robotpos(np.array([dx, 0]))
+                    #dx += ROBOT_SIZE[0] / (2. if dx < 0 else -2.)
+                    if not isnan(dx):
+                        ser.write("(0,"+str(int(px_to_cm(dx, 0)[0]))+",0)")
+                        _sim_update_robotpos(np.array([dx, 0]))
 
                 # Adjust to be within 'opening' range of ball
-                elif not valueInRange(midpoint[1] + ROBOT_SIZE/2, ballpos[0], 0.5*(ROBOT_SIZE - BALL_SIZE)):
+                elif not valueInRange(midpoint[1] + ROBOT_SIZE[1]/2, ballpos[0], 0.5*(ROBOT_SIZE[1] - BALL_SIZE[1])):
                     dy = (ballpos - midpoint)[1] - OPEN_DISTANCE
-                    dy += ROBOT_SIZE / (2. if dy < 0 else -2.)
+                    dy += ROBOT_SIZE[1] / (2. if dy < 0 else -2.)
 
-                    ser.write("(" + str(int(dy)) + ",0,0)")
+                    ser.write("(" + str(int(px_to_cm(0, dy)[1])) + ",0,0)")
                     _sim_update_robotpos(np.array([0, dy]))
 
 
@@ -205,7 +217,7 @@ class Planner:
             while len(s) < 1:
                 if s[0] == 255: break # Cancelled
 
-                ball_dist = np.linalg.norm(self.vision.get_ball_pos()
+                ball_dist = np.linalg.norm(self.vision.get_ball_position()
                                            - self.vision.get_robot_midpoint())
 
                 if ball_dist >= lastEuclideanDistance + 5:

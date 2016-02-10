@@ -6,7 +6,7 @@ from cv2 import waitKey
 from visionwrapper import VisionWrapper
 
 
-OUR_NAME = "blue + green"
+OUR_NAME = "yellow + pink"
 
 goals = {
     'right': np.array([568.0, 232.5]),
@@ -51,6 +51,9 @@ class VisionLauncher(object):
 
     def get_side_circle(self, robot_name=OUR_NAME):
         return self.visionwrap.get_circle_position(robot_name)
+
+    def get_ball_position(self):
+        return self.visionwrap.get_ball_position()
 
     def wait_for_start(self, timeout=None):
         if not self._started:

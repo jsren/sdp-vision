@@ -89,9 +89,9 @@ class VisionWrapper:
                 return np.array(r.get_coordinates()[2:4])
 
     def get_ball_position(self):
-        if self.regular_positions['ball']:
-            return np.array([self.regular_positions['ball']['x'],
-                             self.regular_positions['ball']['y']])
+        if 'x' in self.regular_positions and self.regular_positions['x'] is not None:
+            return np.array([self.regular_positions['x'],
+                             self.regular_positions['y']])
 
 
     def update(self):
