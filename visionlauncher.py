@@ -27,12 +27,22 @@ class StupidTitException(Exception):
         Exception.__init__(self, msg)
 
 class VisionLauncher(object):
-    def __init__(self, pitch):
+    """
+    Launches the vision wrapper which calibrates the camera based on preset settings, takes care of object tracking
+    and can optionally be called to display callibration GUI.
+    """
+    def __init__(self, pitch, launch_GUI):
+        """
+        :param pitch: [0, 1]            0 is the one, closer to the door.
+        :param launch_GUI: boolean      Set to True if you want to calibrate the colors.
+        :return:
+        """
         self.visionwrap = None
         self.pitch      = pitch
         self._started   = False
         self._cv        = threading.Condition()
         self._thread    = threading.currentThread().getName()
+        self.launch_GUI = launch_GUI
 
         import signal
         for sig in (signal.SIGABRT, signal.SIGILL,
@@ -42,9 +52,17 @@ class VisionLauncher(object):
 
     def launch_vision(self):
         print "[INFO] Configuring vision"
-        self.visionwrap = VisionWrapper(self.pitch, OUR_NAME, ROBOT_DESCRIPTIONS)
+        self.visionwrap = VisionWrapper(self.pitch, OUR_NAME, ROBOT_DESCRIPTIONS, self.launch_GUI)
+
+        if self.launch_GUI:
+            print "[INFO] Launching GUI"
+            # TODO: launch GUI. Vision works on the main thread, right?
+            # GUI needs to be instantiated here and its draw function called in the control loop.
+            # self.launch_GUI flag will suppress drawing of standard vision display.
+
         print "[INFO] Beginning vision loop"
         self.control_loop()
+
 
     def get_robot_midpoint(self, robot_name=OUR_NAME):
         return self.visionwrap.get_robot_position(robot_name)
@@ -54,6 +72,9 @@ class VisionLauncher(object):
 
     def get_ball_position(self):
         return self.visionwrap.get_ball_position()
+
+    def get_circle_contours(self):
+        return self.visionwrap.get_
 
     def wait_for_start(self, timeout=None):
         if not self._started:
@@ -77,11 +98,16 @@ class VisionLauncher(object):
                 # update the vision system with the next frame
                 self.visionwrap.update()
 
-                # Wait until robot detected
-                if not self._started and self.get_robot_midpoint() is not None:
-                    self._started = True
-                    with self._cv:
-                        self._cv.notifyAll()
+                if self.launch_GUI:
+                    pass
+                    # TODO: Update/redraw GUI. Call GUI.update or something.
+
+                else:
+                    # Wait until robot detected
+                    if not self._started and self.get_robot_midpoint() is not None:
+                        self._started = True
+                        with self._cv:
+                            self._cv.notifyAll()
         finally:
             self.visionwrap.camera.stop_capture()
             tools.save_colors(self.pitch, self.visionwrap.calibration)
@@ -99,23 +125,27 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument("pitch", help="[0] Pitch next to door, [1] Pitch farther from the door")
-    parser.add_argument("plan", help="Task no. to execute.")
+    parser.add_argument("plan", help="Task no. to execute. 'GUI' to launch calibration GUI.")
     parser.add_argument("goal", help="Which goal to target - one of (left, right)")
 
     args = parser.parse_args()
 
-    # TODO: Need to configure for pitch
-    vision_launcher = VisionLauncher(int(args.pitch))
+    if args.plan == 'GUI':
+        vision_launcher = VisionLauncher(int(args.pitch), True)
 
-    # Create planner
-    planner = Planner(vision_launcher, {'their_goal': goals[args.goal]})
-
-    if args.plan == '1':
-        planner.begin_task1()
-    elif args.plan == '3':
-        planner.begin_task3()
     else:
-        raise StupidTitException("Incorrect task number.")
+        # TODO: Need to configure for pitch
+        vision_launcher = VisionLauncher(int(args.pitch))
+
+        # Create planner
+        planner = Planner(vision_launcher, {'their_goal': goals[args.goal]})
+
+        if args.plan == '1':
+            planner.begin_task1()
+        elif args.plan == '3':
+            planner.begin_task3()
+        else:
+            raise StupidTitException("Incorrect task number.")
 
     vision_launcher.launch_vision()
     exit()

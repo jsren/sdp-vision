@@ -26,7 +26,8 @@ class Vision:
                  pitch,
                  frame_shape,
                  frame_center,
-                 calibration):
+                 calibration,
+                 return_circle_contours=False):
         """
         Initialize the vision system.
 
@@ -34,6 +35,9 @@ class Vision:
             [int] pitch         pitch number (0 or 1)
             [string] color      color of our robot
             [string] our_side   our side
+
+            [boolean] return_circle_contours - will return circle contours as well as calculated robot locations.
+                                               Made for color calibration GUI.
         """
         self.pitch = pitch
 
@@ -46,7 +50,8 @@ class Vision:
         # Find the zone division
         self.zones = zones = self._get_zones(width, height)
 
-
+        #
+        self.return_circle_contours = return_circle_contours
 
         # Set up trackers
         self.ball_tracker = BallTracker(

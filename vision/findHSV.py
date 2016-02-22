@@ -1,6 +1,18 @@
 import cv2
 import numpy as np
 
+'''
+findHSV offers a simple calibration tool for calibrating HSV thresholds, contrast, and
+blur values for a variety of masks including: red ball, yellow i, blue i, black dot, and
+green plate.
+Updates to configurations in the GUI result in realtime updates to the masked value making
+thresholding very simple.
+Attributes:
+    CONTROLS    Names the trackbar labels for each trackbar
+    MAXBAR      The maximum values for each trackbar
+    KEYS        Assigns different colour configurations to keys for quick switching.
+'''
+
 CONTROLS = ["LH", "UH", "LS", "US", "LV", "UV", "CT", "BL"]
 MAXBAR = {"LH": 360,
           "UH": 360,

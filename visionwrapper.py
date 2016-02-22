@@ -24,7 +24,7 @@ class VisionWrapper:
 
     """
 
-    def __init__(self, pitch, our_side, robot_details):
+    def __init__(self, pitch, our_side, robot_details, draw_GUI=False):
         """
         Entry point for the SDP system.
 
@@ -33,6 +33,9 @@ class VisionWrapper:
             [string] colour                 The colour of our teams plates
             [string] our_side               the side we're on - 'left' or 'right'
             [int] video_port                port number for the camera
+
+            [boolean] draw_GUI              Does not draw the normal image to leave space for GUI.
+                                            Also forces the trackers to return circle contour positons in addition to robot details.
         Fields
             pitch
             camera
@@ -57,9 +60,11 @@ class VisionWrapper:
 
         # Set up vision
         self.calibration = tools.get_colors(pitch)
+        self.draw_GUI = draw_GUI
         self.vision = Vision(
             pitch=pitch, frame_shape=self.frame.shape,
-            frame_center=center_point, calibration=self.calibration)
+            frame_center=center_point, calibration=self.calibration,
+            return_circle_contours=draw_GUI)
 
         # Set up preprocessing and postprocessing
         # self.postprocessing = Postprocessing()
@@ -93,6 +98,15 @@ class VisionWrapper:
             return np.array([self.regular_positions['x'],
                              self.regular_positions['y']])
 
+    def get_circle_contours(self):
+        """
+        Careful! Does not return x and y values. Call minimum bounding circles if proper circle locations are required.
+        Or look at dem fish http://docs.opencv.org/2.4/doc/tutorials/imgproc/shapedescriptors/find_contours/find_contours.html
+        :return: [Contours]
+        """
+        if 'circles' in self.regular_positions:
+            return self.regular_positions['circles']
+
 
     def update(self):
         """
@@ -120,10 +134,8 @@ class VisionWrapper:
         self.regular_positions = self.vision.locate1(self.frame)
         # self.model_positions = self.postprocessing.analyze(self.model_positions)
 
-        # Draw at least something
-        cv2.imshow('frame2', cv2.putText(self.frame, "TEAM E", (10, 20), cv2.FONT_HERSHEY_COMPLEX, 0.3, (255, 255, 255)))
 
-
+        # Updates the robot coordinates
         if self.regular_positions['robot_coords']:
             for r_data in self.regular_positions['robot_coords']:
                 for robot in self.robots:
@@ -131,48 +143,52 @@ class VisionWrapper:
                                     r_data['main_color'], r_data['side_color'], r_data['x'], r_data['y']):
                         break
 
-        for r in self.robots:
-            if not r.is_present(): continue
-            clx, cly, x, y = r.get_coordinates()
-            if r.age >0:
-                # Draw robot circles
-                cv2.imshow('frame2', cv2.circle(self.frame, (int(clx), int(cly)), ROBOT_DISTANCE, BGR_COMMON['black'], 2, 0))
 
-                # Draw Names
-                cv2.imshow('frame2', cv2.putText(self.frame, r.name, (int(clx)-15, int(cly)+40), cv2.FONT_HERSHEY_COMPLEX, 0.45, (100, 150, 200)))
+        if not self.draw_GUI:
+            # Draw at least something
+            cv2.imshow('frame2', cv2.putText(self.frame, "TEAM E", (10, 20), cv2.FONT_HERSHEY_COMPLEX, 0.3, (255, 255, 255)))
 
-                cv2.imshow('frame2', cv2.putText(self.frame, str(int(r.get_angle())), (int(clx)-15, int(cly)+30),
-                                                 cv2.FONT_HERSHEY_COMPLEX, 0.45, (100, 150, 200)))
+            for r in self.robots:
+                if not r.is_present(): continue
+                clx, cly, x, y = r.get_coordinates()
+                if r.age >0:
+                    # Draw robot circles
+                    cv2.imshow('frame2', cv2.circle(self.frame, (int(clx), int(cly)), ROBOT_DISTANCE, BGR_COMMON['black'], 2, 0))
 
-                # Draw
-                angle = r.get_angle()
-                new_x = clx + 30 * cos(radians(angle))
-                new_y = cly + 30 * sin(radians(angle))
-                cv2.imshow('frame2', cv2.line(self.frame, (int(clx), int(cly)),
-                                                     (int(new_x), int(new_y)), (200, 150, 50), 3, 0))
+                    # Draw Names
+                    cv2.imshow('frame2', cv2.putText(self.frame, r.name, (int(clx)-15, int(cly)+40), cv2.FONT_HERSHEY_COMPLEX, 0.45, (100, 150, 200)))
 
-        counter += 1
-        if 'x' in self.regular_positions.keys():
-            x_ball = self.regular_positions['x']
-            y_ball = self.regular_positions['y']
-           
-            cv2.imshow('frame2', cv2.circle(self.frame, (int(x_ball), int(y_ball)), 8, (0, 0, 255), 2, 0))
-            #cv2.imshow('frame2', cv2.arrowedLine(self.frame, (int(x_ball_prev), int(y_ball_prev)),
-                       #(abs(int(x_ball+(10*(x_ball-x_ball_prev)))), abs(int(y_ball+(10*(y_ball-y_ball_prev))))), (0, 255, 0), 3, 10))
-            if counter >= 5:
-                x_ball_prev_prev=x_ball_prev
-                y_ball_prev_prev=y_ball_prev
-                x_ball_prev = x_ball
-                y_ball_prev = y_ball
+                    cv2.imshow('frame2', cv2.putText(self.frame, str(int(r.get_angle())), (int(clx)-15, int(cly)+30),
+                                                     cv2.FONT_HERSHEY_COMPLEX, 0.45, (100, 150, 200)))
 
-                counter = 0
-            cv2.imshow('frame2', cv2.arrowedLine(self.frame, (int(x_ball_prev_prev), int(y_ball_prev_prev)),
-                (abs(int(x_ball+(2*(x_ball_prev-x_ball_prev_prev)))), abs(int(y_ball+(2*(y_ball_prev-y_ball_prev_prev))))), (0, 255, 0), 3, 10))
-                #print r.name, r.get_angle()
+                    # Draw
+                    angle = r.get_angle()
+                    new_x = clx + 30 * cos(radians(angle))
+                    new_y = cly + 30 * sin(radians(angle))
+                    cv2.imshow('frame2', cv2.line(self.frame, (int(clx), int(cly)),
+                                                         (int(new_x), int(new_y)), (200, 150, 50), 3, 0))
 
+            counter += 1
+            if 'x' in self.regular_positions.keys():
+                x_ball = self.regular_positions['x']
+                y_ball = self.regular_positions['y']
 
+                cv2.imshow('frame2', cv2.circle(self.frame, (int(x_ball), int(y_ball)), 8, (0, 0, 255), 2, 0))
+                #cv2.imshow('frame2', cv2.arrowedLine(self.frame, (int(x_ball_prev), int(y_ball_prev)),
+                           #(abs(int(x_ball+(10*(x_ball-x_ball_prev)))), abs(int(y_ball+(10*(y_ball-y_ball_prev))))), (0, 255, 0), 3, 10))
+                if counter >= 5:
+                    x_ball_prev_prev=x_ball_prev
+                    y_ball_prev_prev=y_ball_prev
+                    x_ball_prev = x_ball
+                    y_ball_prev = y_ball
 
-        #self.model_positions = self.averagePositions(3, self.model_positions)
+                    counter = 0
+                cv2.imshow('frame2', cv2.arrowedLine(self.frame, (int(x_ball_prev_prev), int(y_ball_prev_prev)),
+                    (abs(int(x_ball+(2*(x_ball_prev-x_ball_prev_prev)))), abs(int(y_ball+(2*(y_ball_prev-y_ball_prev_prev))))), (0, 255, 0), 3, 10))
+                    #print r.name, r.get_angle()
+
+            #self.model_positions = self.averagePositions(3, self.model_positions)
+
 
     def averagePositions(self, frames, positions_in):
         """
