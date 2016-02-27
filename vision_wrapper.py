@@ -66,7 +66,7 @@ class VisionWrapper:
         self.draw_GUI = draw_GUI
         self.gui = None
         if draw_GUI:
-            self.gui = GUI()
+            self.gui = GUI(self.pitch)
         self.vision = Vision(
             pitch=pitch, frame_shape=self.frame.shape,
             frame_center=center_point, calibration=self.calibration,
