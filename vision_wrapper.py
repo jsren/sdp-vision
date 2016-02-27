@@ -205,6 +205,9 @@ class VisionWrapper:
         #     cv2.imshow('frame2', cv2.putText(self.frame, "TEAM E", (10, 20), cv2.FONT_HERSHEY_COMPLEX, 0.3, (255, 255, 255)))
 
 
+        if self.draw_GUI:
+            self.frame = self.gui.warp_image(self.frame)
+
         for r in self.robots:
             if not r.is_present(): continue
             clx, cly, x, y = r.get_coordinates()
@@ -247,7 +250,7 @@ class VisionWrapper:
             #print r.get_angle()
     
         if self.draw_GUI:
-            self.gui.drawGUI(self.frame)
+            self.gui.drawGUI()
 
 
 
