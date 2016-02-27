@@ -1,12 +1,12 @@
-from vision.vision1 import Vision, Camera
-import vision.tools as tools
+from vision1 import Vision, Camera
+import tools as tools
 from postprocessing import Postprocessing
 from preprocessing.preprocessing import Preprocessing
-from vision.tracker1 import RobotInstance
+from tracker1 import RobotInstance
 import cv2
 from copy import deepcopy
-from vision.colors import *
-from vision.tracker1 import ROBOT_DISTANCE
+from colors import *
+from tracker1 import ROBOT_DISTANCE
 from math import radians, cos, sin, isnan
 import numpy as np
 

@@ -1,5 +1,5 @@
 import threading
-import vision.tools as tools
+import tools
 import numpy as np
 
 from cv2 import waitKey
