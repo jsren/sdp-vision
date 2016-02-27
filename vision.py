@@ -302,14 +302,11 @@ class Camera(object):
     Camera access wrapper.
     """
 
-    def __init__(self, pitch, port=0):
+    def __init__(self, pitch, calibration, port=0):
 
         self.port = port
         self.pitch = pitch
         self.capture = None
-
-        # TODO: Calibrate camera for each pitch
-        calibration = Configuration.read_calibration()
 
         # TODO: Find cropping values for each pitch
         self.crop_values = tools.find_extremes(
