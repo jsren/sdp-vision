@@ -43,7 +43,7 @@ class Vision:
         """
         self.pitch = pitch
 
-        self.v4l_settings()
+        # self.v4l_settings()
         #self.GUI = GUI(calibration=calibration, pitch=pitch, launch=self)
         self.frame_center = frame_center
 
@@ -62,38 +62,21 @@ class Vision:
         self.circle_tracker = CircleTracker(
             ['yellow', 'blue'], ['green', 'pink'], (0, width, 0, height), pitch, calibration)
 
-
-
-
-        # create GUI
-        # The first numerical value is the starting point for the vision feed
-        cv2.namedWindow('frame2')
-        cv2.createTrackbar('bright','frame2',180,255,nothing)
-        cv2.createTrackbar('contrast','frame2',120,200,nothing)
-        cv2.createTrackbar('color','frame2',80,255,nothing)
-        cv2.createTrackbar('hue','frame2',5,30,nothing)
-        cv2.createTrackbar('Red Balance','frame2',5,20,nothing)
-        cv2.createTrackbar('Blue Balance','frame2',0,20,nothing)
-
+        
 
     def v4l_settings(self):
         # it would be nice to reset settings after executing the program..
         video0_old = {}
 
-        # for faraway room
+        # # for faraway room
         if self.pitch == 1:
             attributes = ["bright", "contrast", "color", "hue"]
             video0_new = {"bright": 23296, "contrast": 28384, "color": 65408, "hue": 38072}
-        #for closest room
-        elif self.pitch == 0:
-            attributes = ["bright", "contrast", "color", "hue", "Red Balance", "Blue Balance"]
-            video0_new = {"bright": cv2.getTrackbarPos('bright', 'frame2'), "contrast": cv2.getTrackbarPos('contrast','frame2'), 
-            "color": cv2.getTrackbarPos('color','frame2'), "hue": cv2.getTrackbarPos('hue', 'frame2'),
-            "Red Balance": cv2.getTrackbarPos('Red Balance', 'frame2'), "Blue Balance" : cv2.getTrackbarPos('Blue Balance', 'frame2')}
-
-        # attributes = ["bright", "contrast", "color", "hue"]
-        # video0_new = {"bright": 160, "contrast": 110, "color": 100, "hue": 0,"Red Balance": 0, "Blue Balance" : 5}
-	unknowns = []
+        # #for closest room
+        elif self.pitch == 0:           
+            attributes = ["bright", "contrast", "color", "hue"]
+            video0_new = {"bright": 160, "contrast": 110, "color": 100, "hue": 0,"Red Balance": 0, "Blue Balance" : 5}
+	    unknowns = []
 
         for attr in attributes:
             output, err = subprocess.Popen(["v4lctl", "show", attr],

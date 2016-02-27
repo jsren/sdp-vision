@@ -51,8 +51,8 @@ class VisionLauncher(object):
         print "[INFO] Configuring vision"
         self.visionwrap = VisionWrapper(self.pitch, OUR_NAME, ROBOT_DESCRIPTIONS, self.launch_gui)
 
-        if self.launch_gui:
-            print "[INFO] Launching GUI"
+        # if self.launch_gui:
+        #     print "[INFO] Launching GUI"
             # TODO: launch GUI. Vision works on the main thread, right?
             # GUI needs to be instantiated here and its draw function called in the control loop.
             # self.launch_gui flag will suppress drawing of standard vision display.
@@ -101,11 +101,7 @@ class VisionLauncher(object):
                 self.visionwrap.update()
                 self.visionwrap.vision.v4l_settings()
 
-                if self.launch_gui:
-                    pass
-                    # TODO: Update/redraw GUI. Call GUI.update or something.
-
-                else:
+                if not self.launch_gui:
                     # Wait until robot detected
                     if not self._started and self.get_robot_midpoint() is not None:
                         self._started = True
@@ -137,8 +133,6 @@ if __name__ == '__main__':
         vision_launcher = VisionLauncher(int(args.pitch), True)
 
     else:
-        from planner import Planner
-        
         # TODO: Need to configure for pitch
         vision_launcher = VisionLauncher(int(args.pitch))
 

@@ -50,13 +50,7 @@ class Tracker(object):
                 frame = frame[crop[2]:crop[3], crop[0]:crop[1]]
             if frame is None:
                 return None
-            if adjustments['blur'] >= 1:
-                blur = self.oddify(adjustments['blur'])
-                # print adjustments['blur']
 
-                frame =  cv2.GaussianBlur(frame, (9, 9), 0)
-                #plt.imshow(frame)
-                #plt.show()
 
 
             hp = adjustments.get('highpass')

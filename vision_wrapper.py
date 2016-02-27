@@ -3,6 +3,7 @@ import tools as tools
 from postprocessing import Postprocessing
 from preprocessing.preprocessing import Preprocessing
 from tracker1 import RobotInstance
+from gui import GUI
 import cv2
 from copy import deepcopy
 from colors import *
@@ -61,6 +62,9 @@ class VisionWrapper:
         # Set up vision
         self.calibration = tools.get_colors(pitch)
         self.draw_GUI = draw_GUI
+        self.gui = None
+        if draw_GUI:
+            self.gui = GUI()
         self.vision = Vision(
             pitch=pitch, frame_shape=self.frame.shape,
             frame_center=center_point, calibration=self.calibration,
@@ -192,55 +196,56 @@ class VisionWrapper:
                                     r_data['main_color'], r_data['side_color'], r_data['x'], r_data['y']):
                         break
 
-        if not self.draw_GUI:
-            # Draw at least something
-            cv2.imshow('frame2', cv2.putText(self.frame, "TEAM E", (10, 20), cv2.FONT_HERSHEY_COMPLEX, 0.3, (255, 255, 255)))
-
-
-            for r in self.robots:
-                if not r.is_present(): continue
-                clx, cly, x, y = r.get_coordinates()
-                if r.age >0:
-                    # Draw robot circles
-                    # print clx, cly
-                    if not isnan(clx) and not isnan(cly):
-                        cv2.imshow('frame2', cv2.circle(self.frame, (int(clx), int(cly)), ROBOT_DISTANCE, BGR_COMMON['black'], 2, 0))
-
-                        # Draw Names
-                        cv2.imshow('frame2', cv2.putText(self.frame, r.name, (int(clx)-15, int(cly)+40), cv2.FONT_HERSHEY_COMPLEX, 0.45, (100, 150, 200)))
-
-                        cv2.imshow('frame2', cv2.putText(self.frame, str(int(r.get_angle())), (int(clx)-15, int(cly)+30),
-                                                 cv2.FONT_HERSHEY_COMPLEX, 0.45, (100, 150, 200)))
-
-                        # Draw
-                        angle = r.get_angle()
-                        new_x = clx + 30 * cos(radians(angle))
-                        new_y = cly + 30 * sin(radians(angle))
-                        cv2.imshow('frame2', cv2.line(self.frame, (int(clx), int(cly)),
-                                                             (int(new_x), int(new_y)), (200, 150, 50), 3, 0))
-
-            counter += 1
-            if 'x' in self.regular_positions.keys():
-                x_ball = self.regular_positions['x']
-                y_ball = self.regular_positions['y']
-               
-                cv2.imshow('frame2', cv2.circle(self.frame, (int(x_ball), int(y_ball)), 8, (0, 0, 255), 2, 0))
-                #cv2.imshow('frame2', cv2.arrowedLine(self.frame, (int(x_ball_prev), int(y_ball_prev)),
-                           #(abs(int(x_ball+(10*(x_ball-x_ball_prev)))), abs(int(y_ball+(10*(y_ball-y_ball_prev))))), (0, 255, 0), 3, 10))
-                if counter >= 5:
-                    x_ball_prev_prev=x_ball_prev
-                    y_ball_prev_prev=y_ball_prev
-                    x_ball_prev = x_ball
-                    y_ball_prev = y_ball
-
-                    counter = 0
-                cv2.imshow('frame2', cv2.arrowedLine(self.frame, (int(x_ball_prev_prev), int(y_ball_prev_prev)),
-                    (abs(int(x_ball+(5*(x_ball_prev-x_ball_prev_prev)))), abs(int(y_ball+(5*(y_ball_prev-y_ball_prev_prev))))), (0, 255, 0), 3, 10))
-                #print r.get_angle()
         
-        else:
-            pass
-            # Draw GUI
+
+        # else:
+        #     # Draw at least something
+        #     cv2.imshow('frame2', cv2.putText(self.frame, "TEAM E", (10, 20), cv2.FONT_HERSHEY_COMPLEX, 0.3, (255, 255, 255)))
+
+
+        for r in self.robots:
+            if not r.is_present(): continue
+            clx, cly, x, y = r.get_coordinates()
+            if r.age >0:
+                # Draw robot circles
+                # print clx, cly
+                if not isnan(clx) and not isnan(cly):
+                    cv2.imshow('frame2', cv2.circle(self.frame, (int(clx), int(cly)), ROBOT_DISTANCE, BGR_COMMON['black'], 2, 0))
+
+                    # Draw Names
+                    cv2.imshow('frame2', cv2.putText(self.frame, r.name, (int(clx)-15, int(cly)+40), cv2.FONT_HERSHEY_COMPLEX, 0.45, (100, 150, 200)))
+
+                    cv2.imshow('frame2', cv2.putText(self.frame, str(int(r.get_angle())), (int(clx)-15, int(cly)+30),
+                                             cv2.FONT_HERSHEY_COMPLEX, 0.45, (100, 150, 200)))
+
+                    # Draw
+                    angle = r.get_angle()
+                    new_x = clx + 30 * cos(radians(angle))
+                    new_y = cly + 30 * sin(radians(angle))
+                    cv2.imshow('frame2', cv2.line(self.frame, (int(clx), int(cly)),
+                                                         (int(new_x), int(new_y)), (200, 150, 50), 3, 0))
+
+        counter += 1
+        if 'x' in self.regular_positions.keys():
+            x_ball = self.regular_positions['x']
+            y_ball = self.regular_positions['y']
+           
+            cv2.imshow('frame2', cv2.circle(self.frame, (int(x_ball), int(y_ball)), 8, (0, 0, 255), 2, 0))
+            #cv2.imshow('frame2', cv2.arrowedLine(self.frame, (int(x_ball_prev), int(y_ball_prev)),
+                       #(abs(int(x_ball+(10*(x_ball-x_ball_prev)))), abs(int(y_ball+(10*(y_ball-y_ball_prev))))), (0, 255, 0), 3, 10))
+            if counter >= 5:
+                x_ball_prev_prev=x_ball_prev
+                y_ball_prev_prev=y_ball_prev
+                x_ball_prev = x_ball
+                y_ball_prev = y_ball
+
+                counter = 0
+            cv2.imshow('frame2', cv2.arrowedLine(self.frame, (int(x_ball_prev_prev), int(y_ball_prev_prev)),
+                (abs(int(x_ball+(5*(x_ball_prev-x_ball_prev_prev)))), abs(int(y_ball+(5*(y_ball_prev-y_ball_prev_prev))))), (0, 255, 0), 3, 10))
+            #print r.get_angle()
+    
+        if self.draw_GUI:
+            self.gui.drawGUI(self.frame)
 
 
 
