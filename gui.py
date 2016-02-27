@@ -15,7 +15,7 @@ class GUI:
 
 	def __init__(self, pitch):
 		self.frame = None
-
+		self.pitch = pitch
 
 		# create GUI
 		# The first numerical value is the starting point for the vision feed
@@ -40,13 +40,23 @@ class GUI:
 
 
 	def drawGUI(self):
-		video0_new = {"bright": cv2.getTrackbarPos('bright', 'frame2'), "contrast": cv2.getTrackbarPos('contrast','frame2'), 
-		"color": cv2.getTrackbarPos('color','frame2'), "hue": cv2.getTrackbarPos('hue', 'frame2'),
-		"Red Balance": cv2.getTrackbarPos('Red Balance', 'frame2'), "Blue Balance" : cv2.getTrackbarPos('Blue Balance', 'frame2')}
+		if self.pitch == 0:
+			video0_new = {"bright": cv2.getTrackbarPos('bright', 'frame2'), "contrast": cv2.getTrackbarPos('contrast','frame2'),
+			"color": cv2.getTrackbarPos('color','frame2'), "hue": cv2.getTrackbarPos('hue', 'frame2'),
+			"Red Balance": cv2.getTrackbarPos('Red Balance', 'frame2'), "Blue Balance" : cv2.getTrackbarPos('Blue Balance', 'frame2')}
+
+			attributes = ["bright", "contrast", "color", "hue", "Red Balance", "Blue Balance"]
+
+
+		if self.pitch == 1:
+			video0_new = {"bright": cv2.getTrackbarPos('bright', 'frame2'), "contrast": cv2.getTrackbarPos('contrast','frame2'),
+			"color": cv2.getTrackbarPos('color','frame2'), "hue": cv2.getTrackbarPos('hue', 'frame2')}
+
+			attributes = ["bright", "contrast", "color", "hue"]
 
 		video0_old = {}
-		attributes = ["bright", "contrast", "color", "hue", "Red Balance", "Blue Balance"]
 		unknowns = []
+
 		for attr in attributes:
 			output, err = subprocess.Popen(["v4lctl", "show", attr],
 								 stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
