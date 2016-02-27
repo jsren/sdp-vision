@@ -212,10 +212,11 @@ class VisionWrapper:
         if self.draw_GUI:
             self.frame = self.gui.warp_image(self.frame)
 
-            # Draw circles
+            # Draw contours found
             for color in self.regular_positions['circles']:
-
-                cv2.drawContours(self.frame, self.regular_positions['circles'][color], -1, BGR_COMMON['black'], 1)
+                contours = self.regular_positions['circles'][color]
+                cv2.fillPoly(self.frame, contours, BGR_COMMON[color])
+                cv2.drawContours(self.frame, contours, -1, BGR_COMMON['black'], 1)
 
 
         for r in self.robots:
