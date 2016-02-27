@@ -31,7 +31,7 @@ class GUI(object):
         self.pitch = pitch
         self.launch = launch
 
-        # Should create a window with name self.VISION and allow resizing because of cv2.WINDOW_NORMAL
+        # Should create a window with name self.VISION
         cv2.namedWindow(self.VISION, cv2.WINDOW_NORMAL)
 
 

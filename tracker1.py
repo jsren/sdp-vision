@@ -18,7 +18,7 @@ Center = namedtuple('Center', 'x y')
 NUMBER_OF_MAIN_CIRCLES_PER_COLOR = 2
 NUMBER_OF_SIDE_CIRCLES_PER_COLOR = 16
 
-ROBOT_DISTANCE = 30
+ROBOT_DISTANCE = 20
 
 INITDISPLACEMENT = 34.509
 
@@ -314,6 +314,7 @@ class CircleTracker(Tracker):
         # Array of contours found.
         circles = self.find_all_circles(frame)
 
+
         # Use k-means to find cluster centres for main colors
         circle_results = []
         for m_color in self.main_colors:
@@ -322,6 +323,10 @@ class CircleTracker(Tracker):
             
             cls = self.find_color_clusters(circles[m_color], 2)
             if cls.any() and len(cls) == 2 and np.linalg.norm(cls[0] - cls[1]) > ROBOT_DISTANCE:
+                #clusters.append(cls)
+                #queue.put({
+                #    "clusters":cls
+                #})
 
                 # For each cluster, find near circles
                 for cl in cls:
@@ -364,6 +369,114 @@ class CircleTracker(Tracker):
         #queue.put({
         #    "clusters":clusters
         #})
+
+
+
+        # 1) returns the most relevant circles found.
+        # queue.put({
+        #     "circles":circles
+        # })
+
+
+        # 2) Returns the calculated robot positions.
+
+        # Declare robot colors. side1_count must always be 1 circle
+        '''
+        robot_colors = {
+            'OurDefender':
+                {
+                    'main_color': 'blue',
+                    'side0_color': 'pink',
+                    'side0_count': 3,
+                    'side1_color': 'pink',
+                    'side1_count': 1,
+                }
+        }
+        queue.put({
+            'robots': self.get_robots(circles, robot_colors)
+        })
+        '''
+
+
+    '''
+
+    def dist_sq(self, a, b):
+        """
+        Finds squared distance between [a[0], a[1]] and [b[0], b[1]]
+        """
+        return (a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2
+
+    def get_robots(self, circles, robot_colors):
+        """
+        Given all circles on the field, returns the coordinates of each robot.
+        It is assumed that an exact number of circles is provided to locate all given robots.
+        It is assumed that there will be exactly 4 side circles on the robot.
+        It is also assumed that side1 is the one with one circle.
+        This function can be implemented with numpy and matrices, which would speed things up by a lot.
+        :param circles:         {color:[(x, y, radius), ...]}
+        :param robots_colors    {robot_name:{main_color:color_name,
+            side0_color:color_name, side0_count:int,
+            side1_color: color_name, side1_count:int}}
+        :return:    {robot_name:{x:float center_x, y:float center_y, angle:float angle_euclidean}}
+        """
+        print 'robot_colors:', robot_colors
+        main_colors = set(r['main_color'] for r in robot_colors.values())
+        main_circles = []
+
+        for m_color in main_colors:
+            main_circles += circles[m_color]
+
+        side_colors = set()
+        for r in robot_colors.values():
+            side_colors.add(r['side0_color'])
+            side_colors.add(r['side1_color'])
+
+        # For every main circle, create a dictionary for possible side colors.
+        nearest_neighbors = {m_circle:{} for m_circle in main_circles}
+        for m_circle in nearest_neighbors:
+            for s_color in side_colors:
+                nearest_neighbors[m_circle][s_color] = []
+
+        for s_color in side_colors:
+            for s_circle in circles[s_color]:
+
+                # Make each main circle map to the closest side circles.
+                try:
+                    nearest_neighbors[main_circles[
+                        np.argmin([self.dist_sq(m_circle, s_circle) for m_circle in main_circles])
+                    ]][s_color].append(s_circle)
+                except ValueError:
+                    print "NO MAIN CIRCLES FOUND"
+                    raise
+
+        # Find the robots with required numbers of dots above them.
+        found_robots = dict()
+        for robot_name in robot_colors.keys():
+
+            # Don't try to fit other robots if one is found. Just go to the next one
+            next_robot = False
+            robot_values = robot_colors[robot_name]
+            for m_color in main_colors:
+                for m_circle in nearest_neighbors[m_color]:
+
+                    # If numbers of different types of colored circles around the robot matches the robot description
+                    if robot_values['main_color'] == m_color and \
+                    robot_values['side0_count'] == len(nearest_neighbors[m_color][robot_values['side0_color']]) and \
+                    robot_values['side1_count'] == len(nearest_neighbors[m_color][robot_values['side1_color']]):
+
+                        # Calculate angle based on the fact that there is a different colored circle on the bottom left.
+                        side1_circle = nearest_neighbors[m_circle][robot_values['side1_color']][0]
+                        angle_euclidean = self.get_angle(side1_circle, m_circle) + 45
+                        found_robots[robot_name] = {'x':m_circle[0], 'y':m_circle[1], 'angle': angle_euclidean}
+
+                        next_robot = True
+                        break
+                if next_robot:
+                    break
+                    
+        return found_robots
+
+    '''
 
 
 class BallTracker(Tracker):
@@ -413,6 +526,7 @@ class BallTracker(Tracker):
                                                           self.crop,
                                                           color,
                                                           'BALL')
+
             if len(contours) <= 0:
                 #print 'No ball found.'
                 pass
@@ -483,7 +597,7 @@ class RobotInstance(object):
         angle = self.angleOfLine(np.array([x, y]),
                                  np.array([sx, sy]))
         # Correct for marker offset
-        return angle + INITDISPLACEMENT + 110
+        return angle + INITDISPLACEMENT + 90
 
     def get_angle(self):
         return np.median(self.angle)

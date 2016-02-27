@@ -1,3 +1,0 @@
-[submodule "venv"]
-	path = venv
-	url = https://github.com/jsren/sdp-vision-env

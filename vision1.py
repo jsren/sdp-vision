@@ -9,6 +9,8 @@ import time
 from colors import BGR_COMMON
 from testgui import GUI
 
+def nothing(x): pass
+
 TEAM_COLORS = set(['yellow', 'blue'])
 SIDES = ['left', 'right']
 PITCHES = [0, 1]
@@ -42,7 +44,7 @@ class Vision:
         self.pitch = pitch
 
         self.v4l_settings()
-
+        #self.GUI = GUI(calibration=calibration, pitch=pitch, launch=self)
         self.frame_center = frame_center
 
         height, width, channels = frame_shape
@@ -62,20 +64,37 @@ class Vision:
 
 
 
-    
+
+        # create GUI
+        # The first numerical value is the starting point for the vision feed
+        cv2.namedWindow('frame2')
+        cv2.createTrackbar('bright','frame2',180,255,nothing)
+        cv2.createTrackbar('contrast','frame2',120,200,nothing)
+        cv2.createTrackbar('color','frame2',80,255,nothing)
+        cv2.createTrackbar('hue','frame2',5,30,nothing)
+        cv2.createTrackbar('Red Balance','frame2',5,20,nothing)
+        cv2.createTrackbar('Blue Balance','frame2',0,20,nothing)
+
+
     def v4l_settings(self):
         # it would be nice to reset settings after executing the program..
         video0_old = {}
-        # for faraway room
-        #if self.pitch == 1:
-        #attributes = ["bright", "contrast", "color", "hue"]
-        #video0_new = {"bright": 23296, "contrast": 28384, "color": 65408, "hue": 38072}
-        # for closest room
-        #elif self.pitch == 0:
-        attributes = ["bright", "contrast", "color", "hue", "Red Balance", "Blue Balance"]
-        video0_new = {"bright": 130, "contrast": 70, "color": 100 , "hue": 0,"Red Balance": 0, "Blue Balance" : 5}
 
-        unknowns = []
+        # for faraway room
+        if self.pitch == 1:
+            attributes = ["bright", "contrast", "color", "hue"]
+            video0_new = {"bright": 23296, "contrast": 28384, "color": 65408, "hue": 38072}
+        #for closest room
+        elif self.pitch == 0:
+            attributes = ["bright", "contrast", "color", "hue", "Red Balance", "Blue Balance"]
+            video0_new = {"bright": cv2.getTrackbarPos('bright', 'frame2'), "contrast": cv2.getTrackbarPos('contrast','frame2'), 
+            "color": cv2.getTrackbarPos('color','frame2'), "hue": cv2.getTrackbarPos('hue', 'frame2'),
+            "Red Balance": cv2.getTrackbarPos('Red Balance', 'frame2'), "Blue Balance" : cv2.getTrackbarPos('Blue Balance', 'frame2')}
+
+        # attributes = ["bright", "contrast", "color", "hue"]
+        # video0_new = {"bright": 160, "contrast": 110, "color": 100, "hue": 0,"Red Balance": 0, "Blue Balance" : 5}
+	unknowns = []
+
         for attr in attributes:
             output, err = subprocess.Popen(["v4lctl", "show", attr],
                                  stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
@@ -352,85 +371,3 @@ class Camera(object):
         return 320 - self.crop_values[0], 240 - self.crop_values[2]
 
 
-
-
-# camera = Camera()
-# camera.start_capture()
-#
-# frame0 = camera.get_frame()
-# frame1 =  cv2.GaussianBlur(frame0, (9, 9), 0)
-# cv2.imwrite("blurred.jpg", frame1 );
-#
-# vision = Vision(1, frame0.shape,
-#                 camera.get_adjusted_center(frame0),
-#                 tools.get_colors(0))
-#
-# height, width, channels = frame0.shape
-# #print height, width, channels
-#
-# x_ball_prev = 0
-# y_ball_prev = 0
-#
-# while True:
-#     frame0 = camera.get_frame()
-#
-#     # This code creates a small red circle around the ball while tracking
-#     frame0 = frame0[25:465, 45:600]
-#     positions = vision._run_trackers(frame0)
-#     cv2.imwrite("reshaped.jpg", frame0)
-#
-#     if positions[0] is None or positions[1] is None :
-#         pass
-#     else:
-#         x_ball = positions[0]['x']
-#         y_ball = positions[0]['y']
-#         # BGR colors in tuples
-#         cv2.imshow('frame2', cv2.circle(frame0, (int(x_ball), int(y_ball)), 8, (0, 0, 255), 2, 0))
-#         #print "ball corrdinates.  x:", x_ball, ", y:", y_ball
-#         #commenting out the print statements makes the camera feed run smoother
-#
-#         cv2.imshow('frame2', cv2.arrowedLine(frame0, (int(x_ball_prev), int(y_ball_prev)),
-#                  (int(x_ball+(10*(x_ball-x_ball_prev))), int(y_ball+(10*(y_ball-y_ball_prev)))), (0, 255, 0), 3, 10))
-#
-#
-#         x_ball_prev = x_ball
-#         y_ball_prev = y_ball
-#         if 'circles' in positions[1].keys():
-#             for color in positions[1]['circles'].keys():
-#                 for crc in positions[1]['circles'][color]:
-#                     (x, y), radius = cv2.minEnclosingCircle(crc)
-#                     #cv2.imshow('frame2', cv2.circle(frame0, (int(x), int(y)), int(radius), BGR_COMMON[color], 2, 0))
-#                     cv2.imshow('frame2', cv2.circle(frame0, (int(x), int(y)), int(radius), (255, 0, 0), 2, 0))
-#         '''
-#         if 'robots' in positions[1].keys():
-#             for robot_name in positions[1]['robots'].keys():
-#                 robot = positions[1]['robots'][robot_name]
-#                 cv2.imshow('frame2', cv2.circle(frame0, (int(robot['x']), int(robot['y'])), 16, (255, 0, 0), 2, 0))
-#
-#         if 'clusters' in positions[1].keys():
-#             for cl in positions[1]['clusters']:
-#                 cv2.imshow('frame2', cv2.circle(frame0, (int(cl[0]), int(cl[1])), 20, BGR_COMMON['white'], 2, 0))
-#
-#         if 'robot_coords' in positions[0].keys():
-#             for robot in positions[0]['robot_coords']:
-#                 pass
-#                 #print robot
-#         '''
-#
-#
-#         '''
-#         for i in xrange(len(positions)):
-#             if i != 5:
-#                 print "position:", positions[i]
-#             else:
-#                 for x in positions[i]['coordinates']:
-#                     print "circle position:", x
-#         print "--- --- --- --- ---"
-#         '''
-#
-#         if cv2.waitKey(1) & 0xFF == ord('q'):
-#             break
-#
-#
-# camera.stop_capture()
-# cv2.destroyAllWindows()
