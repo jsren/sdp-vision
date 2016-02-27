@@ -27,7 +27,7 @@ class RobotInstance(object):
             self.y.insert(0, y); self.y = self.y[:self.queue_size]
             self.side_y.insert(0, side_y); self.side_y = self.side_y[:self.queue_size]
             self.side_x.insert(0, side_x); self.side_x = self.side_x[:self.queue_size]
-            self.angle.insert(0, self.get_robot_heading()); self.angle = self.angle[:self.queue_size]
+            self.angle.insert(0, self._get_angle()); self.angle = self.angle[:self.queue_size]
             self._present = True
             self.age = 30
             return True
@@ -47,8 +47,7 @@ class RobotInstance(object):
         point2 = list(point2-point1)
         return degrees(atan2(point2[1], point2[0]))
 
-
-    def get_robot_heading(self):
+    def _get_angle(self):
         # Get angle between points
         x, y, sx, sy = self.get_coordinates()
         angle = self.angleOfLine(np.array([x, y]),
@@ -56,7 +55,7 @@ class RobotInstance(object):
         # Correct for marker offset
         return angle + marker_angle_offset + 90
 
-    def get_angle(self):
+    def get_robot_heading(self):
         return np.median(self.angle)
 
     def reset(self):

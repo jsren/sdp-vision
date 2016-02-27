@@ -5,18 +5,30 @@ def nothing(x):
 
 class GUI:
 
-	def __init__(self):
+	def __init__(self, pitch):
+		self.frame = None
+
 
 		# create GUI
 		# The first numerical value is the starting point for the vision feed
-		cv2.namedWindow('frame2')
-		cv2.createTrackbar('bright','frame2',180,255,nothing)
-		cv2.createTrackbar('contrast','frame2',120,200,nothing)
-		cv2.createTrackbar('color','frame2',80,255,nothing)
-		cv2.createTrackbar('hue','frame2',5,30,nothing)
-		cv2.createTrackbar('Red Balance','frame2',5,20,nothing)
-		cv2.createTrackbar('Blue Balance','frame2',0,20,nothing)
-		cv2.createTrackbar('Gaussian blur','frame2',1,1,nothing)
+		if pitch == 0:
+			cv2.namedWindow('frame2')
+			cv2.createTrackbar('bright','frame2',180,255,nothing)
+			cv2.createTrackbar('contrast','frame2',120,200,nothing)
+			cv2.createTrackbar('color','frame2',80,255,nothing)
+			cv2.createTrackbar('hue','frame2',5,30,nothing)
+			cv2.createTrackbar('Red Balance','frame2',5,20,nothing)
+			cv2.createTrackbar('Blue Balance','frame2',0,20,nothing)
+			cv2.createTrackbar('Gaussian blur','frame2',1,1,nothing)
+
+		if pitch == 1:
+			cv2.namedWindow('frame2')
+			cv2.createTrackbar('bright','frame2',23000,40000,nothing)
+			cv2.createTrackbar('contrast','frame2',28000,40000,nothing)
+			cv2.createTrackbar('color','frame2',65000,100000,nothing)
+			cv2.createTrackbar('hue','frame2',38000,60000,nothing)
+			cv2.createTrackbar('Gaussian blur','frame2',1,1,nothing)
+
 
 
 	def drawGUI(self):

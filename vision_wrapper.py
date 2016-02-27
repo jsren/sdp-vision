@@ -66,7 +66,7 @@ class VisionWrapper:
         self.draw_GUI = draw_GUI
         self.gui = None
         if draw_GUI:
-            self.gui = GUI()
+            self.gui = GUI(self.pitch)
         self.vision = Vision(
             pitch=pitch, frame_shape=self.frame.shape,
             frame_center=center_point, calibration=self.calibration,
@@ -88,6 +88,10 @@ class VisionWrapper:
             self.robots.append(RobotInstance(r_name,
                                              robot_details[r_name]['main_colour'],
                                              robot_details[r_name]['side_colour']))
+
+    def get_robots_raw(self):
+        return [(r.name, np.mean(r.x), np.mean(r.y), r.get_robot_heading())
+                for r in self.robots]
 
     def get_robot_position(self, robot_name):
         for r in self.robots:
@@ -128,25 +132,25 @@ class VisionWrapper:
                     robot_x = np.mean(r.x)
                     robot_y = np.mean(r.y) 
                     #print robot_x, robot_y, ball_x, ball_y
-                    if r.get_angle() < 90:
+                    if r.get_robot_heading() < 90:
                         if (robot_x-10 < ball_x < robot_x+30 and robot_y-10 < ball_y < robot_y+30):
                             return True
                         else:
                             return False
 
-                    elif (r.get_angle() >= 90 and r.get_angle() < 180):
+                    elif (r.get_robot_heading() >= 90 and r.get_robot_heading() < 180):
                         if robot_x-30 < ball_x < robot_x+10 and robot_y-10 < ball_y < robot_y+30:
                             return True
                         else:
                             return False
 
-                    elif (r.get_angle() >= 180 and r.get_angle() < 270):
+                    elif (r.get_robot_heading() >= 180 and r.get_robot_heading() < 270):
                         if robot_x-30 < ball_x < robot_x+10 and robot_y-30 < ball_y < robot_y+10:
                             return True
                         else:
                             return False
 
-                    elif (r.get_angle() >= 270 and r.get_angle() < 360):
+                    elif (r.get_robot_heading() >= 270 and r.get_robot_heading() < 360):
                         if robot_x-10 < ball_x < robot_x+30 and robot_y-30 < ball_y < robot_y+10:
                             return True
                         else:
@@ -220,11 +224,11 @@ class VisionWrapper:
                     # Draw Names
                     cv2.imshow('frame2', cv2.putText(self.frame, r.name, (int(clx)-15, int(cly)+40), cv2.FONT_HERSHEY_COMPLEX, 0.45, (100, 150, 200)))
 
-                    cv2.imshow('frame2', cv2.putText(self.frame, str(int(r.get_angle())), (int(clx)-15, int(cly)+30),
-                                             cv2.FONT_HERSHEY_COMPLEX, 0.45, (100, 150, 200)))
+                    cv2.imshow('frame2', cv2.putText(self.frame, str(int(r.get_robot_heading())), (int(clx) - 15, int(cly) + 30),
+                                                     cv2.FONT_HERSHEY_COMPLEX, 0.45, (100, 150, 200)))
 
                     # Draw
-                    angle = r.get_angle()
+                    angle = r.get_robot_heading()
                     new_x = clx + 30 * cos(radians(angle))
                     new_y = cly + 30 * sin(radians(angle))
                     cv2.imshow('frame2', cv2.line(self.frame, (int(clx), int(cly)),
