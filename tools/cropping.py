@@ -1,7 +1,9 @@
+import argparse
+
 import cv2
 import numpy as np
-import tools
-import argparse
+
+from util import tools
 
 FRAME_NAME = 'ConfigureWindow'
 
@@ -17,7 +19,7 @@ CMATRIX = distort_data['camera_matrix']
 DIST = distort_data['dist']
 
 
-class Configure(object):
+class CroppingUI(object):
 
         def __init__(self, pitch, width=640, height=480):
                 self.width = width
@@ -145,5 +147,5 @@ if __name__ == '__main__':
         pitch_num = int(args.pitch)
         assert pitch_num in [0, 1]
 
-        c = Configure(pitch=pitch_num)
+        c = CroppingUI(pitch=pitch_num)
         c.run(camera=True)

@@ -1,9 +1,10 @@
 # coding=utf-8
 import cv2
+import numpy as np
+
 from colors import BGR_COMMON
 from findHSV import CalibrationGUI
-import tools
-import numpy as np
+
 #import consol
 # from collections import namedtuple
 # from planning import Planner

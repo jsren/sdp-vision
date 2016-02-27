@@ -4,12 +4,11 @@ from math import radians, cos, sin, isnan
 import cv2
 import numpy as np
 
-import tools as tools
 from colors import *
 from gui import GUI
 from preprocessing.preprocessing import Preprocessing
-from util import RobotInstance
 from robot_tracker import ROBOT_DISTANCE
+from util import RobotInstance, tools
 from vision import Vision, Camera
 
 x_ball_prev = 0

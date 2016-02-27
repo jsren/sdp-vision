@@ -1,11 +1,12 @@
-from multiprocessing import Process, Queue
-from collections import namedtuple
-from robot_tracker import RobotTracker
-from ball_tracker import BallTracker
-
 import subprocess
-import tools
+from collections import namedtuple
+from multiprocessing import Process, Queue
+
 import cv2
+
+from ball_tracker import BallTracker
+from robot_tracker import RobotTracker
+from util import tools
 
 
 def nothing(x): pass
