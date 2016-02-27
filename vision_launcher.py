@@ -96,6 +96,8 @@ class VisionLauncher(object):
         try:
             while keypress != ord('q'):  # the 'q' key
                 keypress = waitKey(1) & 0xFF
+                self.visionwrap.change_drawing(keypress)
+
                 # update the vision system with the next frame
                 self.visionwrap.update()
 
