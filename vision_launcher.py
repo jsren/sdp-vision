@@ -51,12 +51,6 @@ class VisionLauncher(object):
         print "[INFO] Configuring vision"
         self.visionwrap = VisionWrapper(self.pitch, OUR_NAME, ROBOT_DESCRIPTIONS, self.launch_gui)
 
-        # if self.launch_gui:
-        #     print "[INFO] Launching GUI"
-            # TODO: launch GUI. Vision works on the main thread, right?
-            # GUI needs to be instantiated here and its draw function called in the control loop.
-            # self.launch_gui flag will suppress drawing of standard vision display.
-
         print "[INFO] Beginning vision loop"
         self.control_loop()
 
@@ -98,8 +92,12 @@ class VisionLauncher(object):
         gets the actions for the robots to perform;  passes it to the robot
         controllers before finally updating the GUI.
         """
+        keypress = -1
         try:
-            while waitKey(1) & 0xFF != ord('q'):  # the 'q' key
+            while keypress != ord('q'):  # the 'q' key
+                keypress = waitKey(1) & 0xFF
+                self.visionwrap.change_drawing(keypress)
+
                 # update the vision system with the next frame
                 self.visionwrap.update()
 

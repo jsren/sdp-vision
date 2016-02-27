@@ -66,7 +66,8 @@ class BallTracker(Tracker):
                     'x': x,
                     'y': y,
                     'angle': None,
-                    'velocity': None
+                    'velocity': None,
+                    'ball_contour': cnt
                 })
         queue.put(None)
         pass
