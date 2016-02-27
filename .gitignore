@@ -1,4 +1,7 @@
 .idea/workspace.xml
+.idea/sdp-vision.iml
+.idea/vision.iml
+.idea/misc.xml
 
 *~
 
@@ -13,3 +16,5 @@ pip-log.txt
 pip-delete-this-directory.txt 
 
 !.gitignore
+
+restore_v4lctl_settings.sh
