@@ -1,3 +1,11 @@
+"""
+Computes entity position predictions.
+
+Authors: Kernel Panic
+Team: SDP Team 2015
+
+"""
+
 from copy import deepcopy
 from math import atan2, pi, hypot
 

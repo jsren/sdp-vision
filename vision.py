@@ -1,19 +1,19 @@
-import cv2
-import tools
-from tracker1 import CircleTracker, BallTracker
 from multiprocessing import Process, Queue
 from collections import namedtuple
+from robot_tracker import RobotTracker
+from ball_tracker import BallTracker
+
 import subprocess
-import numpy as np
-import time
-from colors import BGR_COMMON
-from testgui import GUI
+import tools
+import cv2
+
 
 def nothing(x): pass
 
-TEAM_COLORS = set(['yellow', 'blue'])
-SIDES = ['left', 'right']
-PITCHES = [0, 1]
+
+TEAM_COLORS = {'yellow', 'blue'}
+SIDES       = ['left', 'right']
+PITCHES     = [0, 1]
 
 PROCESSING_DEBUG = False
 
@@ -50,7 +50,7 @@ class Vision:
         height, width, channels = frame_shape
 
         # Find the zone division
-        self.zones = zones = self._get_zones(width, height)
+        self.zones = self._get_zones(width, height)
 
         #
         self.return_circle_contours = return_circle_contours
@@ -59,7 +59,7 @@ class Vision:
         self.ball_tracker = BallTracker(
            (0, width, 0, height), 0, pitch, calibration)
 
-        self.circle_tracker = CircleTracker(
+        self.circle_tracker = RobotTracker(
             ['yellow', 'blue'], ['green', 'pink'], (0, width, 0, height), pitch, calibration, return_circle_contours)
 
         
@@ -76,7 +76,7 @@ class Vision:
         elif self.pitch == 0:           
             attributes = ["bright", "contrast", "color", "hue"]
             video0_new = {"bright": 160, "contrast": 110, "color": 100, "hue": 0,"Red Balance": 0, "Blue Balance" : 5}
-	    unknowns = []
+        unknowns = []
 
         for attr in attributes:
             output, err = subprocess.Popen(["v4lctl", "show", attr],
@@ -114,7 +114,7 @@ class Vision:
                                            pitch=self.pitch)]
 
     def _get_opponent_color(self, our_color):
-        return (TEAM_COLORS - set([our_color])).pop()
+        return (TEAM_COLORS - {our_color}).pop()
 
 
     def locate1(self, frame):
@@ -133,6 +133,7 @@ class Vision:
         return regular_positions
 
 
+    # TODO: Why has this been commented out?
     # def locate(self, frame):
     #     """
     #     Find objects on the pitch using multiprocessing.
