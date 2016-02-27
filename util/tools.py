@@ -217,3 +217,7 @@ def crop(frame, size=None):
     # print 'SIZE:', size
     x_min, x_max, y_min, y_max = size
     return frame[y_min:y_max, x_min:x_max]
+
+
+def time_delta_in_s(datetime1, datetime2):
+    return int((datetime2-datetime1).total_seconds())

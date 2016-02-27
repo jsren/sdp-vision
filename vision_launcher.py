@@ -1,10 +1,12 @@
-import threading
-
-import numpy as np
 from cv2 import waitKey
-
 from util import tools
+from datetime import datetime
 from vision_wrapper import VisionWrapper
+from util import time_delta_in_ms
+
+import threading
+import numpy as np
+
 
 OUR_NAME = "yellow + pink"
 
@@ -21,6 +23,7 @@ ROBOT_DESCRIPTIONS = {
 }
 
 assert OUR_NAME in ROBOT_DESCRIPTIONS
+
 
 
 class VisionLauncher(object):
@@ -76,13 +79,24 @@ class VisionLauncher(object):
         return self.visionwrap.get_circle_contours()
 
     def wait_for_start(self, timeout=None):
+        """
+        Sleeps the current thread until the vision system is ready
+        or the given timeout has elapsed.
+        :param timeout: Timeout in seconds or None.
+        :return: True if vision system ready, False if timed-out.
+        """
         if not self._started:
             if threading.currentThread().getName() == self._thread:
                 raise Exception("You cannot wait for the vision "
                                 "to start running on the same thread!")
             else:
                 with self._cv:
+                    start = datetime.now()
                     self._cv.wait(timeout)
+
+                    # If timed-out, then the time taken >= timeout value
+                    return time_delta_in_ms(start, datetime.now()) < \
+                            int(timeout * 1000)
 
     def control_loop(self):
         """
