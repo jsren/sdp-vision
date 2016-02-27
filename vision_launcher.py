@@ -99,6 +99,7 @@ class VisionLauncher(object):
             while waitKey(1) & 0xFF != ord('q'):  # the 'q' key
                 # update the vision system with the next frame
                 self.visionwrap.update()
+
                 #self.visionwrap.vision.v4l_settings()
 
                 if not self.launch_gui:
