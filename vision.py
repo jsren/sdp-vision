@@ -5,6 +5,7 @@ from multiprocessing import Process, Queue
 import cv2
 
 from ball_tracker import BallTracker
+from config import Configuration
 from robot_tracker import RobotTracker
 from util import tools
 
@@ -301,17 +302,18 @@ class Camera(object):
     Camera access wrapper.
     """
 
-    def __init__(self, port=0, pitch=0):
+    def __init__(self, pitch, port=0):
 
         self.port = port
         self.pitch = pitch
         self.capture = None
 
         # TODO: Calibrate camera for each pitch
-        calibration = tools.get_croppings(pitch=pitch)
+        calibration = Configuration.read_calibration()
 
         # TODO: Find cropping values for each pitch
-        self.crop_values = tools.find_extremes(calibration['outline'])
+        self.crop_values = tools.find_extremes(
+            calibration.get_color_setting(pitch, 'outline'))
 
         # TODO: Find and pickle radial distortion data for each pitch
         # Parameters used to fix radial distortion
