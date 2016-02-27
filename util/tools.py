@@ -220,4 +220,4 @@ def crop(frame, size=None):
 
 
 def time_delta_in_ms(datetime1, datetime2):
-    return int((datetime2-datetime1).total_seconds() / 1000)
+    return int((datetime2-datetime1).total_seconds() * 1000)

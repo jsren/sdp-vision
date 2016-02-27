@@ -98,9 +98,11 @@ class VisionLauncher(object):
                     start = datetime.now()
                     self._cv.wait(timeout)
 
+                    print (datetime.now()-start).total_seconds()
+
                     # If timed-out, then the time taken >= timeout value
-                    return time_delta_in_ms(start, datetime.now()) < \
-                            int(timeout / 1000)
+                    return timeout is None or time_delta_in_ms(start, datetime.now()) < \
+                            int(timeout * 1000)
 
     def control_loop(self):
         """
@@ -121,12 +123,11 @@ class VisionLauncher(object):
 
                 #self.visionwrap.vision.v4l_settings()
 
-                if not self.launch_gui:
-                    # Wait until robot detected
-                    if not self._started and self.get_robot_midpoint() is not None:
-                        self._started = True
-                        with self._cv:
-                            self._cv.notifyAll()
+                # Wait until robot detected
+                if not self._started and self.get_robot_midpoint() is not None:
+                    self._started = True
+                    with self._cv:
+                        self._cv.notifyAll()
         finally:
             self.visionwrap.camera.stop_capture()
             #print self.visionwrap.do_we_have_ball(OUR_NAME)
