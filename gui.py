@@ -1,5 +1,13 @@
+""" Vision GUI - (c) SDP Team E 2016
+    --------------------------------
+    Authors:
+    Team: SDP Team E
+"""
+
 import cv2
 import subprocess
+
+
 def nothing(x): 
 	pass
 

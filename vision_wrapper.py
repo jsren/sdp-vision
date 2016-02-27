@@ -1,17 +1,16 @@
-from vision1 import Vision, Camera
-import tools as tools
-from postprocessing import Postprocessing
-from preprocessing.preprocessing import Preprocessing
-from tracker1 import RobotInstance
-from gui import GUI
-import cv2
 from copy import deepcopy
-from colors import *
-from tracker1 import ROBOT_DISTANCE
 from math import radians, cos, sin, isnan
+
+import cv2
 import numpy as np
 
+import tools as tools
+from colors import *
+from gui import GUI
+from preprocessing.preprocessing import Preprocessing
 from util import RobotInstance
+from robot_tracker import ROBOT_DISTANCE
+from vision import Vision, Camera
 
 x_ball_prev = 0
 y_ball_prev = 0
@@ -257,9 +256,7 @@ class VisionWrapper:
             self.gui.drawGUI()
 
             for circle in self.regular_positions['circles']:
-
-
-
+                pass
 
         #self.model_positions = self.averagePositions(3, self.model_positions)
 
