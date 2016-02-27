@@ -11,6 +11,8 @@ from tracker1 import ROBOT_DISTANCE
 from math import radians, cos, sin, isnan
 import numpy as np
 
+from util import RobotInstance
+
 x_ball_prev = 0
 y_ball_prev = 0
 counter = 0

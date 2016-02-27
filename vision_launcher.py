@@ -14,10 +14,10 @@ goals = {
 }
 
 ROBOT_DESCRIPTIONS = {
-    'blue + green': {'main_colour': 'blue', 'side_colour': 'green'},
+    'blue + green'  : {'main_colour': 'blue', 'side_colour': 'green'},
     'yellow + green': {'main_colour': 'yellow', 'side_colour': 'green'},
-    'blue + pink': {'main_colour': 'blue', 'side_colour': 'pink'},
-    'yellow + pink': {'main_colour': 'yellow', 'side_colour': 'pink'}
+    'blue + pink'   : {'main_colour': 'blue', 'side_colour': 'pink'},
+    'yellow + pink' : {'main_colour': 'yellow', 'side_colour': 'pink'}
 }
 
 assert OUR_NAME in ROBOT_DESCRIPTIONS
