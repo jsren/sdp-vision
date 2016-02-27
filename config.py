@@ -58,15 +58,18 @@ class Calibration(object):
         self._machine = machine_name
         self._data    = json
 
+    def __iter__(self):
+        return iter(Configuration.calibration_colors)
+
     @property
     def machine_name(self):
         return self._machine
 
     def get_color_setting(self, pitch, name):
-        return CalibrationSetting(self._data[pitch][name])
+        return CalibrationSetting(self._data[str(pitch)][name])
 
     def set_color_setting(self, pitch, name, setting):
-        self._data[pitch][name] = setting.get_json()
+        self._data[str(pitch)][name] = setting.get_json()
 
     def get_json(self):
         return self._data
@@ -74,7 +77,8 @@ class Calibration(object):
     @staticmethod
     def get_default():
         return Calibration(_get_machine_name(),
-            { i : { c : CalibrationSetting.get_default() for c in ['blue', 'yellow', 'red', 'green', 'pink'] }
+            { str(i) : { c : CalibrationSetting.get_default().get_json()
+                         for c in Configuration.calibration_colors }
              for i in [0,1] })
 
 
@@ -93,6 +97,9 @@ class VideoConfig(object):
         if self._data[key] != value:
             self._changed.add(key)
         self._data[key] = value
+
+    def __iter__(self):
+        return iter(Configuration.video_settings)
 
     def get_json(self):
         self._data['bright']       = int(self._data['bright'])
@@ -209,7 +216,7 @@ class Configuration(object):
 
         # Get filepath
         setting_dir  = os.path.dirname(__file__)
-        setting_file = os.path.join(setting_dir, "calibrations/" + machine_name + ".json")
+        setting_file = os.path.join(setting_dir, "settings/" + machine_name + ".json")
 
         # Save JSON
         with open(setting_file, 'w') as file:
@@ -229,3 +236,6 @@ class Configuration(object):
 
 Configuration.video_settings = \
     [ "bright", "contrast", "color", "hue", "Red Balance", "Blue Balance" ]
+
+Configuration.calibration_colors = \
+    [ 'blue', 'yellow', 'red', 'green', 'pink' ]
