@@ -69,6 +69,8 @@ class Calibration(object):
 
 class VideoConfig(object):
 
+    _changed = set()
+
     def __init__(self, machine_name, json):
         self._data    = json
         self._machine = machine_name
@@ -77,6 +79,8 @@ class VideoConfig(object):
         return self._data[item]
 
     def __setitem__(self, key, value):
+        if self._data[key] != value:
+            self._changed.add(key)
         self._data[key] = value
 
     def get_json(self):
@@ -104,6 +108,22 @@ class VideoConfig(object):
     @property
     def blue_balance(self): return int(self._data['Blue Balance'])
 
+
+class RealTimeVideoConfig(VideoConfig):
+    from subprocess import Popen, PIPE
+
+    def __init__(self, machine_name, json):
+        super(RealTimeVideoConfig).__init__(machine_name, json)
+
+    def commit(self):
+        # Use v4lctl to set only those values which have changed
+        for attr in self._changed:
+            p = self.Popen(["v4lctl", "setattr", attr, str(self[attr])], stdout=self.PIPE)
+            output, _ = p.communicate()
+
+            if output.strip(): print "[V4LCTL] " + output
+
+        self._changed.clear()
 
 
 class Configuration(object):
@@ -156,7 +176,7 @@ class Configuration(object):
 
         # Parse JSON
         with open(setting_file, 'r') as file:
-            return VideoConfig(machine_name, json.load(file))
+            return RealTimeVideoConfig(machine_name, json.load(file))
 
 
     @staticmethod
@@ -182,7 +202,8 @@ class Configuration(object):
             p = subprocess.Popen(["v4lctl", "setattr", attr, str(video_config[attr])],
                                  stdout=subprocess.PIPE)
             output, _ = p.communicate()
-            print "[V4CTL] " + output
+
+            if output.strip(): print "[V4LCTL] " + output
 
 
 

@@ -44,8 +44,6 @@ class GUI:
 		"color": cv2.getTrackbarPos('color','frame2'), "hue": cv2.getTrackbarPos('hue', 'frame2'),
 		"Red Balance": cv2.getTrackbarPos('Red Balance', 'frame2'), "Blue Balance" : cv2.getTrackbarPos('Blue Balance', 'frame2')}
 
-
-
 		video0_old = {}
 		attributes = ["bright", "contrast", "color", "hue", "Red Balance", "Blue Balance"]
 		unknowns = []
