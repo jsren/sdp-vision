@@ -302,15 +302,17 @@ class Camera(object):
     Camera access wrapper.
     """
 
-    def __init__(self, pitch, calibration, port=0):
+    def __init__(self, pitch, port=0):
 
         self.port = port
         self.pitch = pitch
         self.capture = None
 
+        cropping = tools.get_croppings(pitch=pitch)
+
         # TODO: Find cropping values for each pitch
         self.crop_values = tools.find_extremes(
-            calibration.get_color_setting(pitch, 'outline'))
+            cropping['outline'])
 
         # TODO: Find and pickle radial distortion data for each pitch
         # Parameters used to fix radial distortion

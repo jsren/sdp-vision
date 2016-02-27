@@ -5,7 +5,6 @@
 """
 
 import cv2
-import subprocess
 
 from config import Configuration
 

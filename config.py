@@ -1,6 +1,10 @@
 import os
 import json
 
+def _get_machine_name():
+    from socket import gethostname
+    return gethostname()
+
 class CalibrationSetting(object):
 
     def __init__(self, json):
@@ -68,8 +72,10 @@ class Calibration(object):
         return self._data
 
     @staticmethod
-    def get_default_setting():
-        return CalibrationSetting.get_default()
+    def get_default():
+        return Calibration(_get_machine_name(),
+            { i : { c : CalibrationSetting.get_default() for c in ['blue', 'yellow', 'red', 'green', 'pink'] }
+             for i in [0,1] })
 
 
 class VideoConfig(object):
@@ -115,7 +121,7 @@ class VideoConfig(object):
 
     @staticmethod
     def get_default():
-        return VideoConfig({
+        return VideoConfig(_get_machine_name(), {
             'brightness': 180, 'Blue Balance': 0, 'color': 80,
             'hue': 5, 'Red Balance': 5, 'contrast': 120
         })
@@ -144,9 +150,7 @@ class Configuration(object):
     def read_calibration(machine_name=None, create_if_missing=False):
 
         # If no machine name specified, use current machine
-        if machine_name is None:
-            from socket import gethostname
-            machine_name = gethostname()
+        if machine_name is None: machine_name = _get_machine_name()
 
         # Open existing file
         calib_dir  = os.path.dirname(__file__)
@@ -155,7 +159,7 @@ class Configuration(object):
         # If asked to create if missing, initialise a default calibration
         # for this machine name
         if create_if_missing and not os.path.exists(calib_file):
-            Configuration.write_calibration(Calibration.get_default_setting())
+            Configuration.write_calibration(Calibration.get_default())
 
         # Parse JSON
         with open(calib_file, 'r') as file:
@@ -166,9 +170,7 @@ class Configuration(object):
     def write_calibration(calibration, machine_name=None):
 
         # If no machine name specified, use current machine
-        if machine_name is None:
-            from socket import gethostname
-            machine_name = gethostname()
+        if machine_name is None: machine_name = _get_machine_name()
 
         # Get filepath
         calib_dir  = os.path.dirname(__file__)
@@ -183,9 +185,7 @@ class Configuration(object):
     def read_video_config(machine_name=None, create_if_missing=False):
 
         # If no machine name specified, use current machine
-        if machine_name is None:
-            from socket import gethostname
-            machine_name = gethostname()
+        if machine_name is None: machine_name = _get_machine_name()
 
         # Get filepath
         setting_dir  = os.path.dirname(__file__)
@@ -205,9 +205,7 @@ class Configuration(object):
     def write_video_config(video_config, machine_name=None):
 
         # If no machine name specified, use current machine
-        if machine_name is None:
-            from socket import gethostname
-            machine_name = gethostname()
+        if machine_name is None: machine_name = _get_machine_name()
 
         # Get filepath
         setting_dir  = os.path.dirname(__file__)
