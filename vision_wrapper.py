@@ -212,6 +212,12 @@ class VisionWrapper:
         if self.draw_GUI:
             self.frame = self.gui.warp_image(self.frame)
 
+            # Draw circles
+            for color in self.regular_positions['circles']:
+
+                cv2.drawContours(self.frame, self.regular_positions['circles'][color], -1, BGR_COMMON['black'], 1)
+
+
         for r in self.robots:
             if not r.is_present(): continue
             clx, cly, x, y = r.get_coordinates()
@@ -256,7 +262,6 @@ class VisionWrapper:
         if self.draw_GUI:
             self.gui.drawGUI()
 
-            for circle in self.regular_positions['circles']:
 
 
 
