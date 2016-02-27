@@ -10,6 +10,7 @@ from preprocessing.preprocessing import Preprocessing
 from robot_tracker import ROBOT_DISTANCE
 from util import RobotInstance, tools
 from vision import Vision, Camera
+from config import Configuration, Calibration
 
 x_ball_prev = 0
 y_ball_prev = 0
@@ -54,14 +55,18 @@ class VisionWrapper:
 
         self.pitch = pitch
 
+        self.calibration = Configuration.read_calibration(create_if_missing=True)
+
         # Set up camera for frames
-        self.camera = Camera(port=0, pitch=pitch)
+        self.camera = Camera(pitch, self.calibration)
         self.camera.start_capture()
         self.frame = self.camera.get_frame()
         center_point = self.camera.get_adjusted_center(self.frame)
 
         # Set up vision
-        self.calibration = tools.get_colors(pitch)
+
+        # Get machine-specific calibration
+
         self.draw_GUI = draw_GUI
         self.gui = None
         if draw_GUI:
@@ -355,6 +360,5 @@ class VisionWrapper:
 
         return positions_out
 
-
     def saveCalibrations(self):
-        tools.save_colors(self.vision.pitch, self.calibration)
+        Configuration.write_calibration(self.calibration)

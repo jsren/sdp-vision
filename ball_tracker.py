@@ -23,15 +23,10 @@ class BallTracker(Tracker):
                                 crop  crop coordinates
             [int] offset        how much to offset the coordinates
         """
-        self.crop = crop
-        # if pitch == 0:
-        #     self.color = PITCH0['red']
-        # else:
-        #     self.color = PITCH1['red']
-        self.color = [calibration['red']]
+        self.crop   = crop
+        self.color  = calibration.get_color_setting(pitch, 'red')
         self.offset = offset
-        self.name = name
-        self.calibration = calibration
+        self.name   = name
 
     def find(self, frame, queue):
         for color in self.color:

@@ -40,11 +40,12 @@ class CalibrationSetting(object):
     @property
     def contrast(self): return float(self._data['contrast'])
 
-
-CalibrationSetting.get_default = lambda : CalibrationSetting({
-    'erode': 0, 'min': [0,0,0], 'max': [255,255,255],
-    'blur': 0, 'close': 0, 'open': 0, 'contrast': 0
-})
+    @staticmethod
+    def get_default():
+        return CalibrationSetting({
+            'erode': 0, 'min': [0,0,0], 'max': [255,255,255],
+            'blur': 0, 'close': 0, 'open': 0, 'contrast': 0
+        })
 
 
 class Calibration(object):
@@ -65,6 +66,10 @@ class Calibration(object):
 
     def get_json(self):
         return self._data
+
+    @staticmethod
+    def get_default_setting():
+        return CalibrationSetting.get_default()
 
 
 class VideoConfig(object):
@@ -108,6 +113,13 @@ class VideoConfig(object):
     @property
     def blue_balance(self): return int(self._data['Blue Balance'])
 
+    @staticmethod
+    def get_default():
+        return VideoConfig({
+            'brightness': 180, 'Blue Balance': 0, 'color': 80,
+            'hue': 5, 'Red Balance': 5, 'contrast': 120
+        })
+
 
 class RealTimeVideoConfig(VideoConfig):
     from subprocess import Popen, PIPE
@@ -129,7 +141,7 @@ class RealTimeVideoConfig(VideoConfig):
 class Configuration(object):
 
     @staticmethod
-    def read_calibration(machine_name=None):
+    def read_calibration(machine_name=None, create_if_missing=False):
 
         # If no machine name specified, use current machine
         if machine_name is None:
@@ -139,6 +151,11 @@ class Configuration(object):
         # Open existing file
         calib_dir  = os.path.dirname(__file__)
         calib_file = os.path.join(calib_dir, "calibrations/" + machine_name + ".json")
+
+        # If asked to create if missing, initialise a default calibration
+        # for this machine name
+        if create_if_missing and not os.path.exists(calib_file):
+            Configuration.write_calibration(Calibration.get_default_setting())
 
         # Parse JSON
         with open(calib_file, 'r') as file:
@@ -163,7 +180,7 @@ class Configuration(object):
 
 
     @staticmethod
-    def read_video_config(machine_name=None):
+    def read_video_config(machine_name=None, create_if_missing=False):
 
         # If no machine name specified, use current machine
         if machine_name is None:
@@ -173,6 +190,11 @@ class Configuration(object):
         # Get filepath
         setting_dir  = os.path.dirname(__file__)
         setting_file = os.path.join(setting_dir, "settings/" + machine_name + ".json")
+
+        # If asked to create if missing, initialise a default calibration
+        # for this machine name
+        if create_if_missing and not os.path.exists(setting_file):
+            Configuration.write_video_config(VideoConfig.get_default())
 
         # Parse JSON
         with open(setting_file, 'r') as file:
