@@ -60,7 +60,7 @@ class Vision:
            (0, width, 0, height), 0, pitch, calibration)
 
         self.circle_tracker = RobotTracker(
-            ['yellow', 'blue'], ['green', 'pink'], (0, width, 0, height), pitch, calibration)
+            ['yellow', 'blue'], ['green', 'pink'], (0, width, 0, height), pitch, calibration, return_circle_contours)
 
         
 

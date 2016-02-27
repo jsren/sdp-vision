@@ -211,6 +211,13 @@ class VisionWrapper:
         if self.draw_GUI:
             self.frame = self.gui.warp_image(self.frame)
 
+            # Draw contours found
+            for color in self.regular_positions['circles']:
+                contours = self.regular_positions['circles'][color]
+                cv2.fillPoly(self.frame, contours, BGR_COMMON[color])
+                cv2.drawContours(self.frame, contours, -1, BGR_COMMON['black'], 1)
+
+
         for r in self.robots:
             if not r.is_present(): continue
             clx, cly, x, y = r.get_coordinates()
@@ -254,9 +261,6 @@ class VisionWrapper:
     
         if self.draw_GUI:
             self.gui.drawGUI()
-
-            for circle in self.regular_positions['circles']:
-                pass
 
         #self.model_positions = self.averagePositions(3, self.model_positions)
 

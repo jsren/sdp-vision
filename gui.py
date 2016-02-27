@@ -22,7 +22,7 @@ class GUI:
 		if pitch == 0:
 			cv2.namedWindow('frame2')
 			cv2.createTrackbar('bright','frame2',180,255,nothing)
-			cv2.createTrackbar('contrast','frame2',120,200,nothing)
+			cv2.createTrackbar('contrast','frame2',120,127,nothing)
 			cv2.createTrackbar('color','frame2',80,255,nothing)
 			cv2.createTrackbar('hue','frame2',5,30,nothing)
 			cv2.createTrackbar('Red Balance','frame2',5,20,nothing)
@@ -92,6 +92,6 @@ class GUI:
 		if blur >= 1:
 			if blur % 2 == 0:
 				blur += 1
-			frame = cv2.GaussianBlur(frame, (9, 9), 0)
+			frame = cv2.GaussianBlur(frame, (121, 121), 0)
 
 		return frame
