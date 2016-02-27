@@ -252,6 +252,9 @@ class VisionWrapper:
         if self.draw_GUI:
             self.gui.drawGUI()
 
+            for circle in self.regular_positions['circles']:
+
+
 
 
         #self.model_positions = self.averagePositions(3, self.model_positions)
