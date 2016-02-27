@@ -55,8 +55,10 @@ class VisionWrapper:
 
         self.pitch = pitch
 
+        self.calibration = Configuration.read_calibration(create_if_missing=True)
+
         # Set up camera for frames
-        self.camera = Camera(port=0, pitch=pitch)
+        self.camera = Camera(pitch, self.calibration)
         self.camera.start_capture()
         self.frame = self.camera.get_frame()
         center_point = self.camera.get_adjusted_center(self.frame)
@@ -64,7 +66,6 @@ class VisionWrapper:
         # Set up vision
 
         # Get machine-specific calibration
-        self.calibration = Configuration.read_calibration(create_if_missing=True)
 
         self.draw_GUI = draw_GUI
         self.gui = None
