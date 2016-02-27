@@ -78,6 +78,10 @@ class VisionLauncher(object):
     def get_circle_contours(self):
         return self.visionwrap.get_circle_contours()
 
+    # TODO: Implement somehow
+    def get_goal_positions(self):
+        raise NotImplementedError()
+
     def wait_for_start(self, timeout=None):
         """
         Sleeps the current thread until the vision system is ready

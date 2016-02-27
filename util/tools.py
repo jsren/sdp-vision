@@ -34,7 +34,7 @@ GREEN_HIGHER = np.array([13, 255, 220])
 PITCHES = ['Pitch_0', 'Pitch_1']
 
 
-def get_zones(width, height, filename=PATH+'/calibrations/croppings.json', pitch=0):
+def get_zones(width, height, filename=PATH+'/../calibrations/croppings.json', pitch=0):
     calibration = get_croppings(filename, pitch)
     zones_poly = [calibration[key] for key in ['Zone_0', 'Zone_1', 'Zone_2', 'Zone_3']]
 
