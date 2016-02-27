@@ -96,7 +96,7 @@ class VisionLauncher(object):
 
                     # If timed-out, then the time taken >= timeout value
                     return time_delta_in_ms(start, datetime.now()) < \
-                            int(timeout * 1000)
+                            int(timeout / 1000)
 
     def control_loop(self):
         """

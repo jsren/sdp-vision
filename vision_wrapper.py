@@ -49,6 +49,7 @@ class VisionWrapper:
             model_positions
             regular_positions
         """
+        pitch = int(pitch)
         assert pitch in [0, 1]
 
         self.pitch = pitch

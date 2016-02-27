@@ -47,26 +47,26 @@ def get_zones(width, height, filename=PATH+'/calibrations/croppings.json', pitch
     return [(mids[i], mids[i+1], 0, height) for i in range(4)]
 
 
-def get_croppings(filename=PATH+'/calibrations/croppings.json', pitch=0):
+def get_croppings(filename=PATH+'/../calibrations/croppings.json', pitch=0):
     croppings = get_json(filename)
     return croppings[PITCHES[pitch]]
 
 
-def get_json(filename=PATH+'/calibrations/calibrations.json'):
+def get_json(filename=PATH+'/../calibrations/calibrations.json'):
     _file = open(filename, 'r')
     content = json.loads(_file.read())
     _file.close()
     return content
 
 
-def get_radial_data(pitch=0, filename=PATH+'/calibrations/undistort.txt'):
+def get_radial_data(pitch=0, filename=PATH+'/../calibrations/undistort.txt'):
     _file = open(filename, 'r')
     data = cPickle.load(_file)
     _file.close()
     return data[pitch]
 
 
-def get_colors(pitch=0, filename=PATH+'/calibrations/calibrations.json'):
+def get_colors(pitch=0, filename=PATH+'/../calibrations/calibrations.json'):
     """
     Get colors from the JSON calibration file.
     Converts all
@@ -94,7 +94,7 @@ def get_colors(pitch=0, filename=PATH+'/calibrations/calibrations.json'):
     return current
 
 
-def save_colors(pitch, colors, filename=PATH+'/calibrations/calibrations.json'):
+def save_colors(pitch, colors, filename=PATH+'/../calibrations/calibrations.json'):
     json_content = get_json(filename)
     machine_name = "default"
     # machine_name = socket.gethostname().split('.')[0]
@@ -119,7 +119,7 @@ def save_colors(pitch, colors, filename=PATH+'/calibrations/calibrations.json'):
     write_json(filename, json_content)
 
 
-def save_croppings(pitch, data, filename=PATH+'/calibrations/croppings.json'):
+def save_croppings(pitch, data, filename=PATH+'/../calibrations/croppings.json'):
     """
     Open the current croppings file and only change the croppings
     for the relevant pitch.
@@ -129,7 +129,7 @@ def save_croppings(pitch, data, filename=PATH+'/calibrations/croppings.json'):
     write_json(filename, croppings)
 
 
-def write_json(filename=PATH+'/calibrations/calibrations.json', data={}):
+def write_json(filename=PATH+'/../calibrations/calibrations.json', data={}):
     _file = open(filename, 'w')
     _file.write(json.dumps(data, indent=4))
     _file.close()
@@ -163,42 +163,43 @@ def find_crop_coordinates(frame, keypoints=None, width=520, height=285):
     Returns:
         A 4-tuple with crop values
     """
-    frame_height, frame_width, channels = frame.shape
-    if frame_width < width or frame_height < height:
-       # print 'get_crop_coordinates:', 'Requested size of the frame is smaller than the original frame'
-        return frame
-
-
-    if not keypoints:
-        # Smoothen and apply white mask
-        mask = mask_field(normalize(frame))
-
-        # Get FAST detection of features
-        fast = cv2.FastFeatureDetector()
-
-        # get keypoints - list of Keypoints with x/y coordinates
-        kp = fast.detect(mask, None)
-
-        x_min = min(kp, key=lambda x: x.pt[0]).pt[0]
-        y_min = min(kp, key=lambda x: x.pt[1]).pt[1]
-        x_max = max(kp, key=lambda x: x.pt[0]).pt[0]
-        y_max = max(kp, key=lambda x: x.pt[1]).pt[1]
-
-    else:
-        x_min = min(keypoints, key=lambda x: x[0])[0]
-        y_min = min(keypoints, key=lambda x: x[1])[1]
-        x_max = max(keypoints, key=lambda x: x[0])[0]
-        y_max = max(keypoints, key=lambda x: x[1])[1]
-
-    x_delta = x_max - x_min
-    y_delta = y_max - y_min
-
-    # x_remaining = max(0, (width - x_delta) / 2)
-    # y_remaining = max(0, (height - y_delta) / 2)
-
-    return (
-        x_min, x_max,
-        y_min, y_max)
+    raise NotImplementedError("Imports need resolving - please correct - jsren")
+    # frame_height, frame_width, channels = frame.shape
+    # if frame_width < width or frame_height < height:
+    #    # print 'get_crop_coordinates:', 'Requested size of the frame is smaller than the original frame'
+    #     return frame
+    #
+    #
+    # if not keypoints:
+    #     # Smoothen and apply white mask
+    #     mask = mask_field(normalize(frame))
+    #
+    #     # Get FAST detection of features
+    #     fast = cv2.FastFeatureDetector()
+    #
+    #     # get keypoints - list of Keypoints with x/y coordinates
+    #     kp = fast.detect(mask, None)
+    #
+    #     x_min = min(kp, key=lambda x: x.pt[0]).pt[0]
+    #     y_min = min(kp, key=lambda x: x.pt[1]).pt[1]
+    #     x_max = max(kp, key=lambda x: x.pt[0]).pt[0]
+    #     y_max = max(kp, key=lambdtime_delta_in_msa x: x.pt[1]).pt[1]
+    #
+    # else:
+    #     x_min = min(keypoints, key=lambda x: x[0])[0]
+    #     y_min = min(keypoints, key=lambda x: x[1])[1]
+    #     x_max = max(keypoints, key=lambda x: x[0])[0]
+    #     y_max = max(keypoints, key=lambda x: x[1])[1]
+    #
+    # x_delta = x_max - x_min
+    # y_delta = y_max - y_min
+    #
+    # # x_remaining = max(0, (width - x_delta) / 2)
+    # # y_remaining = max(0, (height - y_delta) / 2)
+    #
+    # return (
+    #     x_min, x_max,
+    #     y_min, y_max)
 
 
 
@@ -219,5 +220,5 @@ def crop(frame, size=None):
     return frame[y_min:y_max, x_min:x_max]
 
 
-def time_delta_in_s(datetime1, datetime2):
-    return int((datetime2-datetime1).total_seconds())
+def time_delta_in_ms(datetime1, datetime2):
+    return int((datetime2-datetime1).total_seconds() / 1000)
