@@ -67,10 +67,17 @@ class VisionWrapper:
         self.gui = None
         if draw_GUI:
             self.gui = GUI(self.pitch)
+
+        # Draw various things on the image
+        self.draw_direction = True
+        self.draw_robot = True
+        self.draw_contours = True
         self.vision = Vision(
             pitch=pitch, frame_shape=self.frame.shape,
             frame_center=center_point, calibration=self.calibration,
             return_circle_contours=draw_GUI)
+
+        #self.
 
         # Set up preprocessing and postprocessing
         # self.postprocessing = Postprocessing()
@@ -157,6 +164,20 @@ class VisionWrapper:
                             return False
                  
 
+    def change_drawing(self, key):
+        """
+        Toggles drawing of contours, heading directions, robot positions and ball tracker
+        Usage:
+            * 'b' for ball tracker
+            * 'n' for contours
+            * 'j' for robot_tracker
+            * 'i' for heading direction
+        :param key: keypress
+        :return: nothing
+        """
+        pass
+
+
     def get_circle_contours(self):
         """
         Careful! Does not return x and y values. Call minimum bounding circles if proper circle locations are required.
@@ -204,9 +225,6 @@ class VisionWrapper:
 
         
 
-        # else:
-        #     # Draw at least something
-        #     cv2.imshow('frame2', cv2.putText(self.frame, "TEAM E", (10, 20), cv2.FONT_HERSHEY_COMPLEX, 0.3, (255, 255, 255)))
 
 
         if self.draw_GUI:
