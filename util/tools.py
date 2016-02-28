@@ -58,7 +58,7 @@ def get_json(filename=PATH+'/calibrations/calibrations.json'):
     return content
 
 
-def get_radial_data(pitch=0, filename=PATH+'/calibrations/undistort.txt'):
+def get_radial_data(pitch=0, filename=PATH+'/calibrations/undistort.dat'):
     _file = open(filename, 'r')
     data = cPickle.load(_file)
     _file.close()

@@ -1,13 +1,14 @@
 # Original tutorial: https://opencv-python-tutroals.readthedocs.org/en/latest/py_tutorials/py_calib3d/py_calibration/py_calibration.html#calibration
 
 from copy import copy
-
 import cPickle
-filename = "../vision/calibrations/undistort.txt"
-
 import numpy as np
 import cv2
 import glob
+import os
+
+filename = os.path.join(os.path.dirname(__file__), "../calibrations/undistort.dat")
+
 
 # termination criteria
 criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
@@ -82,7 +83,7 @@ data = {0 : pitch0, 1: pitch1}
 
 with open(filename,'wb') as fp:
     cPickle.dump(data,fp)
-print "Dumping data in undistort.txt"
+print "Dumping data in undistort.dat"
 cv2.destroyAllWindows()
 
 

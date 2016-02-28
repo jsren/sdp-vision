@@ -52,7 +52,7 @@ class RobotTracker(Tracker):
         circles = dict()
         for color in set(self.colors):
             # Get all circles of the given colour
-            cal = self.calibration.get_color_setting(self.pitch, color)
+            cal = self.calibration.get_color_setting[color]
             contours, hierarchy, mask = self.get_contours(frame.copy(), self.crop,
                    cal)
 
