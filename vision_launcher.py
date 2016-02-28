@@ -131,7 +131,7 @@ class VisionLauncher(object):
         finally:
             self.visionwrap.camera.stop_capture()
             #print self.visionwrap.do_we_have_ball(OUR_NAME)
-            tools.save_colors(self.pitch, self.visionwrap.calibration)
+            #tools.save_colors(self.pitch, self.visionwrap.calibration)
 
     def _atexit(self, *args):
         try:

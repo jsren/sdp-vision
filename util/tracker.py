@@ -40,8 +40,11 @@ class Tracker(object):
             if frame is None:
                 return None
 
-            hp = adjustments.get('highpass')
-            if hp is None: hp = 0
+            #hp = adjustments['highpass']
+            #if hp is None: hp = 0
+
+            if type(adjustments) == str:
+                print "[ERROR] " + str(o_type)
 
             if adjustments['contrast'] >= 1.0:
                 frame = cv2.add(frame,
@@ -52,8 +55,8 @@ class Tracker(object):
 
             # Create a mask
             frame_mask = cv2.inRange(frame_hsv,
-                                     adjustments['min'],
-                                     adjustments['max'])
+                                     np.array(adjustments['min']),
+                                     np.array(adjustments['max']))
 
             # Does nothing since highpass is 0.0 everywhere in calibrations.json
             #frame_mask = CalibrationGUI.highpass(frame_mask, frame, hp)

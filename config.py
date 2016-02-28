@@ -19,6 +19,9 @@ class CalibrationSetting(object):
         else:
             self._data[key] = value
 
+    def __iter__(self):
+        return iter(Configuration.calibration_colors)
+
     def get_json(self):
         self._data['erode']    = float(self._data['erode'])
         self._data['blur']     = int(self._data['blur'])
@@ -57,9 +60,6 @@ class Calibration(object):
     def __init__(self, machine_name, json):
         self._machine = machine_name
         self._data    = json
-
-    def __iter__(self):
-        return iter(Configuration.calibration_colors)
 
     @property
     def machine_name(self):
@@ -138,7 +138,7 @@ class RealTimeVideoConfig(VideoConfig):
     from subprocess import Popen, PIPE
 
     def __init__(self, machine_name, json):
-        super(RealTimeVideoConfig).__init__(machine_name, json)
+        super(RealTimeVideoConfig, self).__init__(machine_name, json)
 
     def commit(self):
         # Use v4lctl to set only those values which have changed

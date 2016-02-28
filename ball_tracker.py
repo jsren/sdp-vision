@@ -29,21 +29,24 @@ class BallTracker(Tracker):
         self.name   = name
 
     def find(self, frame, queue):
-        for color in self.color:
+        #for color in self.color:
+        if True:
             """
             contours, hierarchy, mask = self.preprocess(
                 frame,
                 self.crop,
                 color['min'],
-                color['max'],
+                color['max'],            # adjustments = {'min':,'mz'}
+
+            adjustments = calibration.get_color_setting(self.pitch, color)
                 color['contrast'],
                 color['blur']
             )
             """
-            # adjustments = {'min':,'mz'}
+
             contours, hierarchy, mask = self.get_contours(frame.copy(),
                                                           self.crop,
-                                                          color,
+                                                          self.color,
                                                           'BALL')
             if len(contours) <= 0:
                 #print 'No ball found.'
