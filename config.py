@@ -61,25 +61,28 @@ class Calibration(object):
         self._machine = machine_name
         self._data    = json
 
+    def __getitem__(self, item):
+        return CalibrationSetting(self._data[item])
+
+    def __setitem__(self, key, value):
+        assert type(value) == CalibrationSetting
+        self._data[key] = value.get_json()
+
     @property
     def machine_name(self):
         return self._machine
-
-    def get_color_setting(self, pitch, name):
-        return CalibrationSetting(self._data[str(pitch)][name])
-
-    def set_color_setting(self, pitch, name, setting):
-        self._data[str(pitch)][name] = setting.get_json()
 
     def get_json(self):
         return self._data
 
     @staticmethod
     def get_default():
-        return Calibration(_get_machine_name(),
-            { str(i) : { c : CalibrationSetting.get_default().get_json()
-                         for c in Configuration.calibration_colors }
-             for i in [0,1] })
+        try:
+            return Configuration.read_calibration("default", create_if_missing=False)
+        except:
+            return Calibration(_get_machine_name(),
+                { c : CalibrationSetting.get_default().get_json()
+                             for c in Configuration.calibration_colors })
 
 
 class VideoConfig(object):
@@ -175,13 +178,18 @@ class Configuration(object):
 
     @staticmethod
     def write_calibration(calibration, machine_name=None):
+        assert type(calibration) == Calibration
 
         # If no machine name specified, use current machine
         if machine_name is None: machine_name = _get_machine_name()
 
         # Get filepath
-        calib_dir  = os.path.dirname(__file__)
-        calib_file = os.path.join(calib_dir, "calibrations/" + machine_name + ".json")
+        calib_dir  = os.path.join(os.path.dirname(__file__), "calibrations/")
+        calib_file = os.path.join(calib_dir, machine_name + ".json")
+
+        # Make directory calibrations/ if not already there
+        if not os.path.exists(calib_dir):
+            os.mkdir(calib_dir)
 
         # Save JSON
         with open(calib_file, 'w') as file:
@@ -210,13 +218,18 @@ class Configuration(object):
 
     @staticmethod
     def write_video_config(video_config, machine_name=None):
+        assert type(video_config) == VideoConfig
 
         # If no machine name specified, use current machine
         if machine_name is None: machine_name = _get_machine_name()
 
         # Get filepath
-        setting_dir  = os.path.dirname(__file__)
-        setting_file = os.path.join(setting_dir, "settings/" + machine_name + ".json")
+        setting_dir  = os.path.join(os.path.dirname(__file__), "settings/")
+        setting_file = os.path.join(setting_dir, machine_name + ".json")
+
+        # Make directory settings/ if not already there
+        if not os.path.exists(setting_dir):
+            os.mkdir(setting_dir)
 
         # Save JSON
         with open(setting_file, 'w') as file:
@@ -224,6 +237,8 @@ class Configuration(object):
 
     @staticmethod
     def commit_video_config(video_config):
+        assert type(video_config) == VideoConfig
+
         import subprocess
         for attr in Configuration.video_settings:
             p = subprocess.Popen(["v4lctl", "setattr", attr, str(video_config[attr])],
