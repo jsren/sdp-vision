@@ -14,6 +14,7 @@ except:
 from Tkinter import *
 from config import Configuration, Calibration
 import numpy as np
+import tkMessageBox
 
 
 def nothing(x): 
@@ -110,17 +111,17 @@ class MinMaxUI:
             val.pack(anchor = W)
 
 
-
         write_config = Button(self.max_frame, text = "Write Configurations", command = self.config_update, padx=10, pady=10, width = 15)
         write_config.pack(side = LEFT)
 
         revert_config = Button(self.max_frame, text = "Revert to Default", command = self.revert_default, padx=10, pady=10, width = 15)
-        revert_config.pack(side = CENTER)
+        revert_config.pack(side = LEFT)
 
         quit_button = Button(self.max_frame, text = "Quit", command = self.quit_command, padx=10, pady=10, width = 15)
         quit_button.pack(side = RIGHT)
 
-
+        # Perform initial update
+        self.on_colour_selected()
 
 
 
@@ -151,9 +152,6 @@ class MinMaxUI:
         self.update_min_canvas()
 
 
-
-
-
     def update_max(self, e):
         colour = self.colour_var.get()
         entry = self.calibration[colour]
@@ -161,7 +159,10 @@ class MinMaxUI:
         self.update_max_canvas()
 
     def config_update(self):
-        Configuration.write_calibration(self.calibration, self.calibration.machine_name)
+        if tkMessageBox.askquestion("Write to File", "Are you sure you wish to "
+            "commit your settings to file '%s'?\nThis will overwrite your current ones.\n"
+            "This cannot be undone!" %(self.calibration.machine_name+".json"), icon='warning') == 'yes':
+            Configuration.write_calibration(self.calibration, self.calibration.machine_name)
 
     def update_min_canvas(self):
         hsv = np.uint8([[[self.min_hue.get(), self.min_sat.get(), self.min_val.get()]]])
@@ -177,13 +178,15 @@ class MinMaxUI:
         self.canvas_max.configure(bg=mycolor)
 
     def revert_default(self):
-        Configuration.write_calibration(Calibration.get_default(), self.calibration.machine_name)
+        if tkMessageBox.askquestion("Revert to Default", "Are you sure you wish to "
+                "revert to default settings?\nThis will overwrite your current ones.\n"
+                "Reverting does not write to the file.", icon='warning') == 'yes':
+            default = Calibration.get_default()
+            for colour in default:
+                self.calibration[colour] = default[colour]
 
-
-
-
-
-
+            # Now update UI to reflect change
+            self.on_colour_selected()
 
 
 class GUI:
