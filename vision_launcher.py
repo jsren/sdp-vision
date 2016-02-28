@@ -8,7 +8,7 @@ import threading
 import numpy as np
 
 
-OUR_NAME = "yellow + pink"
+OUR_NAME = "blue + pink"
 
 goals = {
     'right': np.array([568.0, 232.5]),
@@ -17,9 +17,9 @@ goals = {
 
 ROBOT_DESCRIPTIONS = {
     'blue + green'  : {'main_colour': 'blue', 'side_colour': 'green'},
-    'yellow + green': {'main_colour': 'yellow', 'side_colour': 'green'},
+    # 'yellow + green': {'main_colour': 'yellow', 'side_colour': 'green'},
     'blue + pink'   : {'main_colour': 'blue', 'side_colour': 'pink'},
-    'yellow + pink' : {'main_colour': 'yellow', 'side_colour': 'pink'}
+    # 'yellow + pink' : {'main_colour': 'yellow', 'side_colour': 'pink'}
 }
 
 assert OUR_NAME in ROBOT_DESCRIPTIONS
@@ -78,6 +78,10 @@ class VisionLauncher(object):
     def get_circle_contours(self):
         return self.visionwrap.get_circle_contours()
 
+    # TODO: Implement somehow
+    def get_goal_positions(self):
+        raise NotImplementedError()
+
     def wait_for_start(self, timeout=None):
         """
         Sleeps the current thread until the vision system is ready
@@ -95,8 +99,8 @@ class VisionLauncher(object):
                     self._cv.wait(timeout)
 
                     # If timed-out, then the time taken >= timeout value
-                    return time_delta_in_ms(start, datetime.now()) < \
-                            int(timeout / 1000)
+                    return timeout is None or time_delta_in_ms(start, datetime.now()) < \
+                            int(timeout * 1000)
 
     def control_loop(self):
         """
@@ -117,16 +121,15 @@ class VisionLauncher(object):
 
                 #self.visionwrap.vision.v4l_settings()
 
-                if not self.launch_gui:
-                    # Wait until robot detected
-                    if not self._started and self.get_robot_midpoint() is not None:
-                        self._started = True
-                        with self._cv:
-                            self._cv.notifyAll()
+                # Wait until robot detected
+                if not self._started and self.get_robot_midpoint() is not None:
+                    self._started = True
+                    with self._cv:
+                        self._cv.notifyAll()
         finally:
             self.visionwrap.camera.stop_capture()
             #print self.visionwrap.do_we_have_ball(OUR_NAME)
-            tools.save_colors(self.pitch, self.visionwrap.calibration)
+            #tools.save_colors(self.pitch, self.visionwrap.calibration)
 
     def _atexit(self, *args):
         try:

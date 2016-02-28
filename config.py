@@ -1,6 +1,10 @@
 import os
 import json
 
+def _get_machine_name():
+    from socket import gethostname
+    return gethostname()
+
 class CalibrationSetting(object):
 
     def __init__(self, json):
@@ -14,6 +18,9 @@ class CalibrationSetting(object):
             self._data[key] = list(value)
         else:
             self._data[key] = value
+
+    def __iter__(self):
+        return iter(Configuration.calibration_colors)
 
     def get_json(self):
         self._data['erode']    = float(self._data['erode'])
@@ -40,11 +47,12 @@ class CalibrationSetting(object):
     @property
     def contrast(self): return float(self._data['contrast'])
 
-
-CalibrationSetting.get_default = lambda : CalibrationSetting({
-    'erode': 0, 'min': [0,0,0], 'max': [255,255,255],
-    'blur': 0, 'close': 0, 'open': 0, 'contrast': 0
-})
+    @staticmethod
+    def get_default():
+        return CalibrationSetting({
+            'erode': 0, 'min': [0,0,0], 'max': [255,255,255],
+            'blur': 0, 'close': 0, 'open': 0, 'contrast': 0
+        })
 
 
 class Calibration(object):
@@ -53,18 +61,28 @@ class Calibration(object):
         self._machine = machine_name
         self._data    = json
 
+    def __getitem__(self, item):
+        return CalibrationSetting(self._data[item])
+
+    def __setitem__(self, key, value):
+        assert type(value) == CalibrationSetting
+        self._data[key] = value.get_json()
+
     @property
     def machine_name(self):
         return self._machine
 
-    def get_color_setting(self, pitch, name):
-        return CalibrationSetting(self._data[pitch][name])
-
-    def set_color_setting(self, pitch, name, setting):
-        self._data[pitch][name] = setting.get_json()
-
     def get_json(self):
         return self._data
+
+    @staticmethod
+    def get_default():
+        try:
+            return Configuration.read_calibration("default", create_if_missing=False)
+        except:
+            return Calibration(_get_machine_name(),
+                { c : CalibrationSetting.get_default().get_json()
+                             for c in Configuration.calibration_colors })
 
 
 class VideoConfig(object):
@@ -82,6 +100,9 @@ class VideoConfig(object):
         if self._data[key] != value:
             self._changed.add(key)
         self._data[key] = value
+
+    def __iter__(self):
+        return iter(Configuration.video_settings)
 
     def get_json(self):
         self._data['bright']       = int(self._data['bright'])
@@ -108,12 +129,19 @@ class VideoConfig(object):
     @property
     def blue_balance(self): return int(self._data['Blue Balance'])
 
+    @staticmethod
+    def get_default():
+        return VideoConfig(_get_machine_name(), {
+            'bright': 180, 'Blue Balance': 0, 'color': 80,
+            'hue': 5, 'Red Balance': 5, 'contrast': 120
+        })
+
 
 class RealTimeVideoConfig(VideoConfig):
     from subprocess import Popen, PIPE
 
     def __init__(self, machine_name, json):
-        super(RealTimeVideoConfig).__init__(machine_name, json)
+        super(RealTimeVideoConfig, self).__init__(machine_name, json)
 
     def commit(self):
         # Use v4lctl to set only those values which have changed
@@ -128,17 +156,27 @@ class RealTimeVideoConfig(VideoConfig):
 
 class Configuration(object):
 
+    video_settings = \
+    [ "bright", "contrast", "color", "hue", "Red Balance", "Blue Balance" ]
+
+    calibration_colors = \
+    [ 'blue', 'yellow', 'red', 'green', 'pink' ]
+
+
     @staticmethod
-    def read_calibration(machine_name=None):
+    def read_calibration(machine_name=None, create_if_missing=False):
 
         # If no machine name specified, use current machine
-        if machine_name is None:
-            from socket import gethostname
-            machine_name = gethostname()
+        if machine_name is None: machine_name = _get_machine_name()
 
         # Open existing file
         calib_dir  = os.path.dirname(__file__)
         calib_file = os.path.join(calib_dir, "calibrations/" + machine_name + ".json")
+
+        # If asked to create if missing, initialise a default calibration
+        # for this machine name
+        if create_if_missing and not os.path.exists(calib_file):
+            Configuration.write_calibration(Calibration.get_default())
 
         # Parse JSON
         with open(calib_file, 'r') as file:
@@ -147,15 +185,18 @@ class Configuration(object):
 
     @staticmethod
     def write_calibration(calibration, machine_name=None):
+        assert type(calibration) == Calibration
 
         # If no machine name specified, use current machine
-        if machine_name is None:
-            from socket import gethostname
-            machine_name = gethostname()
+        if machine_name is None: machine_name = _get_machine_name()
 
         # Get filepath
-        calib_dir  = os.path.dirname(__file__)
-        calib_file = os.path.join(calib_dir, "calibrations/" + machine_name + ".json")
+        calib_dir  = os.path.join(os.path.dirname(__file__), "calibrations/")
+        calib_file = os.path.join(calib_dir, machine_name + ".json")
+
+        # Make directory calibrations/ if not already there
+        if not os.path.exists(calib_dir):
+            os.mkdir(calib_dir)
 
         # Save JSON
         with open(calib_file, 'w') as file:
@@ -163,16 +204,19 @@ class Configuration(object):
 
 
     @staticmethod
-    def read_video_config(machine_name=None):
+    def read_video_config(machine_name=None, create_if_missing=False):
 
         # If no machine name specified, use current machine
-        if machine_name is None:
-            from socket import gethostname
-            machine_name = gethostname()
+        if machine_name is None: machine_name = _get_machine_name()
 
         # Get filepath
         setting_dir  = os.path.dirname(__file__)
         setting_file = os.path.join(setting_dir, "settings/" + machine_name + ".json")
+
+        # If asked to create if missing, initialise a default calibration
+        # for this machine name
+        if create_if_missing and not os.path.exists(setting_file):
+            Configuration.write_video_config(VideoConfig.get_default())
 
         # Parse JSON
         with open(setting_file, 'r') as file:
@@ -181,15 +225,18 @@ class Configuration(object):
 
     @staticmethod
     def write_video_config(video_config, machine_name=None):
+        assert type(video_config) == VideoConfig
 
         # If no machine name specified, use current machine
-        if machine_name is None:
-            from socket import gethostname
-            machine_name = gethostname()
+        if machine_name is None: machine_name = _get_machine_name()
 
         # Get filepath
-        setting_dir  = os.path.dirname(__file__)
-        setting_file = os.path.join(setting_dir, "calibrations/" + machine_name + ".json")
+        setting_dir  = os.path.join(os.path.dirname(__file__), "settings/")
+        setting_file = os.path.join(setting_dir, machine_name + ".json")
+
+        # Make directory settings/ if not already there
+        if not os.path.exists(setting_dir):
+            os.mkdir(setting_dir)
 
         # Save JSON
         with open(setting_file, 'w') as file:
@@ -197,6 +244,8 @@ class Configuration(object):
 
     @staticmethod
     def commit_video_config(video_config):
+        assert type(video_config) == VideoConfig
+
         import subprocess
         for attr in Configuration.video_settings:
             p = subprocess.Popen(["v4lctl", "setattr", attr, str(video_config[attr])],
@@ -205,7 +254,3 @@ class Configuration(object):
 
             if output.strip(): print "[V4LCTL] " + output
 
-
-
-Configuration.video_settings = \
-    [ "bright", "contrast", "color", "hue", "Red Balance", "Blue Balance" ]

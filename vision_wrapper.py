@@ -10,6 +10,7 @@ from preprocessing.preprocessing import Preprocessing
 from robot_tracker import ROBOT_DISTANCE
 from util import RobotInstance, tools
 from vision import Vision, Camera
+from config import Configuration, Calibration
 
 x_ball_prev = 0
 y_ball_prev = 0
@@ -54,14 +55,18 @@ class VisionWrapper:
 
         self.pitch = pitch
 
+        self.calibration = Configuration.read_calibration(create_if_missing=True)
+
         # Set up camera for frames
-        self.camera = Camera(port=0, pitch=pitch)
+        self.camera = Camera(pitch)
         self.camera.start_capture()
         self.frame = self.camera.get_frame()
         center_point = self.camera.get_adjusted_center(self.frame)
 
         # Set up vision
-        self.calibration = tools.get_colors(pitch)
+
+        # Get machine-specific calibration
+
         self.draw_GUI = draw_GUI
         self.gui = None
         if draw_GUI:
@@ -215,6 +220,7 @@ class VisionWrapper:
         # Apply preprocessing methods toggled in the UI
         self.preprocessed = self.preprocessing.run(self.frame, self.preprocessing.options)
         self.frame = self.preprocessed['frame']
+        cv2.imshow('frame3', self.frame)
         if 'background_sub' in self.preprocessed:
             cv2.imshow('bg sub', self.preprocessed['background_sub'])
 
@@ -236,7 +242,7 @@ class VisionWrapper:
 
 
         if self.draw_GUI:
-            self.frame = self.gui.warp_image(self.frame)
+            # self.frame = self.gui.warp_image(self.frame)
 
             # Draw contours found
             if self.draw_contours:
@@ -252,13 +258,16 @@ class VisionWrapper:
                 cv2.drawContours(self.frame, ball_contour, -1, BGR_COMMON['black'], 1)
 
 
+
         # Feed will stop if this is removed and nothing else is shown
         cv2.imshow('frame2', self.frame)
+        cv2.imshow('frame3', self.frame)
+
 
         for r in self.robots:
             if not r.is_present(): continue
             clx, cly, x, y = r.get_coordinates()
-            if r.age >0:
+            if r.age > 0:
                 # Draw robot circles
                 # print clx, cly
                 if not isnan(clx) and not isnan(cly):
@@ -359,6 +368,5 @@ class VisionWrapper:
 
         return positions_out
 
-
     def saveCalibrations(self):
-        tools.save_colors(self.vision.pitch, self.calibration)
+        Configuration.write_calibration(self.calibration)

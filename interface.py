@@ -99,6 +99,12 @@ class VisionInterface(object):
         t.start()
         return t
 
+    def get_goal_positions(self):
+        """ Gets the positions of the back-centre of the goals.
+        :return: [ tuple(x, y), tuple(x, y) ]
+        """
+        return self._launcher.get_goal_positions()
+
     def get_ball_position(self):
         """ Gets the current ball position.
         :return: tuple(x, y)

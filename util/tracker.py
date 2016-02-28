@@ -6,11 +6,8 @@ import warnings
 warnings.simplefilter('ignore', np.RankWarning)
 warnings.simplefilter('ignore', RuntimeWarning)
 
-# TODO: Used by commented-out code
-from collections import namedtuple
-#BoundingBox = namedtuple('BoundingBox', 'x y width height')
-#Center      = namedtuple('Center', 'x y')
-
+# Maximum valid contour area contours with a larger area are culled
+MAX_CONTOUR_AREA = 50
 
 class Tracker(object):
 
@@ -29,19 +26,19 @@ class Tracker(object):
         return inte
 
     @staticmethod
-    def get_contours(frame, crop, adjustments, o_type=None):
+    def get_contours(frame, crop, adjustments, is_ball=False):
         """
         Adjust the given frame based on 'min', 'max', 'contrast' and 'blur'
         keys in adjustments dictionary.
         """
         try:
-            if o_type == 'BALL':
+            if is_ball:
                 frame = frame[crop[2]:crop[3], crop[0]:crop[1]]
             if frame is None:
                 return None
 
-            hp = adjustments.get('highpass')
-            if hp is None: hp = 0
+            # hp = adjustments['highpass']
+            # if hp is None: hp = 0
 
             if adjustments['contrast'] >= 1.0:
                 frame = cv2.add(frame,
@@ -52,11 +49,11 @@ class Tracker(object):
 
             # Create a mask
             frame_mask = cv2.inRange(frame_hsv,
-                                     adjustments['min'],
-                                     adjustments['max'])
+                                     np.array(adjustments['min']),
+                                     np.array(adjustments['max']))
 
             # Does nothing since highpass is 0.0 everywhere in calibrations.json
-            #frame_mask = CalibrationGUI.highpass(frame_mask, frame, hp)
+            # frame_mask = CalibrationGUI.highpass(frame_mask, frame, hp)
 
             # Find contours
             if adjustments['open'] >= 1:
@@ -82,7 +79,8 @@ class Tracker(object):
                 cv2.CHAIN_APPROX_SIMPLE
             )
 
-            return (contours, hierarchy, frame_mask)
+            return ([c for c in contours if cv2.contourArea(c) <= MAX_CONTOUR_AREA],
+                    hierarchy, frame_mask)
         except:
             raise
 
@@ -98,39 +96,6 @@ class Tracker(object):
         bottommost = tuple(cnt[cnt[:, :, 1].argmax()][0])
         return (leftmost, topmost, rightmost, bottommost)
 
-    '''
-    def get_bounding_box(self, points):
-        """
-        Find the bounding box given points by looking at the extremes of each coordinate.
-        """
-        leftmost = min(points, key=lambda x: x[0])[0]
-        rightmost = max(points, key=lambda x: x[0])[0]
-        topmost = min(points, key=lambda x: x[1])[1]
-        bottommost = max(points, key=lambda x: x[1])[1]
-        return BoundingBox(leftmost,
-                           topmost,
-                           rightmost - leftmost,
-                           bottommost - topmost)
-
-    def get_contour_corners(self, contour):
-        """
-        Get exact corner points for the plate given one contour.
-        """
-        if contour is not None:
-            rectangle = cv2.minAreaRect(contour)
-            box = cv2.cv.BoxPoints(rectangle)
-            return np.int0(box)
-    def join_contours(self, contours):
-        """
-        Joins multiple contours together.
-        """
-        cnts = []
-        for i, cnt in enumerate(contours):
-            if cv2.contourArea(cnt) > 100:
-                cnts.append(cnt)
-        return reduce(lambda x, y: np.concatenate((x, y)),
-                                   cnts) if len(cnts) else None
-    '''
 
     @staticmethod
     def get_largest_contour(contours):

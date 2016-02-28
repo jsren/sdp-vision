@@ -2,12 +2,11 @@
 import numpy as np
 import cv2
 import json
-import socket
 import os
 import cPickle
 
 
-PATH = os.path.dirname(os.path.realpath(__file__))
+PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..")
 
 BLACK = (0, 0, 0)
 
@@ -47,26 +46,26 @@ def get_zones(width, height, filename=PATH+'/calibrations/croppings.json', pitch
     return [(mids[i], mids[i+1], 0, height) for i in range(4)]
 
 
-def get_croppings(filename=PATH+'/../calibrations/croppings.json', pitch=0):
+def get_croppings(filename=PATH+'/calibrations/croppings.json', pitch=0):
     croppings = get_json(filename)
     return croppings[PITCHES[pitch]]
 
 
-def get_json(filename=PATH+'/../calibrations/calibrations.json'):
+def get_json(filename=PATH+'/calibrations/calibrations.json'):
     _file = open(filename, 'r')
     content = json.loads(_file.read())
     _file.close()
     return content
 
 
-def get_radial_data(pitch=0, filename=PATH+'/../calibrations/undistort.txt'):
+def get_radial_data(pitch=0, filename=PATH+'/calibrations/undistort.dat'):
     _file = open(filename, 'r')
     data = cPickle.load(_file)
     _file.close()
     return data[pitch]
 
 
-def get_colors(pitch=0, filename=PATH+'/../calibrations/calibrations.json'):
+def get_colors(pitch=0, filename=PATH+'/calibrations/calibrations.json'):
     """
     Get colors from the JSON calibration file.
     Converts all
@@ -94,7 +93,7 @@ def get_colors(pitch=0, filename=PATH+'/../calibrations/calibrations.json'):
     return current
 
 
-def save_colors(pitch, colors, filename=PATH+'/../calibrations/calibrations.json'):
+def save_colors(pitch, colors, filename=PATH+'/calibrations/calibrations.json'):
     json_content = get_json(filename)
     machine_name = "default"
     # machine_name = socket.gethostname().split('.')[0]
@@ -119,7 +118,7 @@ def save_colors(pitch, colors, filename=PATH+'/../calibrations/calibrations.json
     write_json(filename, json_content)
 
 
-def save_croppings(pitch, data, filename=PATH+'/../calibrations/croppings.json'):
+def save_croppings(pitch, data, filename=PATH+'/calibrations/croppings.json'):
     """
     Open the current croppings file and only change the croppings
     for the relevant pitch.
@@ -129,7 +128,7 @@ def save_croppings(pitch, data, filename=PATH+'/../calibrations/croppings.json')
     write_json(filename, croppings)
 
 
-def write_json(filename=PATH+'/../calibrations/calibrations.json', data={}):
+def write_json(filename=PATH+'/calibrations/calibrations.json', data={}):
     _file = open(filename, 'w')
     _file.write(json.dumps(data, indent=4))
     _file.close()
@@ -221,4 +220,4 @@ def crop(frame, size=None):
 
 
 def time_delta_in_ms(datetime1, datetime2):
-    return int((datetime2-datetime1).total_seconds() / 1000)
+    return int((datetime2-datetime1).total_seconds() * 1000)

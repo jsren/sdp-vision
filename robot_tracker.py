@@ -9,7 +9,7 @@ import numpy as np
 NUMBER_OF_MAIN_CIRCLES_PER_COLOR = 2
 NUMBER_OF_SIDE_CIRCLES_PER_COLOR = 16
 
-ROBOT_DISTANCE = 20
+ROBOT_DISTANCE = 30
 
 
 
@@ -42,6 +42,7 @@ class RobotTracker(Tracker):
         self.robots         = []
 
 
+
     def find_all_circles(self, frame):
         """
         Returns all colored circles found. Colors are set in calibrations.json
@@ -51,7 +52,9 @@ class RobotTracker(Tracker):
         circles = dict()
         for color in set(self.colors):
             # Get all circles of the given colour
-            contours, hierarchy, mask = self.get_contours(frame.copy(), self.crop, self.calibration[color], '')
+            cal = self.calibration[color]
+            contours, hierarchy, mask = self.get_contours(frame.copy(), self.crop,
+                   cal)
 
             circles[color] = contours
 
@@ -152,7 +155,7 @@ class RobotTracker(Tracker):
                         s_color = self.side_colors[0]
 
                     (x, y), radius = cv2.minEnclosingCircle(significant_circle)
-                    circle_results.append({'clx': cl[0], 'cly': cl[1], 'x': x, 'y':y, 'main_color': m_color, 'side_color': s_color})
+                    circle_results.append({'clx': cl[0], 'cly': cl[1], 'x': x, 'y': y, 'main_color': m_color, 'side_color': s_color})
 
         results = dict(robot_coords=circle_results)
         if self.return_circles:
