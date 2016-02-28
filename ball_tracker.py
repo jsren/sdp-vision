@@ -47,7 +47,7 @@ class BallTracker(Tracker):
             contours, hierarchy, mask = self.get_contours(frame.copy(),
                                                           self.crop,
                                                           self.color,
-                                                          'BALL')
+                                                          True)
             if len(contours) <= 0:
                 #print 'No ball found.'
                 pass

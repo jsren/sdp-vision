@@ -11,6 +11,10 @@ from collections import namedtuple
 #BoundingBox = namedtuple('BoundingBox', 'x y width height')
 #Center      = namedtuple('Center', 'x y')
 
+# Maximum valid contour area
+# contours with a larger area are
+# culled
+MAX_CONTOUR_AREA = 50
 
 class Tracker(object):
 
@@ -29,22 +33,19 @@ class Tracker(object):
         return inte
 
     @staticmethod
-    def get_contours(frame, crop, adjustments, o_type=None):
+    def get_contours(frame, crop, adjustments, is_ball=False):
         """
         Adjust the given frame based on 'min', 'max', 'contrast' and 'blur'
         keys in adjustments dictionary.
         """
         try:
-            if o_type == 'BALL':
+            if is_ball:
                 frame = frame[crop[2]:crop[3], crop[0]:crop[1]]
             if frame is None:
                 return None
 
             #hp = adjustments['highpass']
             #if hp is None: hp = 0
-
-            if type(adjustments) == str:
-                print "[ERROR] " + str(o_type)
 
             if adjustments['contrast'] >= 1.0:
                 frame = cv2.add(frame,
@@ -85,7 +86,8 @@ class Tracker(object):
                 cv2.CHAIN_APPROX_SIMPLE
             )
 
-            return (contours, hierarchy, frame_mask)
+            return ([c for c in contours if cv2.contourArea(c) <= MAX_CONTOUR_AREA],
+                    hierarchy, frame_mask)
         except:
             raise
 

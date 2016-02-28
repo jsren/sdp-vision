@@ -42,6 +42,7 @@ class RobotTracker(Tracker):
         self.robots         = []
 
 
+
     def find_all_circles(self, frame):
         """
         Returns all colored circles found. Colors are set in calibrations.json
@@ -53,7 +54,7 @@ class RobotTracker(Tracker):
             # Get all circles of the given colour
             cal = self.calibration.get_color_setting(self.pitch, color)
             contours, hierarchy, mask = self.get_contours(frame.copy(), self.crop,
-                   cal, '')
+                   cal)
 
             circles[color] = contours
 
