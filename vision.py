@@ -341,13 +341,13 @@ class Camera(object):
 
         frame = self.fix_radial_distortion(frame)
         if status:
-            """
+
             return frame[
                 self.crop_values[2]:self.crop_values[3],
                 self.crop_values[0]:self.crop_values[1]
             ]
-            """
-            return frame
+
+            # return frame
 
     def fix_radial_distortion(self, frame):
         return cv2.undistort(

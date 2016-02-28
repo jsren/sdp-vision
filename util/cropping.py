@@ -3,9 +3,9 @@ import argparse
 import cv2
 import numpy as np
 
-from util import tools
+import tools
 
-FRAME_NAME = 'ConfigureWindow'
+FRAME_NAME = 'Crop Window'
 
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -65,17 +65,11 @@ class CroppingUI(object):
                 self.get_zone('Zone_4', 'draw LEFT goal')
                 self.get_zone('Zone_5', 'draw RIGHT goal')
 
-                '''
-                self.get_goal('Zone_0')
-                self.get_goal('Zone_3')
-                '''
-
                 print 'Press any key to finish.'
                 cv2.waitKey(0)
                 cv2.destroyAllWindows()
 
                 # Write out the data
-                # self.dump('calibrations/calibrate.json', self.data)
                 tools.save_croppings(pitch=self.pitch, data=self.data)
 
         def reshape(self):
@@ -123,22 +117,6 @@ class CroppingUI(object):
                         cv2.circle(self.image, (x-1, y-1), 2, color, -1)
                         self.data[self.drawing].append((x,y))
 
-        '''
-        def get_goal(self, zone):
-                """
-                Returns the top and bottom corner of the goal in zone.
-                """
-                coords = self.data[zone]
-                reverse = int(zone[-1]) % 2
-                goal_coords = sorted(coords, reverse=reverse)[:2]
-                if goal_coords[0][1] > goal_coords[1][1]:
-                        topCorner = goal_coords[1]
-                        bottomCorner = goal_coords[0]
-                else:
-                        topCorner = goal_coords[0]
-                        bottomCorner = goal_coords[1]
-                self.data[zone + '_goal'] = [topCorner, bottomCorner]
-        '''
 
 if __name__ == '__main__':
         parser = argparse.ArgumentParser()

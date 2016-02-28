@@ -162,43 +162,43 @@ def find_crop_coordinates(frame, keypoints=None, width=520, height=285):
     Returns:
         A 4-tuple with crop values
     """
-    raise NotImplementedError("Imports need resolving - please correct - jsren")
-    # frame_height, frame_width, channels = frame.shape
-    # if frame_width < width or frame_height < height:
-    #    # print 'get_crop_coordinates:', 'Requested size of the frame is smaller than the original frame'
-    #     return frame
-    #
-    #
-    # if not keypoints:
-    #     # Smoothen and apply white mask
-    #     mask = mask_field(normalize(frame))
-    #
-    #     # Get FAST detection of features
-    #     fast = cv2.FastFeatureDetector()
-    #
-    #     # get keypoints - list of Keypoints with x/y coordinates
-    #     kp = fast.detect(mask, None)
-    #
-    #     x_min = min(kp, key=lambda x: x.pt[0]).pt[0]
-    #     y_min = min(kp, key=lambda x: x.pt[1]).pt[1]
-    #     x_max = max(kp, key=lambda x: x.pt[0]).pt[0]
-    #     y_max = max(kp, key=lambdtime_delta_in_msa x: x.pt[1]).pt[1]
-    #
-    # else:
-    #     x_min = min(keypoints, key=lambda x: x[0])[0]
-    #     y_min = min(keypoints, key=lambda x: x[1])[1]
-    #     x_max = max(keypoints, key=lambda x: x[0])[0]
-    #     y_max = max(keypoints, key=lambda x: x[1])[1]
-    #
-    # x_delta = x_max - x_min
-    # y_delta = y_max - y_min
-    #
-    # # x_remaining = max(0, (width - x_delta) / 2)
-    # # y_remaining = max(0, (height - y_delta) / 2)
-    #
-    # return (
-    #     x_min, x_max,
-    #     y_min, y_max)
+    frame_height, frame_width, channels = frame.shape
+    if frame_width < width or frame_height < height:
+       # print 'get_crop_coordinates:', 'Requested size of the frame is smaller than the original frame'
+        return frame
+
+
+    if not keypoints:
+        # Smoothen and apply white mask
+        # mask = mask_field(normalize(frame))
+
+        # Get FAST detection of features
+        fast = cv2.FastFeatureDetector()
+
+        # get keypoints - list of Keypoints with x/y coordinates
+        # kp = fast.detect(mask, None)
+        kp = fast.detect(frame, None)
+
+        x_min = min(kp, key=lambda x: x.pt[0]).pt[0]
+        y_min = min(kp, key=lambda x: x.pt[1]).pt[1]
+        x_max = max(kp, key=lambda x: x.pt[0]).pt[0]
+        y_max = max(kp, key=lambda x: x.pt[1]).pt[1]
+
+    else:
+        x_min = min(keypoints, key=lambda x: x[0])[0]
+        y_min = min(keypoints, key=lambda x: x[1])[1]
+        x_max = max(keypoints, key=lambda x: x[0])[0]
+        y_max = max(keypoints, key=lambda x: x[1])[1]
+
+    x_delta = x_max - x_min
+    y_delta = y_max - y_min
+
+    # x_remaining = max(0, (width - x_delta) / 2)
+    # y_remaining = max(0, (height - y_delta) / 2)
+
+    return (
+        x_min, x_max,
+        y_min, y_max)
 
 
 
