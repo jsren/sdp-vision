@@ -11,6 +11,7 @@ try:
 except:
     pass
 
+from cv2 import waitKey
 from Tkinter import *
 from config import Configuration, Calibration
 from tkColorChooser import askcolor
@@ -45,6 +46,8 @@ class MinMaxUI:
 
         self.form = Tk()
         self.form.wm_title("Set Calibration Values")
+        self.form.resizable(0,0)
+        self.form.bind("<Key-q>", lambda e: self.form.destroy())
 
         selector_frame = LabelFrame(self.form, text="Calibration Colours")
         selector_frame.grid(row=0, columnspan=1, sticky="WE", padx=5, ipadx=5, pady=5, ipady=5)
@@ -91,18 +94,26 @@ class MinMaxUI:
         scale6 = Scale(max_frame, variable = self.max_val, command = self.update_max,
                        to = 255, orient = HORIZONTAL, label = "Value", length = 300)
 
-        write_config = Button(max_frame, text = "Write Configurations", command = self.config_update)
-        write_config.pack(side = BOTTOM)
+
 
         values = [scale1, scale2, scale3, scale4, scale5, scale6]
 
         for val in values:
             val.pack(anchor = W)
 
+        write_config = Button(max_frame, text = "Write Configurations", command = self.config_update, padx=10, pady=10, width = 15)
+        write_config.pack(side = LEFT)
+
+        quit_button = Button(max_frame, text = "Quit", command = self.quit_command, padx=10, pady=10, width = 15)
+        quit_button.pack(side = RIGHT)
 
 
     def show(self):
         self.form.mainloop()
+
+    def quit_command(self):
+        self.form.destroy()
+
 
     def on_colour_selected(self):
         colour = self.colour_var.get()
@@ -118,12 +129,12 @@ class MinMaxUI:
     def update_min(self, e):
         colour = self.colour_var.get()
         entry = self.calibration[colour]
-        entry['min'] = (self.min_hue.get(), self.min_sat.get(), self.min_val.get())
+        entry.min = (self.min_hue.get(), self.min_sat.get(), self.min_val.get())
 
     def update_max(self, e):
         colour = self.colour_var.get()
         entry = self.calibration[colour]
-        entry['max'] = (self.max_hue.get(), self.max_sat.get(), self.max_val.get())
+        entry.max = (self.max_hue.get(), self.max_sat.get(), self.max_val.get())
 
     def config_update(self):
         Configuration.write_calibration(self.calibration, self.calibration.machine_name)
