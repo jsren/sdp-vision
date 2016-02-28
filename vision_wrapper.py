@@ -216,6 +216,7 @@ class VisionWrapper:
         # Apply preprocessing methods toggled in the UI
         self.preprocessed = self.preprocessing.run(self.frame, self.preprocessing.options)
         self.frame = self.preprocessed['frame']
+        cv2.imshow('frame3', self.frame)
         if 'background_sub' in self.preprocessed:
             cv2.imshow('bg sub', self.preprocessed['background_sub'])
 
@@ -235,14 +236,14 @@ class VisionWrapper:
                         break
 
 
-
+        """
         if self.draw_GUI:
-            self.frame = self.gui.warp_image(self.frame)
+            #self.frame = self.gui.warp_image(self.frame)
 
             # Draw contours found
             if self.draw_contours:
                 # Draw robot contours
-                for color in self.regular_positions.get('circles'):
+                 for color in self.regular_positions.get('circles'):
                     contours = self.regular_positions['circles'][color]
                     cv2.fillPoly(self.frame, contours, BGR_COMMON[color])
                     cv2.drawContours(self.frame, contours, -1, BGR_COMMON['black'], 1)
@@ -251,10 +252,12 @@ class VisionWrapper:
                 ball_contour = self.regular_positions.get('ball_contour')
                 cv2.fillPoly(self.frame, ball_contour, BGR_COMMON['red'])
                 cv2.drawContours(self.frame, ball_contour, -1, BGR_COMMON['black'], 1)
+        """
 
 
         # Feed will stop if this is removed and nothing else is shown
         cv2.imshow('frame2', self.frame)
+        #cv2.imshow('frame3', self.frame)
 
         for r in self.robots:
             if not r.is_present(): continue
