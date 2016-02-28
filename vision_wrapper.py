@@ -97,8 +97,12 @@ class VisionWrapper:
                                              robot_details[r_name]['side_colour']))
 
     def get_robots_raw(self):
+        # TODO: This is to make jsren happy
+        assert not any([list(r.x) and None in list(r.x) for r in self.robots])
+
+        # Filter robots that have no position
         return [(r.name, np.mean(r.x), np.mean(r.y), r.get_robot_heading())
-                for r in self.robots]
+                for r in self.robots if list(r.x)]
 
     def get_robot_position(self, robot_name):
         for r in self.robots:
