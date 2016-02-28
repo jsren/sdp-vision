@@ -15,6 +15,7 @@ from Tkinter import *
 from config import Configuration, Calibration
 import numpy as np
 import tkMessageBox
+import threading
 
 
 def nothing(x): 
@@ -114,6 +115,9 @@ class MinMaxUI:
         write_config = Button(self.max_frame, text = "Write Configurations", command = self.config_update, padx=10, pady=10, width = 15)
         write_config.pack(side = LEFT)
 
+        reload_config = Button(self.max_frame, text = "Reload from File", command = self.reload_config, padx=10, pady=10, width = 15)
+        reload_config.pack(side = LEFT)
+
         revert_config = Button(self.max_frame, text = "Revert to Default", command = self.revert_default, padx=10, pady=10, width = 15)
         revert_config.pack(side = LEFT)
 
@@ -178,9 +182,10 @@ class MinMaxUI:
         self.canvas_max.configure(bg=mycolor)
 
     def revert_default(self):
+
         if tkMessageBox.askquestion("Revert to Default", "Are you sure you wish to "
                 "revert to default settings?\nThis will overwrite your current ones.\n"
-                "Reverting does not write to the file.", icon='warning') == 'yes':
+                "Reverting does not write to the file.", icon='warning', parent=self.form) == 'yes':
             default = Calibration.get_default()
             for colour in default:
                 self.calibration[colour] = default[colour]
@@ -188,14 +193,34 @@ class MinMaxUI:
             # Now update UI to reflect change
             self.on_colour_selected()
 
+    def reload_config(self):
+        if tkMessageBox.askquestion("Reload from File", "Are you sure you wish to "
+                "reload settings from file?\nThis will overwrite your current ones.\n"
+                "This cannot be undone!", icon='warning') == 'yes':
+            config = Configuration.read_calibration(self.calibration.machine_name)
+            for colour in config:
+                self.calibration[colour] = config[colour]
+
+            # Now update UI to reflect change
+            self.on_colour_selected()
+
+
+    @staticmethod
+    def create_and_show(calibration):
+        MinMaxUI(calibration).show()
+
 
 class GUI:
 
-    def __init__(self, pitch):
+    def __init__(self, pitch, calibration):
         self.frame = None
         self.pitch = pitch
 
-        self.config = Configuration.read_video_config(create_if_missing=True)
+        self.calibration = calibration
+        self.config      = Configuration.read_video_config(create_if_missing=True)
+
+        # Start Tkinter dialog
+        threading.Thread(name="Calibration UI", target=MinMaxUI.create_and_show, args=[calibration]).start()
 
         # create GUI
         # The first numerical value is the starting point for the vision feed

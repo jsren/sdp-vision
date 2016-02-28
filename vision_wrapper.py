@@ -70,7 +70,7 @@ class VisionWrapper:
         self.draw_GUI = draw_GUI
         self.gui = None
         if draw_GUI:
-            self.gui = GUI(self.pitch)
+            self.gui = GUI(self.pitch, self.calibration)
 
         # Draw various things on the image
         self.draw_direction = True
@@ -220,7 +220,7 @@ class VisionWrapper:
         # Apply preprocessing methods toggled in the UI
         self.preprocessed = self.preprocessing.run(self.frame, self.preprocessing.options)
         self.frame = self.preprocessed['frame']
-        cv2.imshow('frame3', self.frame)
+        #cv2.imshow('frame3', self.frame)
         if 'background_sub' in self.preprocessed:
             cv2.imshow('bg sub', self.preprocessed['background_sub'])
 
@@ -261,7 +261,7 @@ class VisionWrapper:
 
         # Feed will stop if this is removed and nothing else is shown
         cv2.imshow('frame2', self.frame)
-        cv2.imshow('frame3', self.frame)
+        #cv2.imshow('frame3', self.frame)
 
 
         for r in self.robots:
@@ -312,6 +312,8 @@ class VisionWrapper:
     
         if self.draw_GUI:
             self.gui.drawGUI()
+
+
 
         #self.model_positions = self.averagePositions(3, self.model_positions)
 
