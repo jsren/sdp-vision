@@ -3,6 +3,8 @@
     Authors: Andrew, James Renwick
     Team: SDP Team E
 """
+# disable maximize
+# press q to quit + close button
 
 try:
     import cv2
@@ -37,7 +39,7 @@ class HSVSelector:
 class MinMaxUI:
 
     def __init__(self, calibration):
-        assert type(calibration) == Calibration
+        #assert type(calibration) == Calibration
 
         self.calibration = calibration
 
@@ -51,7 +53,7 @@ class MinMaxUI:
         min_frame.grid(row=1, columnspan=1, sticky="WE", padx=5, ipadx=5, pady=5, ipady=5)
 
         max_frame = LabelFrame(self.form, text="Maximum Values")
-        max_frame.grid(row=1, columnspan=1, sticky="WE", padx=5, ipadx=5, pady=5, ipady=5)
+        max_frame.grid(row=2, columnspan=1, sticky="WE", padx=5, ipadx=5, pady=5, ipady=5)
 
 
         # Holds the currently-selected colour name
@@ -64,6 +66,39 @@ class MinMaxUI:
                              value=colour, command=self.on_colour_selected, padx=5, pady=5)
             rb.pack(side=LEFT)
 
+        # Create scales for values
+        self.min_hue = DoubleVar()
+        scale1= Scale(min_frame, variable = self.min_hue, command = self.update_min,
+                      to = 255, orient = HORIZONTAL, label = "Hue", length = 300)
+
+        self.min_sat = DoubleVar()
+        scale2 = Scale(min_frame, variable = self.min_sat, command = self.update_min,
+                       to = 255, orient = HORIZONTAL, label = "Saturation", length = 300)
+
+        self.min_val = DoubleVar()
+        scale3 = Scale(min_frame, variable = self.min_val, command = self.update_min,
+                       to = 255, orient = HORIZONTAL, label = "Value", length = 300)
+
+        self.max_hue = DoubleVar()
+        scale4 = Scale(max_frame, variable = self.max_hue, command = self.update_max,
+                       to = 255, orient = HORIZONTAL, label = "Hue", length = 300)
+
+        self.max_sat = DoubleVar()
+        scale5 = Scale(max_frame, variable = self.max_sat, command = self.update_max,
+                       to = 255, orient = HORIZONTAL, label = "Saturation", length = 300)
+
+        self.max_val = DoubleVar()
+        scale6 = Scale(max_frame, variable = self.max_val, command = self.update_max,
+                       to = 255, orient = HORIZONTAL, label = "Value", length = 300)
+
+        write_config = Button(max_frame, text = "Write Configurations", command = self.config_update)
+        write_config.pack(side = BOTTOM)
+
+        values = [scale1, scale2, scale3, scale4, scale5, scale6]
+
+        for val in values:
+            val.pack(anchor = W)
+
 
 
     def show(self):
@@ -71,6 +106,28 @@ class MinMaxUI:
 
     def on_colour_selected(self):
         colour = self.colour_var.get()
+        entry = self.calibration[colour]
+
+        self.min_hue.set(entry.min[0])
+        self.min_sat.set(entry.min[1])
+        self.min_val.set(entry.min[2])
+        self.max_hue.set(entry.max[0])
+        self.max_sat.set(entry.max[1])
+        self.max_val.set(entry.max[2])
+
+    def update_min(self, e):
+        colour = self.colour_var.get()
+        entry = self.calibration[colour]
+        entry['min'] = (self.min_hue.get(), self.min_sat.get(), self.min_val.get())
+
+    def update_max(self, e):
+        colour = self.colour_var.get()
+        entry = self.calibration[colour]
+        entry['max'] = (self.max_hue.get(), self.max_sat.get(), self.max_val.get())
+
+    def config_update(self):
+        Configuration.write_calibration(self.calibration, self.calibration.machine_name)
+
 
 
 
@@ -90,7 +147,7 @@ class GUI:
         # The first numerical value is the starting point for the vision feed
         cv2.namedWindow('frame2')
 
-
+        """
         cv2.namedWindow('frame3')
 
         cv2.createTrackbar('Blue: 0 \n Red: 1 \n Yellow: 2 \n Pink: 3 \n Green: 4','frame3',0,4 ,nothing)
@@ -100,6 +157,7 @@ class GUI:
         cv2.createTrackbar('Max H','frame3',0,255,nothing)
         cv2.createTrackbar('Max S','frame3',0,255,nothing)
         cv2.createTrackbar('Max V','frame3',0,255,nothing)
+        """
 
 
 
@@ -156,4 +214,4 @@ class GUI:
 
 
 if __name__ == "__main__":
-    MinMaxUI(["blue", "red", "green", "pink", "yellow"]).show()
+    MinMaxUI(Configuration.read_calibration()).show()
