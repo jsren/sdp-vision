@@ -302,9 +302,8 @@ class Camera(object):
     Camera access wrapper.
     """
 
-    def __init__(self, pitch, port=0):
+    def __init__(self, pitch):
 
-        self.port = port
         self.pitch = pitch
         self.capture = None
 
@@ -323,7 +322,7 @@ class Camera(object):
 
     def start_capture(self):
         # noinspection PyArgumentList
-        self.capture = cv2.VideoCapture(self.port)
+        self.capture = cv2.VideoCapture(0)
 
     def stop_capture(self):
         if self.capture:
@@ -341,7 +340,6 @@ class Camera(object):
 
         frame = self.fix_radial_distortion(frame)
         if status:
-
             return frame[
                 self.crop_values[2]:self.crop_values[3],
                 self.crop_values[0]:self.crop_values[1]
