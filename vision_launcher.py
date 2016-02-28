@@ -27,6 +27,7 @@ assert OUR_NAME in ROBOT_DESCRIPTIONS
 
 
 class VisionLauncher(object):
+
     """
     Launches the vision wrapper which calibrates the camera based on preset settings, takes care of object tracking
     and can optionally be called to display callibration GUI.
@@ -42,7 +43,6 @@ class VisionLauncher(object):
         self.pitch = pitch
         self._started = False
         self._cv = threading.Condition()
-        self._thread = threading.currentThread().getName()
         self.launch_gui = launch_gui
 
         import signal
@@ -90,17 +90,13 @@ class VisionLauncher(object):
         :return: True if vision system ready, False if timed-out.
         """
         if not self._started:
-            if threading.currentThread().getName() == self._thread:
-                raise Exception("You cannot wait for the vision "
-                                "to start running on the same thread!")
-            else:
-                with self._cv:
-                    start = datetime.now()
-                    self._cv.wait(timeout)
+            with self._cv:
+                start = datetime.now()
+                self._cv.wait(timeout)
 
-                    # If timed-out, then the time taken >= timeout value
-                    return timeout is None or time_delta_in_ms(start, datetime.now()) < \
-                            int(timeout * 1000)
+                # If timed-out, then the time taken >= timeout value
+                return timeout is None or time_delta_in_ms(start, datetime.now()) < \
+                        int(timeout * 1000)
 
     def control_loop(self):
         """
