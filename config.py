@@ -12,23 +12,21 @@ def _get_machine_name():
     return gethostname()
 
 class CalibrationSetting(object):
+    """ Object representing a colour entry inside a calibration file. """
 
     def __init__(self, json):
+        """
+        :param json: The dictionary representation of the colour entry.
+        """
         self._data = json
 
-    def __getitem__(self, item):
-        return self._data[item]
-
-    def __setitem__(self, key, value):
-        if key in ('min', 'max'):
-            self._data[key] = list(value)
-        else:
-            self._data[key] = value
-
     def __iter__(self):
-        return iter(Configuration.calibration_colors)
+        return iter(self._data)
 
     def get_json(self):
+        """ Gets the underlying JSON object.
+        :return: The dictionary representation of the colour entry.
+        """
         self._data['erode']    = float(self._data['erode'])
         self._data['blur']     = int(self._data['blur'])
         self._data['close']    = float(self._data['close'])
@@ -69,6 +67,10 @@ class CalibrationSetting(object):
 
     @staticmethod
     def get_default():
+        """ Gets a new `CalibrationSetting` instance initialised
+        with default values.
+        :return: A new `CalibrationSetting` instance.
+        """
         return CalibrationSetting({
             'erode': 0, 'min': [0,0,0], 'max': [255,255,255],
             'blur': 0, 'close': 0, 'open': 0, 'contrast': 0
@@ -87,6 +89,9 @@ class Calibration(object):
     def __setitem__(self, key, value):
         assert type(value) == CalibrationSetting
         self._data[key] = value.get_json()
+
+    def __iter__(self):
+        return iter(Configuration.calibration_colors)
 
     @property
     def machine_name(self):
