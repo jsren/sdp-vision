@@ -1,3 +1,9 @@
+""" config.py - (c) SDP Team E 2016
+    --------------------------------
+    Authors: James Renwick
+    Team: SDP Team E
+"""
+
 import os
 import json
 
@@ -34,18 +40,32 @@ class CalibrationSetting(object):
 
     @property
     def erode(self): return float(self._data['erode'])
+    @erode.setter
+    def erode(self, value): self._data['erode'] = float(value)
     @property
     def min(self): return tuple([float(i) for i in self._data['min']])
+    @min.setter
+    def min(self, value): self._data['min'] = tuple([float(i) for i in value])
     @property
     def max(self): return tuple([float(i) for i in self._data['max']])
+    @max.setter
+    def max(self, value): self._data['max'] = tuple([float(i) for i in value])
     @property
     def blur(self): return int(self._data['blur'])
+    @blur.setter
+    def blur(self, value): self._data['blur'] = int(value)
     @property
     def close(self): return float(self._data['close'])
+    @close.setter
+    def close(self, value): self._data['close'] = float(value)
     @property
     def open(self): return float(self._data['open'])
+    @open.setter
+    def open(self, value): self._data['open'] = float(value)
     @property
     def contrast(self): return float(self._data['contrast'])
+    @contrast.setter
+    def contrast(self, value): self._data['contrast'] = float(value)
 
     @staticmethod
     def get_default():
@@ -118,16 +138,28 @@ class VideoConfig(object):
 
     @property
     def brightness(self): return int(self._data['bright'])
+    @brightness.setter
+    def brightness(self, value): self._data['bright'] = int(value)
     @property
     def contrast(self): return int(self._data['contrast'])
+    @contrast.setter
+    def contrast(self, value): self._data['contrast'] = int(value)
     @property
     def color(self): return int(self._data['color'])
+    @color.setter
+    def color(self, value): self._data['color'] = int(value)
     @property
     def hue(self): return int(self._data['hue'])
+    @hue.setter
+    def hue(self, value): self._data['hue'] = int(value)
     @property
     def red_balance(self): return int(self._data['Red Balance'])
+    @red_balance.setter
+    def red_balance(self, value): self._data['Red Balance'] = int(value)
     @property
     def blue_balance(self): return int(self._data['Blue Balance'])
+    @blue_balance.setter
+    def blue_balance(self, value): self._data['Blue Balance'] = int(value)
 
     @staticmethod
     def get_default():
