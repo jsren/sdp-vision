@@ -132,7 +132,7 @@ class VideoConfig(object):
     @staticmethod
     def get_default():
         return VideoConfig(_get_machine_name(), {
-            'brightness': 180, 'Blue Balance': 0, 'color': 80,
+            'bright': 180, 'Blue Balance': 0, 'color': 80,
             'hue': 5, 'Red Balance': 5, 'contrast': 120
         })
 

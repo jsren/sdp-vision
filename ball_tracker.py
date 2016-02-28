@@ -24,7 +24,7 @@ class BallTracker(Tracker):
             [int] offset        how much to offset the coordinates
         """
         self.crop   = crop
-        self.color  = calibration.get_color_setting(pitch, 'red')
+        self.color  = calibration['red']
         self.offset = offset
         self.name   = name
 
@@ -38,7 +38,7 @@ class BallTracker(Tracker):
                 color['min'],
                 color['max'],            # adjustments = {'min':,'mz'}
 
-            adjustments = calibration.get_color_setting(self.pitch, color)
+            adjustments = calibration[color]
                 color['contrast'],
                 color['blur']
             )

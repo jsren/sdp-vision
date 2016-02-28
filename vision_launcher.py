@@ -98,8 +98,6 @@ class VisionLauncher(object):
                     start = datetime.now()
                     self._cv.wait(timeout)
 
-                    print (datetime.now()-start).total_seconds()
-
                     # If timed-out, then the time taken >= timeout value
                     return timeout is None or time_delta_in_ms(start, datetime.now()) < \
                             int(timeout * 1000)
