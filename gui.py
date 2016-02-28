@@ -90,16 +90,16 @@ class GUI:
         # The first numerical value is the starting point for the vision feed
         cv2.namedWindow('frame2')
 
-        #
-        # cv2.namedWindow('frame3')
-        #
-        # cv2.createTrackbar('Blue: 0 \n Red: 1 \n Yellow: 2 \n Pink: 3 \n Green: 4','frame3',0,4 ,nothing)
-        # cv2.createTrackbar('Min H','frame3',0,255,nothing)
-        # cv2.createTrackbar('Min S','frame3',0,255,nothing)
-        # cv2.createTrackbar('Min V','frame3',0,255,nothing)
-        # cv2.createTrackbar('Max H','frame3',0,255,nothing)
-        # cv2.createTrackbar('Max S','frame3',0,255,nothing)
-        # cv2.createTrackbar('Max V','frame3',0,255,nothing)
+
+        cv2.namedWindow('frame3')
+
+        cv2.createTrackbar('Blue: 0 \n Red: 1 \n Yellow: 2 \n Pink: 3 \n Green: 4','frame3',0,4 ,nothing)
+        cv2.createTrackbar('Min H','frame3',0,255,nothing)
+        cv2.createTrackbar('Min S','frame3',0,255,nothing)
+        cv2.createTrackbar('Min V','frame3',0,255,nothing)
+        cv2.createTrackbar('Max H','frame3',0,255,nothing)
+        cv2.createTrackbar('Max S','frame3',0,255,nothing)
+        cv2.createTrackbar('Max V','frame3',0,255,nothing)
 
 
 

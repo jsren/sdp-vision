@@ -216,7 +216,7 @@ class VisionWrapper:
         # Apply preprocessing methods toggled in the UI
         self.preprocessed = self.preprocessing.run(self.frame, self.preprocessing.options)
         self.frame = self.preprocessed['frame']
-        # cv2.imshow('frame3', self.frame)
+        cv2.imshow('frame3', self.frame)
         if 'background_sub' in self.preprocessed:
             cv2.imshow('bg sub', self.preprocessed['background_sub'])
 
@@ -257,7 +257,7 @@ class VisionWrapper:
 
         # Feed will stop if this is removed and nothing else is shown
         cv2.imshow('frame2', self.frame)
-        # cv2.imshow('frame3', self.frame)
+        cv2.imshow('frame3', self.frame)
 
 
         for r in self.robots:
