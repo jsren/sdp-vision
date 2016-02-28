@@ -1,16 +1,82 @@
 """ Vision GUI - (c) SDP Team E 2016
     --------------------------------
-    Authors:
+    Authors: Andrew, James Renwick
     Team: SDP Team E
 """
 
-import cv2
+try:
+    import cv2
+except:
+    pass
 
-from config import Configuration
+from Tkinter import *
+from config import Configuration, Calibration
+from tkColorChooser import askcolor
 
 
 def nothing(x): 
     pass
+
+
+class HSVSelector:
+
+    def __init__(self, master, onchange=None):
+        self.frame    = Frame(master)
+        self.onchange = onchange
+
+    def grid(self, *args, **kwargs):
+        self.frame.grid(*args, **kwargs)
+
+    def pack(self, *args, **kwargs):
+        self.frame.pack(*args, **kwargs)
+
+    def place(self, *args, **kwargs):
+        self.frame.place(*args, **kwargs)
+
+
+class MinMaxUI:
+
+    def __init__(self, calibration):
+        assert type(calibration) == Calibration
+
+        self.calibration = calibration
+
+        self.form = Tk()
+        self.form.wm_title("Set Calibration Values")
+
+        selector_frame = LabelFrame(self.form, text="Calibration Colours")
+        selector_frame.grid(row=0, columnspan=1, sticky="WE", padx=5, ipadx=5, pady=5, ipady=5)
+
+        min_frame = LabelFrame(self.form, text="Minimum Values")
+        min_frame.grid(row=1, columnspan=1, sticky="WE", padx=5, ipadx=5, pady=5, ipady=5)
+
+        max_frame = LabelFrame(self.form, text="Maximum Values")
+        max_frame.grid(row=1, columnspan=1, sticky="WE", padx=5, ipadx=5, pady=5, ipady=5)
+
+
+        # Holds the currently-selected colour name
+        self.colour_var = StringVar()
+        self.colour_var.set(Configuration.calibration_colors[0])
+
+        # Create radio buttons for each colour
+        for colour in Configuration.calibration_colors:
+            rb = Radiobutton(selector_frame, variable=self.colour_var, text=colour,
+                             value=colour, command=self.on_colour_selected, padx=5, pady=5)
+            rb.pack(side=LEFT)
+
+
+
+    def show(self):
+        self.form.mainloop()
+
+    def on_colour_selected(self):
+        colour = self.colour_var.get()
+
+
+
+
+
+
 
 class GUI:
 
@@ -72,3 +138,7 @@ class GUI:
             frame = cv2.GaussianBlur(frame, (121, 121), 0)
 
         return frame
+
+
+if __name__ == "__main__":
+    MinMaxUI(["blue", "red", "green", "pink", "yellow"]).show()

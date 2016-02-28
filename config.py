@@ -156,6 +156,13 @@ class RealTimeVideoConfig(VideoConfig):
 
 class Configuration(object):
 
+    video_settings = \
+    [ "bright", "contrast", "color", "hue", "Red Balance", "Blue Balance" ]
+
+    calibration_colors = \
+    [ 'blue', 'yellow', 'red', 'green', 'pink' ]
+
+
     @staticmethod
     def read_calibration(machine_name=None, create_if_missing=False):
 
@@ -247,10 +254,3 @@ class Configuration(object):
 
             if output.strip(): print "[V4LCTL] " + output
 
-
-
-Configuration.video_settings = \
-    [ "bright", "contrast", "color", "hue", "Red Balance", "Blue Balance" ]
-
-Configuration.calibration_colors = \
-    [ 'blue', 'yellow', 'red', 'green', 'pink' ]
