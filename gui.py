@@ -88,8 +88,22 @@ class GUI:
 
         # create GUI
         # The first numerical value is the starting point for the vision feed
+        cv2.namedWindow('frame2')
+
+        cv2.namedWindow('frame3')
+
+        cv2.createTrackbar('Blue: 0 \n Red: 1 \n Yellow: 2 \n Pink: 3 \n Green: 4','frame3',0,4 ,nothing)
+        cv2.createTrackbar('Min H','frame3',0,255,nothing)
+        cv2.createTrackbar('Min S','frame3',0,255,nothing)
+        cv2.createTrackbar('Min V','frame3',0,255,nothing)
+        cv2.createTrackbar('Max H','frame3',0,255,nothing)
+        cv2.createTrackbar('Max S','frame3',0,255,nothing)
+        cv2.createTrackbar('Max V','frame3',0,255,nothing)
+
+
+
         if pitch == 0:
-            cv2.namedWindow('frame2')
+
             cv2.createTrackbar('bright','frame2',180,255,nothing)
             cv2.createTrackbar('contrast','frame2',120,127,nothing)
             cv2.createTrackbar('color','frame2',80,255,nothing)
@@ -98,8 +112,8 @@ class GUI:
             cv2.createTrackbar('Blue Balance','frame2',0,20,nothing)
             cv2.createTrackbar('Gaussian blur','frame2',1,1,nothing)
 
+
         if pitch == 1:
-            cv2.namedWindow('frame2')
             cv2.createTrackbar('bright','frame2',23000,40000,nothing)
             cv2.createTrackbar('contrast','frame2',28000,40000,nothing)
             cv2.createTrackbar('color','frame2',65000,100000,nothing)
