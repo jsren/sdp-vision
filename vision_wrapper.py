@@ -263,7 +263,7 @@ class VisionWrapper:
         for r in self.robots:
             if not r.is_present(): continue
             clx, cly, x, y = r.get_coordinates()
-            if r.age >0:
+            if r.age > 0:
                 # Draw robot circles
                 # print clx, cly
                 if not isnan(clx) and not isnan(cly):

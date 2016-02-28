@@ -6,14 +6,7 @@ import warnings
 warnings.simplefilter('ignore', np.RankWarning)
 warnings.simplefilter('ignore', RuntimeWarning)
 
-# TODO: Used by commented-out code
-from collections import namedtuple
-#BoundingBox = namedtuple('BoundingBox', 'x y width height')
-#Center      = namedtuple('Center', 'x y')
-
-# Maximum valid contour area
-# contours with a larger area are
-# culled
+# Maximum valid contour area contours with a larger area are culled
 MAX_CONTOUR_AREA = 50
 
 class Tracker(object):
@@ -44,8 +37,8 @@ class Tracker(object):
             if frame is None:
                 return None
 
-            #hp = adjustments['highpass']
-            #if hp is None: hp = 0
+            # hp = adjustments['highpass']
+            # if hp is None: hp = 0
 
             if adjustments['contrast'] >= 1.0:
                 frame = cv2.add(frame,
@@ -60,7 +53,7 @@ class Tracker(object):
                                      np.array(adjustments['max']))
 
             # Does nothing since highpass is 0.0 everywhere in calibrations.json
-            #frame_mask = CalibrationGUI.highpass(frame_mask, frame, hp)
+            # frame_mask = CalibrationGUI.highpass(frame_mask, frame, hp)
 
             # Find contours
             if adjustments['open'] >= 1:
@@ -103,39 +96,6 @@ class Tracker(object):
         bottommost = tuple(cnt[cnt[:, :, 1].argmax()][0])
         return (leftmost, topmost, rightmost, bottommost)
 
-    '''
-    def get_bounding_box(self, points):
-        """
-        Find the bounding box given points by looking at the extremes of each coordinate.
-        """
-        leftmost = min(points, key=lambda x: x[0])[0]
-        rightmost = max(points, key=lambda x: x[0])[0]
-        topmost = min(points, key=lambda x: x[1])[1]
-        bottommost = max(points, key=lambda x: x[1])[1]
-        return BoundingBox(leftmost,
-                           topmost,
-                           rightmost - leftmost,
-                           bottommost - topmost)
-
-    def get_contour_corners(self, contour):
-        """
-        Get exact corner points for the plate given one contour.
-        """
-        if contour is not None:
-            rectangle = cv2.minAreaRect(contour)
-            box = cv2.cv.BoxPoints(rectangle)
-            return np.int0(box)
-    def join_contours(self, contours):
-        """
-        Joins multiple contours together.
-        """
-        cnts = []
-        for i, cnt in enumerate(contours):
-            if cv2.contourArea(cnt) > 100:
-                cnts.append(cnt)
-        return reduce(lambda x, y: np.concatenate((x, y)),
-                                   cnts) if len(cnts) else None
-    '''
 
     @staticmethod
     def get_largest_contour(contours):

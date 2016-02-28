@@ -8,7 +8,7 @@ import threading
 import numpy as np
 
 
-OUR_NAME = "yellow + pink"
+OUR_NAME = "blue + pink"
 
 goals = {
     'right': np.array([568.0, 232.5]),
@@ -17,9 +17,9 @@ goals = {
 
 ROBOT_DESCRIPTIONS = {
     'blue + green'  : {'main_colour': 'blue', 'side_colour': 'green'},
-    'yellow + green': {'main_colour': 'yellow', 'side_colour': 'green'},
+    # 'yellow + green': {'main_colour': 'yellow', 'side_colour': 'green'},
     'blue + pink'   : {'main_colour': 'blue', 'side_colour': 'pink'},
-    'yellow + pink' : {'main_colour': 'yellow', 'side_colour': 'pink'}
+    # 'yellow + pink' : {'main_colour': 'yellow', 'side_colour': 'pink'}
 }
 
 assert OUR_NAME in ROBOT_DESCRIPTIONS
