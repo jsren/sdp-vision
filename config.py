@@ -23,6 +23,9 @@ class CalibrationSetting(object):
     def __iter__(self):
         return iter(self._data)
 
+    def __getitem__(self, item):
+        return self._data[item]
+
     def get_json(self):
         """ Gets the underlying JSON object.
         :return: The dictionary representation of the colour entry.
