@@ -57,6 +57,11 @@ class VisionWrapper:
 
         self.calibration = Configuration.read_calibration(create_if_missing=True)
 
+        from threading import Thread
+        from gui import MinMaxUI
+        Thread(name="Calibration UI", target=MinMaxUI.create_and_show,
+               args=[self.calibration]).start()
+
         # Set up camera for frames
         self.camera = Camera(pitch)
         self.camera.start_capture()

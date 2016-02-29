@@ -39,6 +39,30 @@ class HSVSelector:
         self.frame.place(*args, **kwargs)
 
 
+class TrackerSettingsUI:
+
+    def __init__(self, trackers):
+        self.trackers = trackers
+
+        self.form = Tk()
+        self.form.wm_title("Tracker Settings")
+        self.form.resizable(0,0)
+        self.form.bind("<Key-q>", lambda e: self.form.destroy())
+
+        row = 0
+        for tracker in trackers:
+            frame = LabelFrame(self.form, text=tracker.__name__.title() + " Settings")
+            frame.grid(row=row, columnspan=1, sticky="WE", padx=5, ipadx=5, pady=5, ipady=5)
+            row += 1
+            try:
+                tracker.draw_ui(frame)
+            except Exception, e:
+                print e
+
+    def show(self):
+        self.form.mainloop()
+
+
 class MinMaxUI:
 
     def __init__(self, calibration):
@@ -133,6 +157,10 @@ class MinMaxUI:
     def show(self):
         self.form.mainloop()
 
+    @staticmethod
+    def create_and_show(calibration):
+        MinMaxUI(calibration).show()
+
     def on_colour_selected(self):
         colour = self.colour_var.get()
         entry = self.calibration[colour]
@@ -175,32 +203,32 @@ class MinMaxUI:
 
 
     def config_update(self):
-        if tkMessageBox.askquestion("Write to File", "Are you sure you wish to "
-            "commit your settings to file '%s'?\nThis will overwrite your current ones.\n"
-            "This cannot be undone!" %(self.calibration.machine_name+".json"), icon='warning') == 'yes':
-            Configuration.write_calibration(self.calibration, self.calibration.machine_name)
+        # if tkMessageBox.askquestion("Write to File", "Are you sure you wish to "
+        #     "commit your settings to file '%s'?\nThis will overwrite your current ones.\n"
+        #     "This cannot be undone!" %(self.calibration.machine_name+".json"), icon='warning') == 'yes':
+        Configuration.write_calibration(self.calibration, self.calibration.machine_name)
 
     def revert_default(self):
-        if tkMessageBox.askquestion("Revert to Default", "Are you sure you wish to "
-                "revert to default settings?\nThis will overwrite your current ones.\n"
-                "Reverting does not write to the file.", icon='warning', parent=self.form) == 'yes':
-            default = Calibration.get_default()
-            for colour in default:
-                self.calibration[colour] = default[colour]
+        # if tkMessageBox.askquestion("Revert to Default", "Are you sure you wish to "
+        #         "revert to default settings?\nThis will overwrite your current ones.\n"
+        #         "Reverting does not write to the file.", icon='warning', parent=self.form) == 'yes':
+        default = Calibration.get_default()
+        for colour in default:
+            self.calibration[colour] = default[colour]
 
-            # Now update UI to reflect change
-            self.on_colour_selected()
+        # Now update UI to reflect change
+        self.on_colour_selected()
 
     def reload_config(self):
-        if tkMessageBox.askquestion("Reload from File", "Are you sure you wish to "
-                "reload settings from file?\nThis will overwrite your current ones.\n"
-                "This cannot be undone!", icon='warning') == 'yes':
-            config = Configuration.read_calibration(self.calibration.machine_name)
-            for colour in config:
-                self.calibration[colour] = config[colour]
+        # if tkMessageBox.askquestion("Reload from File", "Are you sure you wish to "
+        #         "reload settings from file?\nThis will overwrite your current ones.\n"
+        #         "This cannot be undone!", icon='warning') == 'yes':
+        config = Configuration.read_calibration(self.calibration.machine_name)
+        for colour in config:
+            self.calibration[colour] = config[colour]
 
-            # Now update UI to reflect change
-            self.on_colour_selected()
+        # Now update UI to reflect change
+        self.on_colour_selected()
 
 
 class GUI:

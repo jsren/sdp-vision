@@ -11,6 +11,9 @@ MAX_CONTOUR_AREA = 50
 
 class Tracker(object):
 
+    def draw_ui(self, parent):
+        pass
+
     @staticmethod
     def oddify(inte):
         """
