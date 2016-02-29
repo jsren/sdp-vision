@@ -8,7 +8,7 @@ import threading
 import numpy as np
 
 
-OUR_NAME = "blue + pink"
+OUR_NAME = "blue + green"
 
 goals = {
     'right': np.array([568.0, 232.5]),
