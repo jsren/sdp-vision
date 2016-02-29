@@ -26,12 +26,14 @@ class VisionWrapper:
 
     """
 
-    def __init__(self, pitch, our_side, robot_details, draw_GUI=False):
+    def __init__(self, pitch, color_settings, our_side, robot_details, draw_GUI=False):
         """
         Entry point for the SDP system.
 
         Params:
             [int] pitch                     0 - main pitch, 1 - secondary pitch
+            [int or string] color_settings  [0, small, 1, big] - 0 or small for pitch color settings with small numbers (previously - pitch 0)
+                                            1 or big - pitch color settings with big numbers (previously - pitch 1)
             [string] colour                 The colour of our teams plates
             [string] our_side               the side we're on - 'left' or 'right'
             [int] video_port                port number for the camera
@@ -54,6 +56,7 @@ class VisionWrapper:
         assert pitch in [0, 1]
 
         self.pitch = pitch
+        self.color_settings = color_settings
 
         self.calibration = Configuration.read_calibration(create_if_missing=True)
 
@@ -75,7 +78,7 @@ class VisionWrapper:
         self.draw_GUI = draw_GUI
         self.gui = None
         if draw_GUI:
-            self.gui = GUI(self.pitch, self.calibration)
+            self.gui = GUI(self.pitch, self.color_settings, self.calibration)
 
         # Draw various things on the image
         self.draw_direction = True
