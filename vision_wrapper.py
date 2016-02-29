@@ -107,12 +107,9 @@ class VisionWrapper:
         from gui.trackers import TrackerSettingsUI
         from gui.common import MainWindow
 
-        def set_color_pick_callback(callback):
-            self.color_pick_callback = callback
-
         def create_windows():
             return [
-                CalibrationUI(self.calibration, set_color_pick_callback),
+                CalibrationUI(self.calibration),
                 TrackerSettingsUI(self.trackers)
             ]
 

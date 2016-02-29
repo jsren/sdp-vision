@@ -50,8 +50,9 @@ class GUI:
 
     def on_mouse_event(self, event, x, y, *_):
         if event == cv2.EVENT_LBUTTONDOWN:
-            if self.wrapper.color_pick_callback is not None:
-                self.wrapper.color_pick_callback(self.frame[x, y])
+            #if self.wrapper.color_pick_callback is not None:
+                #self.wrapper.color_pick_callback(self.frame[x, y])
+            print self.frame[x, y]
 
     def drawGUI(self, frame):
         self.frame = frame
