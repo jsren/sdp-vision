@@ -104,7 +104,6 @@ class RobotTracker(Tracker):
         # Array of contours found.
         circles = self.find_all_circles(frame)
 
-
         # Use k-means to find cluster centres for main colors
         circle_results = []
         for m_color in self.main_colors:

@@ -129,7 +129,8 @@ class VisionLauncher(object):
                 #self.visionwrap.vision.v4l_settings()
 
                 # Wait until robot detected
-                if not self._started and self.get_robot_midpoint() is not None:
+                if not self._started and self.get_robot_midpoint() is not None \
+                    and not np.isnan(self.get_robot_midpoint()[0]):
                     self._started = True
                     with self._cv:
                         self._cv.notifyAll()
