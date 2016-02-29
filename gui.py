@@ -16,6 +16,7 @@ from config import Configuration, Calibration
 import numpy as np
 import tkMessageBox
 import threading
+import functools
 
 
 def nothing(x): 
@@ -41,7 +42,7 @@ class HSVSelector:
 class MinMaxUI:
 
     def __init__(self, calibration):
-        #assert type(calibration) == Calibration
+        assert type(calibration) == Calibration
 
         self.calibration = calibration
 
@@ -59,6 +60,11 @@ class MinMaxUI:
         self.max_frame = LabelFrame(self.form, text="Maximum Values")
         self.max_frame.grid(row=2, columnspan=1, sticky="WE", padx=5, ipadx=5, pady=5, ipady=5)
 
+        self.button_frame = Frame(self.form)
+        self.button_frame.grid(row=3, columnspan=1, sticky="WE", padx=5, ipadx=5, pady=5, ipady=5)
+
+        self.text_frame = Frame(self.form)
+        self.text_frame.grid(row=4, columnspan=1, sticky="WE", padx=5, ipadx=5, pady=5, ipady=5)
 
         # Holds the currently-selected colour name
         self.colour_var = StringVar()
@@ -66,75 +72,66 @@ class MinMaxUI:
 
         # Create radio buttons for each colour
         for colour in Configuration.calibration_colors:
-            rb = Radiobutton(selector_frame, variable=self.colour_var, text=colour,
+            rb = Radiobutton(selector_frame, variable=self.colour_var, text=colour.title(),
                              value=colour, command=self.on_colour_selected, padx=5, pady=5)
             rb.pack(side=LEFT)
 
+        # Get specific functions
+        min_changed = functools.partial(self.on_slider_changed, 'min')
+        max_changed = functools.partial(self.on_slider_changed, 'max')
+
+        self.min_subframe = Frame(self.min_frame)
+        self.min_subframe.pack(side=LEFT)
+
+        self.max_subframe = Frame(self.max_frame)
+        self.max_subframe.pack(side=LEFT)
+
         # Create scales for values
         self.min_hue = DoubleVar()
-        scale1= Scale(self.min_frame, variable = self.min_hue, command = self.update_min,
-                      to = 179, orient = HORIZONTAL, label = "Hue", length = 300)
-
+        Scale(self.min_subframe, variable=self.min_hue, command=min_changed,
+                      to=179, orient=HORIZONTAL, label="Hue", length=300).pack(anchor=W)
         self.min_sat = DoubleVar()
-        scale2 = Scale(self.min_frame, variable = self.min_sat, command = self.update_min,
-                       to = 255, orient = HORIZONTAL, label = "Saturation", length = 300)
-
+        Scale(self.min_subframe, variable=self.min_sat, command=min_changed,
+                       to=255, orient=HORIZONTAL, label="Saturation", length=300).pack(anchor=W)
         self.min_val = DoubleVar()
-        scale3 = Scale(self.min_frame, variable = self.min_val, command = self.update_min,
-                       to = 255, orient = HORIZONTAL, label = "Value", length = 300)
-
+        Scale(self.min_subframe, variable=self.min_val, command=min_changed,
+                       to=255, orient=HORIZONTAL, label="Value", length=300).pack(anchor=W)
         self.max_hue = DoubleVar()
-        scale4 = Scale(self.max_frame, variable = self.max_hue, command = self.update_max,
-                       to = 179, orient = HORIZONTAL, label = "Hue", length = 300)
-
+        Scale(self.max_subframe, variable=self.max_hue, command=max_changed,
+                       to=179, orient=HORIZONTAL, label="Hue", length=300).pack(anchor=W)
         self.max_sat = DoubleVar()
-        scale5 = Scale(self.max_frame, variable = self.max_sat, command = self.update_max,
-                       to = 255, orient = HORIZONTAL, label = "Saturation", length = 300)
-
+        Scale(self.max_subframe, variable=self.max_sat, command=max_changed,
+                       to=255, orient=HORIZONTAL, label="Saturation", length=300).pack(anchor=W)
         self.max_val = DoubleVar()
-        scale6 = Scale(self.max_frame, variable = self.max_val, command = self.update_max,
-                       to = 255, orient = HORIZONTAL, label = "Value", length = 300)
+        Scale(self.max_subframe, variable=self.max_val, command=max_changed,
+                       to=255, orient=HORIZONTAL, label="Value", length=300).pack(anchor=W)
 
+        self.canvas_min = Canvas(self.min_frame, width=200, height=200, bg='black')
+        self.canvas_min.pack(side=RIGHT, padx=15)
 
+        self.canvas_max = Canvas(self.max_frame, width=200, height=200, bg='black')
+        self.canvas_max.pack(side=RIGHT, padx=15)
 
+        # Buttons
+        Button(self.button_frame, text="Write Configurations", command=self.config_update,
+               padx=10, pady=10, width=15).pack(side=LEFT)
 
-        self.canvas_min = Canvas(self.min_frame, width = 75, height = 75, borderwidth = 20, bg = 'black')
-        self.canvas_min.pack(side = RIGHT)
+        Button(self.button_frame, text="Reload from File", command=self.reload_config,
+                padx=10, pady=10, width=15).pack(side=LEFT)
 
+        Button(self.button_frame, text="Revert to Default", command=self.revert_default,
+                padx=10, pady=10, width=15).pack(side=LEFT)
 
-        self.canvas_max = Canvas(self.max_frame, width = 75, height = 75, borderwidth = 20, bg = 'black')
-        self.canvas_max.pack(side = RIGHT)
+        Button(self.button_frame, text="Quit", command=self.form.destroy,
+                padx=10, pady=10, width=15).pack(side=RIGHT)
 
-
-        values = [scale1, scale2, scale3, scale4, scale5, scale6]
-
-        for val in values:
-            val.pack(anchor = W)
-
-
-        write_config = Button(self.max_frame, text = "Write Configurations", command = self.config_update, padx=10, pady=10, width = 15)
-        write_config.pack(side = LEFT)
-
-        reload_config = Button(self.max_frame, text = "Reload from File", command = self.reload_config, padx=10, pady=10, width = 15)
-        reload_config.pack(side = LEFT)
-
-        revert_config = Button(self.max_frame, text = "Revert to Default", command = self.revert_default, padx=10, pady=10, width = 15)
-        revert_config.pack(side = LEFT)
-
-        quit_button = Button(self.max_frame, text = "Quit", command = self.quit_command, padx=10, pady=10, width = 15)
-        quit_button.pack(side = RIGHT)
+        Label(self.text_frame, text="Press 'q' to quit").pack()
 
         # Perform initial update
         self.on_colour_selected()
 
-
-
     def show(self):
         self.form.mainloop()
-
-    def quit_command(self):
-        self.form.destroy()
-
 
     def on_colour_selected(self):
         colour = self.colour_var.get()
@@ -146,21 +143,36 @@ class MinMaxUI:
         self.max_hue.set(entry.max[0])
         self.max_sat.set(entry.max[1])
         self.max_val.set(entry.max[2])
-        self.update_min_canvas()
-        self.update_max_canvas()
-
-    def update_min(self, e):
-        colour = self.colour_var.get()
-        entry = self.calibration[colour]
-        entry.min = (self.min_hue.get(), self.min_sat.get(), self.min_val.get())
-        self.update_min_canvas()
+        self.update_swatches('min')
+        self.update_swatches('max')
 
 
-    def update_max(self, e):
-        colour = self.colour_var.get()
-        entry = self.calibration[colour]
-        entry.max = (self.max_hue.get(), self.max_sat.get(), self.max_val.get())
-        self.update_max_canvas()
+    def on_slider_changed(self, minmax, _):
+        entry = self.calibration[self.colour_var.get()]
+        if minmax == 'min':
+            entry.min = (self.min_hue.get(), self.min_sat.get(), self.min_val.get())
+        elif minmax == 'max':
+            entry.max = (self.max_hue.get(), self.max_sat.get(), self.max_val.get())
+        else:
+            raise Exception("Invalid value for parameter 'minmax'")
+        # Update swatch
+        self.update_swatches(minmax)
+
+
+    def update_swatches(self, minmax):
+        if minmax == 'min':
+            canvas = self.canvas_min
+            hsv = np.uint8([[[self.min_hue.get(), self.min_sat.get(), self.min_val.get()]]])
+        elif minmax == 'max':
+            canvas = self.canvas_max
+            hsv = np.uint8([[[self.max_hue.get(), self.max_sat.get(), self.max_val.get()]]])
+        else:
+            raise Exception("Invalid value for parameter 'minmax'")
+
+        # Convert colour to RGB & set canvas bg
+        rgb = cv2.cvtColor(hsv, cv2.COLOR_HSV2RGB)
+        canvas.configure(bg='#%02x%02x%02x' % (rgb[0][0][0], rgb[0][0][1], rgb[0][0][2]))
+
 
     def config_update(self):
         if tkMessageBox.askquestion("Write to File", "Are you sure you wish to "
@@ -168,21 +180,7 @@ class MinMaxUI:
             "This cannot be undone!" %(self.calibration.machine_name+".json"), icon='warning') == 'yes':
             Configuration.write_calibration(self.calibration, self.calibration.machine_name)
 
-    def update_min_canvas(self):
-        hsv = np.uint8([[[self.min_hue.get(), self.min_sat.get(), self.min_val.get()]]])
-        rgb = cv2.cvtColor(hsv, cv2.COLOR_HSV2RGB)
-
-        mycolor = '#%02x%02x%02x' % (rgb[0][0][0], rgb[0][0][1], rgb[0][0][2])
-        self.canvas_min.configure(bg=mycolor)
-
-    def update_max_canvas(self):
-        hsv = np.uint8([[[self.max_hue.get(), self.max_sat.get(), self.max_val.get()]]])
-        rgb = cv2.cvtColor(hsv, cv2.COLOR_HSV2RGB)
-        mycolor = '#%02x%02x%02x' % (rgb[0][0][0], rgb[0][0][1], rgb[0][0][2])
-        self.canvas_max.configure(bg=mycolor)
-
     def revert_default(self):
-
         if tkMessageBox.askquestion("Revert to Default", "Are you sure you wish to "
                 "revert to default settings?\nThis will overwrite your current ones.\n"
                 "Reverting does not write to the file.", icon='warning', parent=self.form) == 'yes':
@@ -205,11 +203,6 @@ class MinMaxUI:
             self.on_colour_selected()
 
 
-    @staticmethod
-    def create_and_show(calibration):
-        MinMaxUI(calibration).show()
-
-
 class GUI:
 
     def __init__(self, pitch, calibration):
@@ -219,29 +212,11 @@ class GUI:
         self.calibration = calibration
         self.config      = Configuration.read_video_config(create_if_missing=True)
 
-        # Start Tkinter dialog
-        threading.Thread(name="Calibration UI", target=MinMaxUI.create_and_show, args=[calibration]).start()
-
         # create GUI
         # The first numerical value is the starting point for the vision feed
         cv2.namedWindow('frame2')
 
-        """
-        cv2.namedWindow('frame3')
-
-        cv2.createTrackbar('Blue: 0 \n Red: 1 \n Yellow: 2 \n Pink: 3 \n Green: 4','frame3',0,4 ,nothing)
-        cv2.createTrackbar('Min H','frame3',0,255,nothing)
-        cv2.createTrackbar('Min S','frame3',0,255,nothing)
-        cv2.createTrackbar('Min V','frame3',0,255,nothing)
-        cv2.createTrackbar('Max H','frame3',0,255,nothing)
-        cv2.createTrackbar('Max S','frame3',0,255,nothing)
-        cv2.createTrackbar('Max V','frame3',0,255,nothing)
-        """
-
-
-
         if pitch == 0:
-
             cv2.createTrackbar('bright','frame2',180,255,nothing)
             cv2.createTrackbar('contrast','frame2',120,127,nothing)
             cv2.createTrackbar('color','frame2',80,255,nothing)
