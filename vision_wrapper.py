@@ -295,6 +295,9 @@ class VisionWrapper:
                         # Draw angle in degrees
                         cv2.imshow('frame2', cv2.putText(self.frame, str(int(r.get_robot_heading())), (int(clx) - 15, int(cly) + 30),
                                                      cv2.FONT_HERSHEY_COMPLEX, 0.45, (100, 150, 200)))
+                        cv2.imshow('frame2', cv2.line(self.frame, (int(clx), int(cly)),
+                                                             (int(x), int(y)), BGR_COMMON['black'], 1, 0))
+
 
                         # Draw line
                         angle = r.get_robot_heading()
