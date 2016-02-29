@@ -133,7 +133,7 @@ class VisionWrapper:
         assert not any([list(r.x) and None in list(r.x) for r in self.robots])
 
         # Filter robots that have no position
-        return [(r.name, np.mean(r.x), np.mean(r.y), r.get_robot_heading())
+        return [(r.name, (np.mean(r.x), np.mean(r.y)), r.get_robot_heading())
                 for r in self.robots if list(r.x)]
 
     def get_robot_position(self, robot_name):
