@@ -245,21 +245,20 @@ class GUI:
         cv2.namedWindow('frame2')
 
         if pitch == 0:
-            cv2.createTrackbar('bright','frame2',180,255,nothing)
-            cv2.createTrackbar('contrast','frame2',120,127,nothing)
-            cv2.createTrackbar('color','frame2',80,255,nothing)
-            cv2.createTrackbar('hue','frame2',5,30,nothing)
-            cv2.createTrackbar('Red Balance','frame2',5,20,nothing)
-            cv2.createTrackbar('Blue Balance','frame2',0,20,nothing)
-            cv2.createTrackbar('Gaussian blur','frame2',1,1,nothing)
-
+            cv2.createTrackbar('bright','frame2',self.config.brightness,255,nothing)
+            cv2.createTrackbar('contrast','frame2',self.config.contrast,127,nothing)
+            cv2.createTrackbar('color','frame2',self.config.color,255,nothing)
+            cv2.createTrackbar('hue','frame2',self.config.hue,30,nothing)
+            cv2.createTrackbar('Red Balance','frame2',self.config.red_balance,20,nothing)
+            cv2.createTrackbar('Blue Balance','frame2',self.config.blue_balance,20,nothing)
+            cv2.createTrackbar('Gaussian blur','frame2',0,1,nothing)
 
         if pitch == 1:
-            cv2.createTrackbar('bright','frame2',23000,40000,nothing)
-            cv2.createTrackbar('contrast','frame2',28000,40000,nothing)
-            cv2.createTrackbar('color','frame2',65000,100000,nothing)
-            cv2.createTrackbar('hue','frame2',38000,60000,nothing)
-            cv2.createTrackbar('Gaussian blur','frame2',1,1,nothing)
+            cv2.createTrackbar('bright','frame2',self.config.brightness,40000,nothing)
+            cv2.createTrackbar('contrast','frame2',self.config.contrast,40000,nothing)
+            cv2.createTrackbar('color','frame2',self.config.color,100000,nothing)
+            cv2.createTrackbar('hue','frame2',self.config.hue,60000,nothing)
+            cv2.createTrackbar('Gaussian blur','frame2',0,1,nothing)
 
 
 
@@ -274,6 +273,11 @@ class GUI:
         for att in attributes:
             self.config[att] = cv2.getTrackbarPos(att, 'frame2')
         self.config.commit()
+
+    def commit_settings(self):
+        for attr in self.config:
+            self.config[attr] = cv2.getTrackbarPos(attr, 'frame2')
+        Configuration.write_video_config(self.config, self.config.machine_name)
 
 
     def warp_image(self, frame):

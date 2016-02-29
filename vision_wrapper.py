@@ -106,6 +106,9 @@ class VisionWrapper:
                                              robot_details[r_name]['main_colour'],
                                              robot_details[r_name]['side_colour']))
 
+    def end(self):
+        self.gui.commit_settings()
+
     def get_robots_raw(self):
         # TODO: This is to make jsren happy
         assert not any([list(r.x) and None in list(r.x) for r in self.robots])

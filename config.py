@@ -265,7 +265,7 @@ class Configuration(object):
 
     @staticmethod
     def write_video_config(video_config, machine_name=None):
-        assert type(video_config) == VideoConfig
+        assert isinstance(video_config, VideoConfig)
 
         # If no machine name specified, use current machine
         if machine_name is None: machine_name = _get_machine_name()
