@@ -38,6 +38,7 @@ class Tracker(object):
         Adjust the given frame based on 'min', 'max', 'contrast' and 'blur'
         keys in adjustments dictionary.
         """
+        return (list(), None, None)
         try:
             if is_ball:
                 frame = frame[crop[2]:crop[3], crop[0]:crop[1]]

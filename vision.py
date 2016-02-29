@@ -61,8 +61,8 @@ class Vision:
            (0, width, 0, height), 0, pitch, calibration)
 
         self.circle_tracker = RobotTracker(
-            ['yellow', 'blue'], ['green', 'pink'], (0, width, 0, height), pitch, robots,
-            calibration, return_circle_contours)
+            ['yellow', 'blue'], ['green', 'pink'], (0, width, 0, height), pitch,
+            calibration, robots, return_circle_contours)
 
         trackers_out.append(self.ball_tracker)
         trackers_out.append(self.circle_tracker)

@@ -150,26 +150,30 @@ class RobotTracker(Tracker):
         #     "circles":circles
         # })
 
+    def update_settings(self):
+        for i in range(0, len(self.robots)):
+            self.robots[i].present = self.robot_present_vars[i].get()
+
+
     def draw_ui(self, parent):
         host = Frame(parent)
         host.pack()
 
         from os import path
+        from PIL import ImageTk, Image
         imgdir = path.join(path.dirname(__file__), "images")
 
-        column = 0
+        self.images = list()
+        self.robot_present_vars = list()
+
         for robot in self.robots:
-            Radiobutton(host, bitmap=BitmapImage(host, file=path.join(imgdir, robot.name+".bmp"))) \
-                .grid(row=0, column=column)
-            column += 1
+            img = ImageTk.PhotoImage(Image.open(path.join(imgdir, robot.name+".bmp")))
 
+            self.images.append(img)
+            self.robot_present_vars.append(BooleanVar(host, robot.present))
 
-
-
-
-
-
-
+            Checkbutton(parent, image=img, variable=self.robot_present_vars[-1],
+                        command=self.update_settings).pack(side=LEFT)
 
 
 

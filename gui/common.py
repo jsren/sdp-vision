@@ -15,11 +15,7 @@ class UserControl(Frame):
 
 
     def show(self):
-        if self.window:
-            self.pack()
-            self.window.mainloop()
-        else:
-            self.pack()
+        self.pack()
 
     def close(self):
         if self.window:
