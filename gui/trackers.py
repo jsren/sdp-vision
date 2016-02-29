@@ -21,6 +21,6 @@ class TrackerSettingsUI(UserControl):
 
 
     @staticmethod
-    def create_and_show(self, trackers, parent=None):
+    def create_and_show(trackers, parent=None):
         TrackerSettingsUI(trackers).show()
 

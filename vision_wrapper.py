@@ -79,6 +79,16 @@ class VisionWrapper:
         if draw_GUI:
             self.gui = GUI(self.pitch, self.color_settings, self.calibration)
 
+        # Initialize robots
+        self.ball   = []
+        self.robots = []
+
+        for r_name in robot_details.keys():
+            self.robots.append(RobotInstance(r_name,
+                                             robot_details[r_name]['main_colour'],
+                                             robot_details[r_name]['side_colour'],
+                                             r_name in robots_on_pitch))
+
         # Draw various things on the image
         self.draw_direction = True
         self.draw_robot = True
@@ -87,6 +97,7 @@ class VisionWrapper:
         self.vision = Vision(
             pitch=pitch, frame_shape=self.frame.shape,
             frame_center=center_point, calibration=self.calibration,
+            robots=self.robots,
             return_circle_contours=draw_GUI, trackers_out=self.trackers)
 
         # Show calibration UI
@@ -112,15 +123,6 @@ class VisionWrapper:
 
         self.frameQueue = []
 
-        # Initialize robots
-        self.ball   = []
-        self.robots = []
-
-        for r_name in robot_details.keys():
-            self.robots.append(RobotInstance(r_name,
-                                             robot_details[r_name]['main_colour'],
-                                             robot_details[r_name]['side_colour'],
-                                             r_name in robots_on_pitch))
 
     def end(self):
         self.gui.commit_settings()

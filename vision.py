@@ -295,6 +295,8 @@ class Camera(object):
             self.capture = None
 
     def get_frame(self):
+        import numpy as np
+        return np.uint8([[[]]])
         """
         Retrieve a frame from the camera.
 
