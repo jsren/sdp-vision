@@ -16,10 +16,11 @@ def nothing(x):
 
 class GUI:
 
-    def __init__(self, pitch, color_settings, calibration):
+    def __init__(self, pitch, color_settings, calibration, wrapper):
         self.frame = None
         self.pitch = pitch
         self.color_settings = color_settings
+        self.wrapper = wrapper
 
         self.calibration = calibration
         self.config      = Configuration.read_video_config(create_if_missing=True)
@@ -27,6 +28,9 @@ class GUI:
         # create GUI
         # The first numerical value is the starting point for the vision feed
         cv2.namedWindow('frame2')
+
+        # Handle mouse clicks
+        cv2.setMouseCallback('frame2', self.on_mouse_event)
 
         if self.color_settings in [0, "small"]:
             cv2.createTrackbar('bright','frame2',self.config.brightness,255,nothing)
@@ -44,9 +48,14 @@ class GUI:
             cv2.createTrackbar('hue','frame2',self.config.hue,60000,nothing)
             cv2.createTrackbar('Gaussian blur','frame2',0,1,nothing)
 
+    def on_mouse_event(self, event, x, y, *_):
+        if event == cv2.EVENT_LBUTTONDOWN:
+            if self.wrapper.color_pick_callback is not None:
+                self.wrapper.color_pick_callback(self.frame[x, y])
 
+    def drawGUI(self, frame):
+        self.frame = frame
 
-    def drawGUI(self):
         if self.color_settings in [0, "small"]:
             attributes = ["bright", "contrast", "color", "hue", "Red Balance", "Blue Balance"]
         elif self.color_settings in [1, "big"]:

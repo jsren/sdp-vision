@@ -5,7 +5,7 @@ import cv2
 import numpy as np
 
 from colors import *
-from gui.vision_overlay import GUI
+from gui.vision_feed import GUI
 from preprocessing.preprocessing import Preprocessing
 from robot_tracker import ROBOT_DISTANCE
 from util import RobotInstance, tools
@@ -76,8 +76,9 @@ class VisionWrapper:
 
         self.draw_GUI = draw_GUI
         self.gui = None
+        self.color_pick_callback = None
         if draw_GUI:
-            self.gui = GUI(self.pitch, self.color_settings, self.calibration)
+            self.gui = GUI(self.pitch, self.color_settings, self.calibration, self)
 
         # Initialize robots
         self.ball   = []
@@ -106,9 +107,12 @@ class VisionWrapper:
         from gui.trackers import TrackerSettingsUI
         from gui.common import MainWindow
 
+        def set_color_pick_callback(callback):
+            self.color_pick_callback = callback
+
         def create_windows():
             return [
-                CalibrationUI(self.calibration),
+                CalibrationUI(self.calibration, set_color_pick_callback),
                 TrackerSettingsUI(self.trackers)
             ]
 
@@ -342,7 +346,7 @@ class VisionWrapper:
                 #print r.get_angle()
     
         if self.draw_GUI:
-            self.gui.drawGUI()
+            self.gui.drawGUI(self.frame)
 
 
 

@@ -180,4 +180,4 @@ class CalibrationUI(UserControl):
 
 
 if __name__ == "__main__":
-    CalibrationUI(Configuration.read_calibration(create_if_missing=True)).show()
+    CalibrationUI(Configuration.read_calibration(create_if_missing=True), None).show()
