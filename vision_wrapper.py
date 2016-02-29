@@ -5,7 +5,7 @@ import cv2
 import numpy as np
 
 from colors import *
-from gui import GUI
+from gui.vision_overlay import GUI
 from preprocessing.preprocessing import Preprocessing
 from robot_tracker import ROBOT_DISTANCE
 from util import RobotInstance, tools
@@ -26,18 +26,22 @@ class VisionWrapper:
 
     """
 
-    def __init__(self, pitch, our_side, robot_details, draw_GUI=False):
+    def __init__(self, pitch, color_settings, our_side, robot_details, draw_GUI=False, pc_name=None):
         """
         Entry point for the SDP system.
 
         Params:
             [int] pitch                     0 - main pitch, 1 - secondary pitch
+            [int or string] color_settings  [0, small, 1, big] - 0 or small for pitch color settings with small numbers (previously - pitch 0)
+                                            1 or big - pitch color settings with big numbers (previously - pitch 1)
             [string] colour                 The colour of our teams plates
             [string] our_side               the side we're on - 'left' or 'right'
             [int] video_port                port number for the camera
 
             [boolean] draw_GUI              Does not draw the normal image to leave space for GUI.
                                             Also forces the trackers to return circle contour positons in addition to robot details.
+            [string] pc_name                Name of the PC to load the files from (BUT NOT SAVE TO). Will default to local machine if not specified.
+
         Fields
             pitch
             camera
@@ -54,8 +58,9 @@ class VisionWrapper:
         assert pitch in [0, 1]
 
         self.pitch = pitch
+        self.color_settings = color_settings
 
-        self.calibration = Configuration.read_calibration(create_if_missing=True)
+        self.calibration = Configuration.read_calibration(machine_name=pc_name, create_if_missing=True)
 
         # Show calibration UI
         from threading import Thread
@@ -76,7 +81,7 @@ class VisionWrapper:
         self.draw_GUI = draw_GUI
         self.gui = None
         if draw_GUI:
-            self.gui = GUI(self.pitch, self.calibration)
+            self.gui = GUI(self.pitch, self.color_settings, self.calibration)
 
         # Draw various things on the image
         self.draw_direction = True
@@ -291,6 +296,9 @@ class VisionWrapper:
                         # Draw angle in degrees
                         cv2.imshow('frame2', cv2.putText(self.frame, str(int(r.get_robot_heading())), (int(clx) - 15, int(cly) + 30),
                                                      cv2.FONT_HERSHEY_COMPLEX, 0.45, (100, 150, 200)))
+                        cv2.imshow('frame2', cv2.line(self.frame, (int(clx), int(cly)),
+                                                             (int(x), int(y)), BGR_COMMON['black'], 1, 0))
+
 
                         # Draw line
                         angle = r.get_robot_heading()

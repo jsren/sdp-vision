@@ -16,9 +16,10 @@ def nothing(x):
 
 class GUI:
 
-    def __init__(self, pitch, calibration):
+    def __init__(self, pitch, color_settings, calibration):
         self.frame = None
         self.pitch = pitch
+        self.color_settings = color_settings
 
         self.calibration = calibration
         self.config      = Configuration.read_video_config(create_if_missing=True)
@@ -27,7 +28,7 @@ class GUI:
         # The first numerical value is the starting point for the vision feed
         cv2.namedWindow('frame2')
 
-        if pitch == 0:
+        if self.color_settings in [0, "small"]:
             cv2.createTrackbar('bright','frame2',self.config.brightness,255,nothing)
             cv2.createTrackbar('contrast','frame2',self.config.contrast,127,nothing)
             cv2.createTrackbar('color','frame2',self.config.color,255,nothing)
@@ -36,7 +37,7 @@ class GUI:
             cv2.createTrackbar('Blue Balance','frame2',self.config.blue_balance,20,nothing)
             cv2.createTrackbar('Gaussian blur','frame2',0,1,nothing)
 
-        if pitch == 1:
+        if self.color_settings in [1, "big"]:
             cv2.createTrackbar('bright','frame2',self.config.brightness,40000,nothing)
             cv2.createTrackbar('contrast','frame2',self.config.contrast,40000,nothing)
             cv2.createTrackbar('color','frame2',self.config.color,100000,nothing)
@@ -46,12 +47,12 @@ class GUI:
 
 
     def drawGUI(self):
-        if self.pitch == 0:
+        if self.color_settings in [0, "small"]:
             attributes = ["bright", "contrast", "color", "hue", "Red Balance", "Blue Balance"]
-        elif self.pitch == 1:
+        elif self.color_settings in [1, "big"]:
             attributes = ["bright", "contrast", "color", "hue"]
         else:
-            raise RuntimeError("StupidTitException: Incorrect pitch number")
+            raise RuntimeError("StupidTitException: Incorrect color_settings value. Choose from the set [0, small, 1, big]")
 
         for att in attributes:
             self.config[att] = cv2.getTrackbarPos(att, 'frame2')
