@@ -89,7 +89,7 @@ class RobotTracker(Tracker):
         """
         circles = []
         for crc in circles_of_one_color:
-            (x, y), radius = cv2.minEnclosingCircle(crc)
+            (x, y), _ = cv2.minEnclosingCircle(crc)
             circles.append((x, y))
         circles = np.array(circles)
 
@@ -123,9 +123,6 @@ class RobotTracker(Tracker):
                             # Convert contour into circle
                             (x0, y0), _ = cv2.minEnclosingCircle(circle)
 
-                            d2 = ((x0-cl[0])**2 + (y0-cl[1])**2)
-                            # if d2 < 50 ** 2:
-                            #     print "[INFO] Circle distances: " + str(d2**0.5), color
                             if (x0-cl[0])**2 + (y0-cl[1])**2 < ROBOT_DISTANCE**2:
                                 near_circles[color].append(circle)
 
@@ -140,7 +137,7 @@ class RobotTracker(Tracker):
                         significant_circle = self.get_largest_contour(near_circles[self.side_colors[0]])
                         s_color = self.side_colors[0]
 
-                    (x, y), radius = cv2.minEnclosingCircle(significant_circle)
+                    (x, y), _ = cv2.minEnclosingCircle(significant_circle)
                     circle_results.append({'clx': cl[0], 'cly': cl[1], 'x': x, 'y': y, 'main_color': m_color, 'side_color': s_color})
 
         results = dict(robot_coords=circle_results)
