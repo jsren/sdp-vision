@@ -26,7 +26,7 @@ class VisionWrapper:
 
     """
 
-    def __init__(self, pitch, color_settings, our_side, robot_details, draw_GUI=False):
+    def __init__(self, pitch, color_settings, our_side, robot_details, draw_GUI=False, pc_name=None):
         """
         Entry point for the SDP system.
 
@@ -40,6 +40,8 @@ class VisionWrapper:
 
             [boolean] draw_GUI              Does not draw the normal image to leave space for GUI.
                                             Also forces the trackers to return circle contour positons in addition to robot details.
+            [string] pc_name                Name of the PC to load the files from (BUT NOT SAVE TO). Will default to local machine if not specified.
+
         Fields
             pitch
             camera
@@ -58,7 +60,7 @@ class VisionWrapper:
         self.pitch = pitch
         self.color_settings = color_settings
 
-        self.calibration = Configuration.read_calibration(create_if_missing=True)
+        self.calibration = Configuration.read_calibration(machine_name=pc_name, create_if_missing=True)
 
         from threading import Thread
         from gui import MinMaxUI
