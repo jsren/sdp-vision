@@ -31,6 +31,8 @@ class Vision:
                  frame_shape,
                  frame_center,
                  calibration,
+                 robots,
+                 trackers_out,
                  return_circle_contours=False):
         """
         Initialize the vision system.
@@ -44,9 +46,6 @@ class Vision:
                                                Made for color calibration GUI.
         """
         self.pitch = pitch
-
-        # self.v4l_settings()
-        #self.GUI = GUI(calibration=calibration, pitch=pitch, launch=self)
         self.frame_center = frame_center
 
         height, width, channels = frame_shape
@@ -62,7 +61,11 @@ class Vision:
            (0, width, 0, height), 0, pitch, calibration)
 
         self.circle_tracker = RobotTracker(
-            ['yellow', 'blue'], ['green', 'pink'], (0, width, 0, height), pitch, calibration, return_circle_contours)
+            ['yellow', 'blue'], ['green', 'pink'], (0, width, 0, height), pitch, robots,
+            calibration, return_circle_contours)
+
+        trackers_out.append(self.ball_tracker)
+        trackers_out.append(self.circle_tracker)
 
         
 
@@ -196,44 +199,6 @@ class Vision:
 
         return (int(x-delta_x), int(y-delta_y))
 
-    def get_adjusted_positions(self, positions):
-        try:
-            for robot in range(4):
-                # Adjust each corner of the plate
-                for i in range(4):
-                    x = positions[robot]['box'][i][0]
-                    y = positions[robot]['box'][i][1]
-                    positions[robot]['box'][i] = self.get_adjusted_point((x, y))
-
-                new_direction = []
-                for i in range(2):
-                    # Adjust front line
-                    x = positions[robot]['front'][i][0]
-                    y = positions[robot]['front'][i][1]
-                    positions[robot]['front'][i] = self.get_adjusted_point((x, y))
-
-                    # Adjust direction line
-                    x = positions[robot]['direction'][i][0]
-                    y = positions[robot]['direction'][i][1]
-                    adj_point = self.get_adjusted_point((x, y))
-                    new_direction.append(adj_point)
-
-                # Change the namedtuples used for storing direction points
-                positions[robot]['direction'] = (
-                    Center(new_direction[0][0], new_direction[0][1]),
-                    Center(new_direction[1][0], new_direction[1][1]))
-
-                # Adjust the center point of the plate
-                x = positions[robot]['x']
-                y = positions[robot]['y']
-                new_point = self.get_adjusted_point((x, y))
-                positions[robot]['x'] = new_point[0]
-                positions[robot]['y'] = new_point[1]
-        except:
-            # At least one robot has not been found
-            pass
-
-        return positions
 
     def _run_trackers(self, frame):
         """

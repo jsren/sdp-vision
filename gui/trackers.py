@@ -9,6 +9,8 @@ class TrackerSettingsUI(UserControl):
 
         row = 0
         for tracker in trackers:
+            if not tracker.hasUI: continue
+
             frame = LabelFrame(self, text=tracker.__name__.title() + " Settings")
             frame.grid(row=row, columnspan=1, sticky="WE", padx=5, ipadx=5, pady=5, ipady=5)
             row += 1
@@ -16,4 +18,9 @@ class TrackerSettingsUI(UserControl):
                 tracker.draw_ui(frame)
             except Exception, e:
                 print e
+
+
+    @staticmethod
+    def create_and_show(self, trackers, parent=None):
+        TrackerSettingsUI(trackers).show()
 

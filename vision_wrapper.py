@@ -26,7 +26,8 @@ class VisionWrapper:
 
     """
 
-    def __init__(self, pitch, color_settings, our_side, robot_details, draw_GUI=False, pc_name=None):
+    def __init__(self, pitch, color_settings, our_side, robot_details,
+                 draw_GUI=False, pc_name=None, robots_on_pitch=list()):
         """
         Entry point for the SDP system.
 
@@ -62,12 +63,6 @@ class VisionWrapper:
 
         self.calibration = Configuration.read_calibration(machine_name=pc_name, create_if_missing=True)
 
-        # Show calibration UI
-        from threading import Thread
-        from gui.calibration import CalibrationUI
-        Thread(name="Calibration UI", target=CalibrationUI.create_and_show,
-               args=[self.calibration]).start()
-
         # Set up camera for frames
         self.camera = Camera(pitch)
         self.camera.start_capture()
@@ -75,6 +70,7 @@ class VisionWrapper:
         center_point = self.camera.get_adjusted_center(self.frame)
 
         # Set up vision
+        self.trackers = list()
 
         # Get machine-specific calibration
 
@@ -91,9 +87,17 @@ class VisionWrapper:
         self.vision = Vision(
             pitch=pitch, frame_shape=self.frame.shape,
             frame_center=center_point, calibration=self.calibration,
-            return_circle_contours=draw_GUI)
+            return_circle_contours=draw_GUI, trackers_out=self.trackers)
 
-        #self.
+        # Show calibration UI
+        from threading import Thread
+        from gui.calibration import CalibrationUI
+        from gui.trackers import TrackerSettingsUI
+        Thread(name="Calibration UI", target=CalibrationUI.create_and_show,
+               args=[self.calibration]).start()
+
+        Thread(name="Tracker Settings UI", target=TrackerSettingsUI.create_and_show,
+               args=[self.trackers]).start()
 
         # Set up preprocessing and postprocessing
         # self.postprocessing = Postprocessing()
@@ -104,13 +108,14 @@ class VisionWrapper:
         self.frameQueue = []
 
         # Initialize robots
-
-        self.ball = []
+        self.ball   = []
         self.robots = []
+
         for r_name in robot_details.keys():
             self.robots.append(RobotInstance(r_name,
                                              robot_details[r_name]['main_colour'],
-                                             robot_details[r_name]['side_colour']))
+                                             robot_details[r_name]['side_colour'],
+                                             r_name in robots_on_pitch))
 
     def end(self):
         self.gui.commit_settings()
@@ -249,10 +254,12 @@ class VisionWrapper:
         if self.regular_positions['robot_coords']:
             for r_data in self.regular_positions['robot_coords']:
                 for robot in self.robots:
+                    # Only update robots we've set as being present
+                    if not robot.present: continue
+
                     if robot.update(r_data['clx'], r_data['cly'],
                                     r_data['main_color'], r_data['side_color'], r_data['x'], r_data['y']):
                         break
-
 
 
         if self.draw_GUI:
@@ -279,7 +286,7 @@ class VisionWrapper:
 
 
         for r in self.robots:
-            if not r.is_present(): continue
+            if not r.visible(): continue
             clx, cly, x, y = r.get_coordinates()
             if r.age > 0:
                 # Draw robot circles

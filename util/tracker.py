@@ -11,6 +11,10 @@ MAX_CONTOUR_AREA = 50
 
 class Tracker(object):
 
+    @property
+    def hasUI(self):
+        return False
+
     def draw_ui(self, parent):
         pass
 

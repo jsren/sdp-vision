@@ -7,9 +7,8 @@ marker_angle_offset = 34.509
 
 
 class RobotInstance(object):
-    _present = False
 
-    def __init__(self, name, m_color, s_color):
+    def __init__(self, name, m_color, s_color, present=False):
         self.queue_size = 4
         self.x = list()
         self.y = list()
@@ -21,6 +20,9 @@ class RobotInstance(object):
         self.age = 0
         self.angle = list()
 
+        self._visible = False
+        self._present = bool(present)
+
     def update(self, x, y, m_color, s_color, side_x, side_y):
         if self.main_color == m_color and self.side_color == s_color:
             self.x.insert(0, x); self.x = self.x[:self.queue_size]
@@ -28,7 +30,7 @@ class RobotInstance(object):
             self.side_y.insert(0, side_y); self.side_y = self.side_y[:self.queue_size]
             self.side_x.insert(0, side_x); self.side_x = self.side_x[:self.queue_size]
             self.angle.insert(0, self._get_angle()); self.angle = self.angle[:self.queue_size]
-            self._present = True
+            self._visible = True
             self.age = 30
             return True
         else:
@@ -37,8 +39,18 @@ class RobotInstance(object):
                 self.reset()
             return False
 
-    def is_present(self):
+    @property
+    def present(self):
         return self._present
+
+    @present.setter
+    def present(self, value):
+        self._present = bool(value)
+
+    @property
+    def visible(self):
+        return self._present and self._visible
+
 
     def get_coordinates(self):
         return np.median(self.x), np.median(self.y), np.median(self.side_x), np.median(self.side_y)

@@ -12,14 +12,14 @@ OUR_NAME = "blue + green"
 
 goals = {
     'right': np.array([568.0, 232.5]),
-    'left': np.array([5.5, 226.0])
+    'left' : np.array([5.5, 226.0])
 }
 
 ROBOT_DESCRIPTIONS = {
-    'blue + green'  : {'main_colour': 'blue', 'side_colour': 'green'},
-     'yellow + green': {'main_colour': 'yellow', 'side_colour': 'green'},
-    'blue + pink'   : {'main_colour': 'blue', 'side_colour': 'pink'},
-     'yellow + pink' : {'main_colour': 'yellow', 'side_colour': 'pink'}
+    'blue + green'  : {'main_colour': 'blue',   'side_colour': 'green'},
+    'yellow + green': {'main_colour': 'yellow', 'side_colour': 'green'},
+    'blue + pink'   : {'main_colour': 'blue',   'side_colour': 'pink'},
+    'yellow + pink' : {'main_colour': 'yellow', 'side_colour': 'pink'}
 }
 
 assert OUR_NAME in ROBOT_DESCRIPTIONS
@@ -55,9 +55,11 @@ class VisionLauncher(object):
                     signal.SIGINT, signal.SIGSEGV, signal.SIGTERM):
             signal.signal(sig, self._atexit)
 
-    def launch_vision(self):
+    def launch_vision(self, robots_on_pitch=list()):
         print "[INFO] Configuring vision"
-        self.visionwrap = VisionWrapper(self.pitch, self.color_settings, OUR_NAME, ROBOT_DESCRIPTIONS, self.launch_gui, self.pc_name)
+        self.visionwrap = VisionWrapper(self.pitch, self.color_settings,
+                                        OUR_NAME, ROBOT_DESCRIPTIONS, self.launch_gui,
+                                        self.pc_name, robots_on_pitch)
 
         print "[INFO] Beginning vision loop"
         self.control_loop()

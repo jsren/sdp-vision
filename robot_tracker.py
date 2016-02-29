@@ -1,6 +1,7 @@
 from util import Tracker, RobotInstance
 
 from scipy.cluster.vq import kmeans
+from Tkinter import *
 
 import cv2
 import numpy as np
@@ -14,12 +15,18 @@ ROBOT_DISTANCE = 30
 
 
 class RobotTracker(Tracker):
+
+    @property
+    def hasUI(self):
+        return True
+
     def __init__(self,
                  main_colors,
                  side_colors,
                  crop,
                  pitch,
                  calibration,
+                 robots,
                  return_circles=False):
         """
         Tracks all circles of given colors and calls k-nn to find the robots. Maps each one into a different set,
@@ -39,7 +46,7 @@ class RobotTracker(Tracker):
         self.pitch          = pitch
         self.calibration    = calibration
         self.return_circles = return_circles
-        self.robots         = []
+        self.robots         = robots
 
 
 
@@ -68,27 +75,6 @@ class RobotTracker(Tracker):
                     NUMBER_OF_SIDE_CIRCLES_PER_COLOR, circles[color])
 
         return circles
-
-
-    def initialize_robots(self, frame):
-        circles = self.find_all_circles(frame)
-
-        clusters = []
-        # Use k-means to find cluster centres for main colors
-        for m_color in self.main_colors:
-
-            cls = self.find_color_clusters(circles[m_color], 1)
-            if cls.any() and len(cls) == 1: # and np.linalg.norm(cls[0] - cls[1]) > 20:
-                cls.append(m_color)
-                clusters.append(cls)
-
-        for c in xrange(len(clusters)):
-            x = clusters[c][0]
-            y = clusters[c][1]
-            m_color = clusters[c][2]
-            self.robots[c] = RobotInstance(x, y, m_color)
-
-
 
 
 
@@ -162,8 +148,31 @@ class RobotTracker(Tracker):
             results["circles"] = circles
         queue.put(results)
 
-
         # 1) returns the most relevant circles found.
         # queue.put({
         #     "circles":circles
         # })
+
+    def draw_ui(self, parent):
+        host = Frame(parent)
+        host.pack()
+
+        from os import path
+        imgdir = path.join(path.dirname(__file__), "images")
+
+        column = 0
+        for robot in self.robots:
+            Radiobutton(host, bitmap=BitmapImage(host, file=path.join(imgdir, robot.name+".bmp"))) \
+                .grid(row=0, column=column)
+            column += 1
+
+
+
+
+
+
+
+
+
+
+
