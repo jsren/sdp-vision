@@ -297,7 +297,7 @@ class VisionWrapper:
 
 
         for r in self.robots:
-            if not r.visible(): continue
+            if not r.visible: continue
             clx, cly, x, y = r.get_coordinates()
             if r.age > 0:
                 # Draw robot circles
@@ -344,7 +344,7 @@ class VisionWrapper:
                 cv2.imshow('frame2', cv2.arrowedLine(self.frame, (int(x_ball_prev_prev), int(y_ball_prev_prev)),
                     (abs(int(x_ball+(5*(x_ball_prev-x_ball_prev_prev)))), abs(int(y_ball+(5*(y_ball_prev-y_ball_prev_prev))))), (0, 255, 0), 3, 10))
                 #print r.get_angle()
-    
+
         if self.draw_GUI:
             self.gui.drawGUI(self.frame)
 
