@@ -93,11 +93,16 @@ class VisionWrapper:
         from threading import Thread
         from gui.calibration import CalibrationUI
         from gui.trackers import TrackerSettingsUI
-        Thread(name="Calibration UI", target=CalibrationUI.create_and_show,
-               args=[self.calibration]).start()
+        from gui.common import MainWindow
 
-        Thread(name="Tracker Settings UI", target=TrackerSettingsUI.create_and_show,
-               args=[self.trackers]).start()
+        def create_windows():
+            return [
+                CalibrationUI(self.calibration),
+                TrackerSettingsUI(self.trackers)
+            ]
+
+        Thread(name="Tkinter UI", target=MainWindow.create_and_show,
+               args=[create_windows]).start()
 
         # Set up preprocessing and postprocessing
         # self.postprocessing = Postprocessing()
