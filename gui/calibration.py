@@ -1,93 +1,42 @@
-""" Vision GUI - (c) SDP Team E 2016
+""" Calibration GUI - (c) SDP Team E 2016
     --------------------------------
-    Authors: Andrew, James Renwick
+    Authors: Jake, James Renwick
     Team: SDP Team E
 """
-# disable maximize
-# press q to quit + close button
 
 try:
     import cv2
 except:
-    pass
+    cv2 = None
 
-from Tkinter import *
+from common import *
 from config import Configuration, Calibration
-import numpy as np
-import tkMessageBox
-import threading
+
 import functools
+import numpy as np
 
 
-def nothing(x): 
-    pass
+class CalibrationUI(UserControl):
 
+    def __init__(self, calibration, parent=None):
+        UserControl.__init__(self, parent, "Colour Calibration")
 
-class HSVSelector:
-
-    def __init__(self, master, onchange=None):
-        self.frame    = Frame(master)
-        self.onchange = onchange
-
-    def grid(self, *args, **kwargs):
-        self.frame.grid(*args, **kwargs)
-
-    def pack(self, *args, **kwargs):
-        self.frame.pack(*args, **kwargs)
-
-    def place(self, *args, **kwargs):
-        self.frame.place(*args, **kwargs)
-
-
-class TrackerSettingsUI:
-
-    def __init__(self, trackers):
-        self.trackers = trackers
-
-        self.form = Tk()
-        self.form.wm_title("Tracker Settings")
-        self.form.resizable(0,0)
-        self.form.bind("<Key-q>", lambda e: self.form.destroy())
-
-        row = 0
-        for tracker in trackers:
-            frame = LabelFrame(self.form, text=tracker.__name__.title() + " Settings")
-            frame.grid(row=row, columnspan=1, sticky="WE", padx=5, ipadx=5, pady=5, ipady=5)
-            row += 1
-            try:
-                tracker.draw_ui(frame)
-            except Exception, e:
-                print e
-
-    def show(self):
-        self.form.mainloop()
-
-
-class MinMaxUI:
-
-    def __init__(self, calibration):
         assert type(calibration) == Calibration
-
         self.calibration = calibration
 
-        self.form = Tk()
-        self.form.wm_title("Set Calibration Values")
-        self.form.resizable(0,0)
-        self.form.bind("<Key-q>", lambda e: self.form.destroy())
-
-        selector_frame = LabelFrame(self.form, text="Calibration Colours")
+        selector_frame = LabelFrame(self, text="Calibration Colours")
         selector_frame.grid(row=0, columnspan=1, sticky="WE", padx=5, ipadx=5, pady=5, ipady=5)
 
-        self.min_frame = LabelFrame(self.form, text="Minimum Values")
+        self.min_frame = LabelFrame(self, text="Minimum Values")
         self.min_frame.grid(row=1, columnspan=1, sticky="WE", padx=5, ipadx=5, pady=5, ipady=5)
 
-        self.max_frame = LabelFrame(self.form, text="Maximum Values")
+        self.max_frame = LabelFrame(self, text="Maximum Values")
         self.max_frame.grid(row=2, columnspan=1, sticky="WE", padx=5, ipadx=5, pady=5, ipady=5)
 
-        self.button_frame = Frame(self.form)
+        self.button_frame = Frame(self)
         self.button_frame.grid(row=3, columnspan=1, sticky="WE", padx=5, ipadx=5, pady=5, ipady=5)
 
-        self.text_frame = Frame(self.form)
+        self.text_frame = Frame(self)
         self.text_frame.grid(row=4, columnspan=1, sticky="WE", padx=5, ipadx=5, pady=5, ipady=5)
 
         # Holds the currently-selected colour name
@@ -146,7 +95,7 @@ class MinMaxUI:
         Button(self.button_frame, text="Revert to Default", command=self.revert_default,
                 padx=10, pady=10, width=15).pack(side=LEFT)
 
-        Button(self.button_frame, text="Quit", command=self.form.destroy,
+        Button(self.button_frame, text="Quit", command=self.close,
                 padx=10, pady=10, width=15).pack(side=RIGHT)
 
         Label(self.text_frame, text="Press 'q' to quit").pack()
@@ -154,12 +103,10 @@ class MinMaxUI:
         # Perform initial update
         self.on_colour_selected()
 
-    def show(self):
-        self.form.mainloop()
 
     @staticmethod
     def create_and_show(calibration):
-        MinMaxUI(calibration).show()
+        CalibrationUI(calibration).show()
 
     def on_colour_selected(self):
         colour = self.colour_var.get()
@@ -198,8 +145,9 @@ class MinMaxUI:
             raise Exception("Invalid value for parameter 'minmax'")
 
         # Convert colour to RGB & set canvas bg
-        rgb = cv2.cvtColor(hsv, cv2.COLOR_HSV2RGB)
-        canvas.configure(bg='#%02x%02x%02x' % (rgb[0][0][0], rgb[0][0][1], rgb[0][0][2]))
+        if cv2:
+            rgb = cv2.cvtColor(hsv, cv2.COLOR_HSV2RGB)
+            canvas.configure(bg='#%02x%02x%02x' % (rgb[0][0][0], rgb[0][0][1], rgb[0][0][2]))
 
 
     def config_update(self):
@@ -211,7 +159,7 @@ class MinMaxUI:
     def revert_default(self):
         # if tkMessageBox.askquestion("Revert to Default", "Are you sure you wish to "
         #         "revert to default settings?\nThis will overwrite your current ones.\n"
-        #         "Reverting does not write to the file.", icon='warning', parent=self.form) == 'yes':
+        #         "Reverting does not write to the file.", icon='warning', parent=self) == 'yes':
         default = Calibration.get_default()
         for colour in default:
             self.calibration[colour] = default[colour]
@@ -231,73 +179,5 @@ class MinMaxUI:
         self.on_colour_selected()
 
 
-class GUI:
-
-    def __init__(self, pitch, calibration):
-        self.frame = None
-        self.pitch = pitch
-
-        self.calibration = calibration
-        self.config      = Configuration.read_video_config(create_if_missing=True)
-
-        # create GUI
-        # The first numerical value is the starting point for the vision feed
-        cv2.namedWindow('frame2')
-
-        if pitch == 0:
-            cv2.createTrackbar('bright','frame2',self.config.brightness,255,nothing)
-            cv2.createTrackbar('contrast','frame2',self.config.contrast,127,nothing)
-            cv2.createTrackbar('color','frame2',self.config.color,255,nothing)
-            cv2.createTrackbar('hue','frame2',self.config.hue,30,nothing)
-            cv2.createTrackbar('Red Balance','frame2',self.config.red_balance,20,nothing)
-            cv2.createTrackbar('Blue Balance','frame2',self.config.blue_balance,20,nothing)
-            cv2.createTrackbar('Gaussian blur','frame2',0,1,nothing)
-
-        if pitch == 1:
-            cv2.createTrackbar('bright','frame2',self.config.brightness,40000,nothing)
-            cv2.createTrackbar('contrast','frame2',self.config.contrast,40000,nothing)
-            cv2.createTrackbar('color','frame2',self.config.color,100000,nothing)
-            cv2.createTrackbar('hue','frame2',self.config.hue,60000,nothing)
-            cv2.createTrackbar('Gaussian blur','frame2',0,1,nothing)
-
-
-
-    def drawGUI(self):
-        if self.pitch == 0:
-            attributes = ["bright", "contrast", "color", "hue", "Red Balance", "Blue Balance"]
-        elif self.pitch == 1:
-            attributes = ["bright", "contrast", "color", "hue"]
-        else:
-            raise RuntimeError("StupidTitException: Incorrect pitch number")
-
-        for att in attributes:
-            self.config[att] = cv2.getTrackbarPos(att, 'frame2')
-        self.config.commit()
-
-    def commit_settings(self):
-        for attr in self.config:
-            self.config[attr] = cv2.getTrackbarPos(attr, 'frame2')
-        Configuration.write_video_config(self.config, self.config.machine_name)
-
-
-    def warp_image(self, frame):
-        # TODO: this might work in gui, but are the blur values saved anywhere?
-        # TODO: implement blur value variations
-        """
-        Creates trackbars and applies frame preprocessing for functions that actually require a frame,
-        instead of setting the video device options
-        :param frame: frame
-        :return: preprocessed frame
-        """
-        blur = cv2.getTrackbarPos('Gaussian blur', 'frame2')
-
-        if blur >= 1:
-            if blur % 2 == 0:
-                blur += 1
-            frame = cv2.GaussianBlur(frame, (121, 121), 0)
-
-        return frame
-
-
 if __name__ == "__main__":
-    MinMaxUI(Configuration.read_calibration()).show()
+    CalibrationUI(Configuration.read_calibration(create_if_missing=True)).show()
