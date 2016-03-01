@@ -15,7 +15,7 @@ class StatusUI(UserControl):
             path.join(path.dirname(__file__), "../images/no_ball.jpg")
         ))
 
-        self.ball_status_var = UserVariable(self.window, False,
+        self.ball_status_var = UserVariable(self.window, bool, False,
                                     self.on_ball_status_changed, 500)
 
         frame = Frame(self)
