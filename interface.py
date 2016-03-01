@@ -46,6 +46,13 @@ class Robot(object):
     @property
     def heading(self):
         """ Gets the robot's current heading in degrees. """
+        angle = self.heading
+        while -180 >= angle or angle > 180:
+            if -180 >= angle:
+                angle += 360
+            else:
+                angle -= 360
+        self.heading = angle
         return self.heading
 
     @property

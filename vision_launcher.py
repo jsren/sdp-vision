@@ -130,7 +130,8 @@ class VisionLauncher(object):
 
                 # Wait until robot detected
                 if not self._started and self.get_robot_midpoint() is not None \
-                    and not np.isnan(self.get_robot_midpoint()[0]):
+                    and not np.isnan(self.get_robot_midpoint()[0]) \
+                    and self.get_ball_position() is not None:
                     self._started = True
                     with self._cv:
                         self._cv.notifyAll()
