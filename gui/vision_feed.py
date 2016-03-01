@@ -13,6 +13,9 @@ from colors import *
 from config import Configuration
 from math import radians, cos, sin, isnan
 from robot_tracker import ROBOT_DISTANCE
+
+from Tkinter import *
+
 import numpy as np
 def nothing(x): 
     pass
@@ -49,21 +52,64 @@ class GUI:
         # Handle mouse clicks
         cv2.setMouseCallback('frame2', self.on_mouse_event)
 
+        self.selector_frame = LabelFrame(self, text="Camera Settings")
+        self.selector_frame.grid(row=0, columnspan=1, sticky="WE", padx=5, ipadx=5, pady=5, ipady=5)
+
+        self._vars = list()
+
         if self.color_settings in [0, "small"]:
-            cv2.createTrackbar('bright','frame2',self.config.brightness,255,nothing)
-            cv2.createTrackbar('contrast','frame2',self.config.contrast,127,nothing)
-            cv2.createTrackbar('color','frame2',self.config.color,255,nothing)
-            cv2.createTrackbar('hue','frame2',self.config.hue,30,nothing)
-            cv2.createTrackbar('Red Balance','frame2',self.config.red_balance,20,nothing)
-            cv2.createTrackbar('Blue Balance','frame2',self.config.blue_balance,20,nothing)
-            cv2.createTrackbar('Gaussian blur','frame2',0,1,nothing)
+
+             for att in self.config:
+                var = DoubleVar(self)
+                self._vars.append(var)
+
+                Scale(self.selector_frame, variable=att,
+                    to=Configuration.video_settings_max.small[att], orient=HORIZONTAL, label=att.title(),
+                    length=300).pack(anchor=W)
+
+
+            #cv2.createTrackbar('bright','frame2',self.config.brightness,255,nothing)
+            #cv2.createTrackbar('contrast','frame2',self.config.contrast,127,nothing)
+            #cv2.createTrackbar('color','frame2',self.config.color,255,nothing)
+            #cv2.createTrackbar('hue','frame2',self.config.hue,30,nothing)
+            #cv2.createTrackbar('Red Balance','frame2',self.config.red_balance,20,nothing)
+            #cv2.createTrackbar('Blue Balance','frame2',self.config.blue_balance,20,nothing)
+            #cv2.createTrackbar('Gaussian blur','frame2',0,1,nothing)
+
 
         if self.color_settings in [1, "big"]:
-            cv2.createTrackbar('bright','frame2',self.config.brightness,40000,nothing)
-            cv2.createTrackbar('contrast','frame2',self.config.contrast,40000,nothing)
-            cv2.createTrackbar('color','frame2',self.config.color,100000,nothing)
-            cv2.createTrackbar('hue','frame2',self.config.hue,60000,nothing)
-            cv2.createTrackbar('Gaussian blur','frame2',0,1,nothing)
+
+            for att in self.config:
+                var = DoubleVar(self)
+                self._vars.append(var)
+
+                Scale(self.selector_frame, variable=att,
+                    to=Configuration.video_settings_max.big[att], orient=HORIZONTAL, label=att.title(),
+                    length=300).pack(anchor=W)
+
+
+            #cv2.createTrackbar('bright','frame2',self.config.brightness,40000,nothing)
+            #cv2.createTrackbar('contrast','frame2',self.config.contrast,40000,nothing)
+            #cv2.createTrackbar('color','frame2',self.config.color,100000,nothing)
+            #cv2.createTrackbar('hue','frame2',self.config.hue,60000,nothing)
+            #cv2.createTrackbar('Gaussian blur','frame2',0,1,nothing)
+
+        self.button_frame = Frame(self)
+        self.button_frame.grid(row=1, columnspan=1, sticky="WE", padx=5, ipadx=5, pady=5, ipady=5)
+
+        Button(self.button_frame, text="Write Configurations", command=self.commit_settings,
+               padx=10, pady=10, width=15).pack(side=LEFT)
+
+        Button(self.button_frame, text="Reload from File", command=self.reload_config,
+                padx=10, pady=10, width=15).pack(side=LEFT)
+
+        #Button(self.button_frame, text="Revert to Default", command=self.revert_default,
+                #padx=10, pady=10, width=15).pack(side=LEFT)
+
+        #Button(self.button_frame, text="Quit", command=self.close,
+                #padx=10, pady=10, width=15).pack(side=RIGHT)
+
+
 
     def on_mouse_event(self, event, x, y, *_):
         if event == cv2.EVENT_LBUTTONDOWN:
@@ -73,16 +119,31 @@ class GUI:
 
         self.frame = wrapper.frame
 
+        """
         if self.color_settings in [0, "small"]:
-            attributes = ["bright", "contrast", "color", "hue", "Red Balance", "Blue Balance"]
+             #attributes = ["bright", "contrast", "color", "hue", "Red Balance", "Blue Balance"]
+             self.config.bright =  self.bright.get()
+             self.config.contrast =  self.contrast.get()
+             self.config.color =  self.color.get()
+             self.config.hue =  self.hue.get()
+             self.config.red_balance = self.red_balance.get()
+             self.config.blue_balance = self.blue_balance.get()
+
         elif self.color_settings in [1, "big"]:
-            attributes = ["bright", "contrast", "color", "hue"]
+            #attributes = ["bright", "contrast", "color", "hue"]
+            self.config.bright =  self.bright.get()
+            self.config.contrast =  self.contrast.get()
+            self.config.color =  self.color.get()
+            self.config.hue =  self.hue.get()
+
+
         else:
             raise RuntimeError("StupidTitException: Incorrect color_settings value. "
                                "Choose from the set [0, small, 1, big]")
+        """
 
-        for att in attributes:
-            self.config[att] = cv2.getTrackbarPos(att, 'frame2')
+        for att in self._vars:
+            self.config[att] = self.att.get()
         self.config.commit()
 
 
@@ -165,9 +226,20 @@ class GUI:
                                                      (0,255,0), 3, 10))
 
 
+
+
+    def reload_config(self):
+        video_settings = Configuration.read_calibration(self.config.machine_name)
+        for setting in video_settings:
+            self.config[setting] = video_settings[setting]
+
+        self.config.commit()
+
+        pass
+    
     def commit_settings(self):
-        for attr in self.config:
-            self.config[attr] = cv2.getTrackbarPos(attr, 'frame2')
+        for attr in self._vars:
+            self.config[attr] = self.attr.get()
         Configuration.write_video_config(self.config, self.config.machine_name)
 
 
@@ -180,11 +252,11 @@ class GUI:
         :param frame: frame
         :return: preprocessed frame
         """
-        blur = cv2.getTrackbarPos('Gaussian blur', 'frame2')
+       # blur = cv2.getTrackbarPos('Gaussian blur', 'frame2')
 
-        if blur >= 1:
-            if blur % 2 == 0:
-                blur += 1
-            frame = cv2.GaussianBlur(frame, (121, 121), 0)
+        #if blur >= 1:
+        #    if blur % 2 == 0:
+        #        blur += 1
+        #    frame = cv2.GaussianBlur(frame, (121, 121), 0)
 
         return frame
