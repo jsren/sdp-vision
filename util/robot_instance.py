@@ -51,9 +51,21 @@ class RobotInstance(object):
     def visible(self):
         return self._present and self._visible
 
+    @property
+    def position(self):
+        return np.median(self.x), np.median(self.y)
+
+    @property
+    def marker_position(self):
+        return np.median(self.side_x), np.median(self.side_y)
+
+    @property
+    def heading(self):
+        return np.median(self.angle)
 
     def get_coordinates(self):
-        return np.median(self.x), np.median(self.y), np.median(self.side_x), np.median(self.side_y)
+        return np.median(self.x), np.median(self.y), \
+               np.median(self.side_x), np.median(self.side_y)
 
     def angleOfLine(self, point1, point2):
         point2 = list(point2-point1)

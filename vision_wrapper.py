@@ -53,7 +53,7 @@ class VisionWrapper:
             side
             preprocessing
             model_positions
-            regular_positions
+            world_objects
         """
         pitch = int(pitch)
         assert pitch in [0, 1]
@@ -92,9 +92,10 @@ class VisionWrapper:
 
         # Draw various things on the image
         self.draw_direction = True
-        self.draw_robot = True
-        self.draw_contours = True
-        self.draw_ball = True
+        self.draw_robot     = True
+        self.draw_contours  = True
+        self.draw_ball      = True
+
         self.vision = Vision(
             pitch=pitch, frame_shape=self.frame.shape,
             frame_center=center_point, calibration=self.calibration,
@@ -138,74 +139,45 @@ class VisionWrapper:
         self.gui.commit_settings()
 
     def get_robots_raw(self):
-
         # Filter robots that have no position
-        return [(r.name, (np.mean(r.x), np.mean(r.y)), r.get_robot_heading())
+        return [(r.name, r.position, r.heading)
                 for r in self.robots if list(r.x)]
 
     def get_robot_position(self, robot_name):
-        for r in self.robots:
-            if r.name == robot_name:
-                return np.mean(r.x), np.mean(r.y)
-            # Team 10:
-            # if r.name == robot_name and r.is_present():
-            #     return np.array(r.get_coordinates()[:2])
+        return filter(lambda r: r.name == robot_name, self.robots)[0].position
+
 
     def get_circle_position(self, robot_name):
         for r in self.robots:
             if r.name == robot_name:
                 return r.side_x, r.side_y
-            # Team 10
-            # if r.name == robot_name and r.is_present():
-            #     return np.array(r.get_coordinates()[2:4])
 
     def get_ball_position(self):
-        if 'x' in self.regular_positions.keys():
-            return self.regular_positions['x'], self.regular_positions['y']
-        # Team 10
-        # def get_ball_position(self):
-        # if 'x' in self.regular_positions and self.regular_positions['x'] is not None:
-        #     return np.array([self.regular_positions['x'],
-        #                      self.regular_positions['y']])
+        return self.world_objects.get('ball')
 
     def get_robot_direction(self, robot_name):
-        for r in self.robots:
-            if r.name == robot_name:
-                return r.get_robot_heading()
+        return filter(lambda r: r.name == robot_name, self.robots)[0]
 
     def do_we_have_ball(self, robot_name):
+        if 'ball' not in self.world_objects: return None
+
         for r in self.robots:
             if r.name == robot_name:
-                if 'x' in self.regular_positions.keys():
-                    ball_x = self.regular_positions['x']
-                    ball_y = self.regular_positions['y']
-                    robot_x = np.mean(r.x)
-                    robot_y = np.mean(r.y) 
-                    #print robot_x, robot_y, ball_x, ball_y
-                    if r.get_robot_heading() < 90:
-                        if (robot_x-10 < ball_x < robot_x+30 and robot_y-10 < ball_y < robot_y+30):
-                            return True
-                        else:
-                            return False
+                ball_x, ball_y = self.world_objects['ball']
+                robot_x, robot_y = r.position
+                heading = r.heading
 
-                    elif (r.get_robot_heading() >= 90 and r.get_robot_heading() < 180):
-                        if robot_x-30 < ball_x < robot_x+10 and robot_y-10 < ball_y < robot_y+30:
-                            return True
-                        else:
-                            return False
+                assert heading <= 360
 
-                    elif (r.get_robot_heading() >= 180 and r.get_robot_heading() < 270):
-                        if robot_x-30 < ball_x < robot_x+10 and robot_y-30 < ball_y < robot_y+10:
-                            return True
-                        else:
-                            return False
+                if heading < 90:
+                    return robot_x-10 < ball_x < robot_x+30 and robot_y-10 < ball_y < robot_y+30
+                elif heading >= 90 and heading < 180:
+                    return robot_x-30 < ball_x < robot_x+10 and robot_y-10 < ball_y < robot_y+30
+                elif heading >= 180 and heading < 270:
+                    return robot_x-30 < ball_x < robot_x+10 and robot_y-30 < ball_y < robot_y+10
+                else:
+                    return robot_x-10 < ball_x < robot_x+30 and robot_y-30 < ball_y < robot_y+10
 
-                    elif (r.get_robot_heading() >= 270 and r.get_robot_heading() < 360):
-                        if robot_x-10 < ball_x < robot_x+30 and robot_y-30 < ball_y < robot_y+10:
-                            return True
-                        else:
-                            return False
-                 
 
     def change_drawing(self, key):
         """
@@ -233,9 +205,7 @@ class VisionWrapper:
         Or look at dem fish http://docs.opencv.org/2.4/doc/tutorials/imgproc/shapedescriptors/find_contours/find_contours.html
         :return: [Contours]
         """
-        if 'circles' in self.regular_positions:
-            return self.regular_positions['circles']
-
+        return self.world_objects.get('circles')
 
     def update(self):
         """
@@ -254,23 +224,22 @@ class VisionWrapper:
         # Apply preprocessing methods toggled in the UI
         self.preprocessed = self.preprocessing.run(self.frame, self.preprocessing.options)
         self.frame = self.preprocessed['frame']
-        #cv2.imshow('frame3', self.frame)
+
         if 'background_sub' in self.preprocessed:
             cv2.imshow('bg sub', self.preprocessed['background_sub'])
 
         # Find object positions
+        # TODO: is this still the case?
         # model_positions have their y coordinate inverted
-        # self.model_positions, self.regular_positions = self.vision.locate(self.frame)
-        self.regular_positions = self.vision.locate1(self.frame)
-        # self.model_positions = self.postprocessing.analyze(self.model_positions)
+        self.world_objects, self.world_contours = self.vision.perform_locate(self.frame)
 
         if self.status_window:
             self.status_window.ball_status_var.value = \
-                'x' in self.regular_positions
+                'ball' in self.world_objects
 
         # Updates the robot coordinates
-        if self.regular_positions['robot_coords']:
-            for r_data in self.regular_positions['robot_coords']:
+        if self.world_objects['robots']:
+            for r_data in self.world_objects['robots']:
                 for robot in self.robots:
                     # Only update robots we've set as being present
                     if not robot.present: continue
@@ -281,31 +250,27 @@ class VisionWrapper:
 
 
         if self.draw_GUI:
-            # self.frame = self.gui.warp_image(self.frame)
-
             # Draw contours found
             if self.draw_contours:
                 # Draw robot contours
-                for color in self.regular_positions.get('circles'):
-                    contours = self.regular_positions['circles'][color]
+                for color in self.world_contours.get('circles', list()):
+                    contours = self.world_contours['circles'][color]
                     cv2.fillPoly(self.frame, contours, BGR_COMMON[color])
                     cv2.drawContours(self.frame, contours, -1, BGR_COMMON['black'], 1)
 
                 # Draw ball contours
-                ball_contour = self.regular_positions.get('ball_contour')
+                ball_contour = self.world_contours.get('ball')
                 cv2.fillPoly(self.frame, ball_contour, BGR_COMMON['red'])
                 cv2.drawContours(self.frame, ball_contour, -1, BGR_COMMON['black'], 1)
 
 
-
         # Feed will stop if this is removed and nothing else is shown
         cv2.imshow('frame2', self.frame)
-        #cv2.imshow('frame3', self.frame)
-
 
         for r in self.robots:
             if not r.visible: continue
             clx, cly, x, y = r.get_coordinates()
+
             if r.age > 0:
                 # Draw robot circles
                 # print clx, cly
@@ -319,14 +284,13 @@ class VisionWrapper:
 
                     if self.draw_direction:
                         # Draw angle in degrees
-                        cv2.imshow('frame2', cv2.putText(self.frame, str(int(r.get_robot_heading())), (int(clx) - 15, int(cly) + 30),
+                        cv2.imshow('frame2', cv2.putText(self.frame, str(int(r.heading)), (int(clx) - 15, int(cly) + 30),
                                                      cv2.FONT_HERSHEY_COMPLEX, 0.45, (100, 150, 200)))
                         cv2.imshow('frame2', cv2.line(self.frame, (int(clx), int(cly)),
                                                              (int(x), int(y)), BGR_COMMON['black'], 1, 0))
 
-
                         # Draw line
-                        angle = r.get_robot_heading()
+                        angle = r.heading
                         new_x = clx + 30 * cos(radians(angle))
                         new_y = cly + 30 * sin(radians(angle))
                         cv2.imshow('frame2', cv2.line(self.frame, (int(clx), int(cly)),
@@ -334,30 +298,23 @@ class VisionWrapper:
 
         if self.draw_ball:
             counter += 1
-            if 'x' in self.regular_positions.keys():
-                x_ball = self.regular_positions['x']
-                y_ball = self.regular_positions['y']
-
+            if 'ball' in self.world_objects:
+                x_ball, y_ball = self.world_objects['ball']
                 cv2.imshow('frame2', cv2.circle(self.frame, (int(x_ball), int(y_ball)), 8, (0, 0, 255), 2, 0))
-                #cv2.imshow('frame2', cv2.arrowedLine(self.frame, (int(x_ball_prev), int(y_ball_prev)),
-                           #(abs(int(x_ball+(10*(x_ball-x_ball_prev)))), abs(int(y_ball+(10*(y_ball-y_ball_prev))))), (0, 255, 0), 3, 10))
+
                 if counter >= 5:
                     x_ball_prev_prev=x_ball_prev
                     y_ball_prev_prev=y_ball_prev
                     x_ball_prev = x_ball
                     y_ball_prev = y_ball
-
                     counter = 0
+
                 cv2.imshow('frame2', cv2.arrowedLine(self.frame, (int(x_ball_prev_prev), int(y_ball_prev_prev)),
                     (abs(int(x_ball+(5*(x_ball_prev-x_ball_prev_prev)))), abs(int(y_ball+(5*(y_ball_prev-y_ball_prev_prev))))), (0, 255, 0), 3, 10))
-                #print r.get_angle()
 
         if self.draw_GUI:
             self.gui.drawGUI(self.frame)
 
-
-
-        #self.model_positions = self.averagePositions(3, self.model_positions)
 
     def averagePositions(self, frames, positions_in):
         """

@@ -122,7 +122,7 @@ class Vision:
         return (TEAM_COLORS - {our_color}).pop()
 
 
-    def locate1(self, frame):
+    def perform_locate(self, frame):
         """
         Find objects on the pitch using multiprocessing.
 
@@ -135,45 +135,16 @@ class Vision:
         regular_positions = positions[0] if positions[0] is not None else dict()
         regular_positions.update(positions[1])
 
-        return regular_positions
+        objects = {
+            'ball'  : (regular_positions.get('x'), regular_positions.get('y')),
+            'robots': regular_positions.get('robot_coords')
+        }
+        contours = {
+            'circles': regular_positions.get('circles'),
+            'ball'   : regular_positions.get('ball_contour')
+        }
+        return objects, contours
 
-
-    # TODO: Why has this been commented out?
-    # def locate(self, frame):
-    #     """
-    #     Find objects on the pitch using multiprocessing.
-    #
-    #     Returns:
-    #         [5-tuple] Location of the robots and the ball
-    #     """
-    #     # Run trackers as processes
-    #     positions = self._run_trackers(frame)
-    #     # Correct for perspective
-    #     positions = self.get_adjusted_positions(positions)
-    #
-    #     # Wrap list of positions into a dictionary
-    #     keys = ['our_defender',
-    #             'our_attacker',
-    #             'their_defender',
-    #             'their_attacker',
-    #             'ball']
-    #     regular_positions = dict()
-    #     for i, key in enumerate(keys):
-    #         regular_positions[key] = positions[i]
-    #
-    #     # Error check we got a frame
-    #     height, width, channels = frame.shape if frame is not None \
-    #         else (None, None, None)
-    #
-    #     model_positions = {
-    #         'our_attacker': self.to_info(positions[1], height),
-    #         'their_attacker': self.to_info(positions[3], height),
-    #         'our_defender': self.to_info(positions[0], height),
-    #         'their_defender': self.to_info(positions[2], height),
-    #         'ball': self.to_info(positions[4], height)
-    #     }
-    #
-    #     return model_positions, regular_positions
 
     def get_adjusted_point(self, point):
         """

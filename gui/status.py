@@ -6,7 +6,7 @@ from os import path
 class StatusUI(UserControl):
 
     def __init__(self, parent=None):
-        UserControl.__init__(self, parent)
+        UserControl.__init__(self, parent, title="Vision Status (WIP)")
 
         self.img_ball = ImageTk.PhotoImage(Image.open(
             path.join(path.dirname(__file__), "../images/ball.jpg")
