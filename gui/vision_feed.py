@@ -52,7 +52,8 @@ class GUI:
         if event == cv2.EVENT_LBUTTONDOWN:
             #if self.wrapper.color_pick_callback is not None:
                 #self.wrapper.color_pick_callback(self.frame[x, y])
-            print self.frame[x, y]
+            print "Colour:", self.frame[x, y], "@", (x, y)
+
 
     def drawGUI(self, frame):
         self.frame = frame

@@ -50,9 +50,7 @@ class BallTracker(Tracker):
                                                           color,
                                                           True)
             if len(contours) <= 0:
-                #print 'No ball found.'
                 pass
-                # queue.put(None)
             else:
                 # Trim contours matrix
                 cnt = self.get_largest_contour(contours)

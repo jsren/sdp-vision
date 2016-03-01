@@ -106,11 +106,20 @@ class VisionWrapper:
         from gui.calibration import CalibrationUI
         from gui.trackers import TrackerSettingsUI
         from gui.common import MainWindow
+        from gui.status import StatusUI
+
+        self.calibration_window = None
+        self.tracker_settings_window = None,
+        self.status_window = None
 
         def create_windows():
+            self.calibration_window = CalibrationUI(self.calibration)
+            self.tracker_settings_window = TrackerSettingsUI(self.trackers)
+            self.status_window = StatusUI()
             return [
-                CalibrationUI(self.calibration),
-                TrackerSettingsUI(self.trackers)
+                self.calibration_window,
+                self.tracker_settings_window,
+                self.status_window
             ]
 
         Thread(name="Tkinter UI", target=MainWindow.create_and_show,
@@ -129,8 +138,6 @@ class VisionWrapper:
         self.gui.commit_settings()
 
     def get_robots_raw(self):
-        # TODO: This is to make jsren happy
-        assert not any([list(r.x) and None in list(r.x) for r in self.robots])
 
         # Filter robots that have no position
         return [(r.name, (np.mean(r.x), np.mean(r.y)), r.get_robot_heading())
@@ -257,6 +264,9 @@ class VisionWrapper:
         self.regular_positions = self.vision.locate1(self.frame)
         # self.model_positions = self.postprocessing.analyze(self.model_positions)
 
+        if self.status_window:
+            self.status_window.ball_status_var.value = \
+                'x' in self.regular_positions
 
         # Updates the robot coordinates
         if self.regular_positions['robot_coords']:
