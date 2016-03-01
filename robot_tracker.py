@@ -13,6 +13,30 @@ NUMBER_OF_SIDE_CIRCLES_PER_COLOR = 16
 ROBOT_DISTANCE = 30
 
 
+class TopPlate(object):
+
+    def __init__(self, midpoint, markers):
+        self.midpoint        = midpoint
+        self.primary_color   = midpoint['color']
+        self.secondary_color = markers[0]['color'] if any(markers) else None
+
+        self.markers = list(markers)
+
+        if len(markers) > 1:
+
+            self.naive_midpoint = np.array([np.mean(np.array([
+                p['pos'][0] - markers[0]['pos'][0]
+                for p in markers[1:]])),
+                                           np.mean(np.array([
+                p['pos'][1] - markers[0]['pos'][1]
+                for p in markers[1:]]))])
+
+            self.naive_midpoint += np.array(markers[0]['pos'])
+
+        else:
+            self.naive_midpoint = np.array(self.midpoint['pos'])
+
+
 
 class RobotTracker(Tracker):
 
@@ -105,7 +129,7 @@ class RobotTracker(Tracker):
         circles = self.find_all_circles(frame)
 
         # Use k-means to find cluster centres for main colors
-        circle_results = []
+        robot_results = []
         for m_color in self.main_colors:
 
             cls = self.find_color_clusters(circles[m_color], 2)
@@ -126,20 +150,30 @@ class RobotTracker(Tracker):
                                 near_circles[color].append(circle)
 
 
-                    # Find the significant side circle
+                    # Find the significant side circle & others
                     if len(near_circles[self.side_colors[0]]) == 0 or len(near_circles[self.side_colors[1]]) == 0:
                         continue
                     if len(near_circles[self.side_colors[0]]) > len(near_circles[self.side_colors[1]]):
                         significant_circle = self.get_largest_contour(near_circles[self.side_colors[1]])
+                        other_markers = self.get_n_largest_contours(3, near_circles[self.side_colors[0]])
                         s_color = self.side_colors[1]
+                        o_color = self.side_colors[0]
                     else:
                         significant_circle = self.get_largest_contour(near_circles[self.side_colors[0]])
+                        other_markers = self.get_n_largest_contours(3, near_circles[self.side_colors[1]])
                         s_color = self.side_colors[0]
+                        o_color = self.side_colors[1]
 
-                    (x, y), _ = cv2.minEnclosingCircle(significant_circle)
-                    circle_results.append({'clx': cl[0], 'cly': cl[1], 'x': x, 'y': y, 'main_color': m_color, 'side_color': s_color})
+                    pos, r = cv2.minEnclosingCircle(significant_circle)
+                    markers = [ dict(color=s_color, pos=pos, rad=r) ]
 
-        results = dict(robot_coords=circle_results)
+                    for marker in other_markers:
+                        pos, r = cv2.minEnclosingCircle(marker)
+                        markers.append(dict(color=o_color, pos=pos, rad=r))
+
+                    robot_results.append(TopPlate(dict(pos=cl,color=m_color), markers))
+
+        results = dict(robot_coords=robot_results)
         if self.return_circles:
             results["circles"] = circles
         queue.put(results)

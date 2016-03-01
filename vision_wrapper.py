@@ -204,14 +204,18 @@ class VisionWrapper:
 
         # Updates the robot coordinates
         if 'robots' in self.world_objects:
-            for r_data in self.world_objects['robots']:
+            for topplate in self.world_objects['robots']:
                 for robot in self.robots:
                     # Only update robots we've set as being present
                     if not robot.present: continue
 
-                    if robot.update(r_data['clx'], r_data['cly'],
-                                    r_data['main_color'], r_data['side_color'],
-                                    r_data['x'], r_data['y']):
+                    if robot.update(topplate.naive_midpoint[0], topplate.naive_midpoint[1],
+                                    topplate.primary_color, topplate.secondary_color,
+                                    topplate.markers[0]['pos'][0] if any(topplate.markers)
+                                        else None,
+                                    topplate.markers[0]['pos'][1] if any(topplate.markers)
+                                        else None
+                                    ):
                         break
 
         # Perform GUI update
