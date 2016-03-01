@@ -67,7 +67,7 @@ class VisionWrapper:
         self.camera = Camera(pitch)
         self.camera.start_capture()
         self.frame = self.camera.get_frame()
-        center_point = self.camera.get_adjusted_center(self.frame)
+        center_point = self.camera.get_adjusted_center()
 
         # Set up vision
         self.trackers = list()
@@ -131,12 +131,15 @@ class VisionWrapper:
         self.preprocessing = Preprocessing()
 
         self.side = our_side
-
         self.frameQueue = []
 
 
     def end(self):
         self.gui.commit_settings()
+
+    def saveCalibrations(self):
+        Configuration.write_calibration(self.calibration)
+
 
     def get_robots_raw(self):
         # Filter robots that have no position
@@ -199,6 +202,7 @@ class VisionWrapper:
         elif key == ord('i'):
             self.draw_direction = not self.draw_direction
 
+
     def get_circle_contours(self):
         """
         Careful! Does not return x and y values. Call minimum bounding circles if proper circle locations are required.
@@ -207,17 +211,15 @@ class VisionWrapper:
         """
         return self.world_objects.get('circles')
 
+
     def update(self):
         """
         Gets this frame's positions from the vision system.
         """
-        global x_ball_prev
-        global y_ball_prev
-        global y_ball_prev_prev
-        global x_ball_prev_prev
-        global counter
-        global x_ball
-        global y_ball
+        global x_ball_prev,      y_ball_prev, \
+               x_ball_prev_prev, y_ball_prev_prev, \
+               x_ball,           y_ball, \
+               counter
 
         self.frame = self.camera.get_frame()
 
@@ -231,7 +233,8 @@ class VisionWrapper:
         # Find object positions
         # TODO: is this still the case?
         # model_positions have their y coordinate inverted
-        self.world_objects, self.world_contours = self.vision.perform_locate(self.frame)
+        self.world_objects, self.world_contours = \
+            self.vision.perform_locate(self.frame)
 
         if self.status_window:
             self.status_window.ball_status_var.value = \
@@ -248,20 +251,17 @@ class VisionWrapper:
                                     r_data['main_color'], r_data['side_color'], r_data['x'], r_data['y']):
                         break
 
+        if self.draw_GUI and self.draw_contours:
+            # Draw robot contours
+            for color in self.world_contours.get('circles', list()):
+                contours = self.world_contours['circles'][color]
+                cv2.fillPoly(self.frame, contours, BGR_COMMON[color])
+                cv2.drawContours(self.frame, contours, -1, BGR_COMMON['black'], 1)
 
-        if self.draw_GUI:
-            # Draw contours found
-            if self.draw_contours:
-                # Draw robot contours
-                for color in self.world_contours.get('circles', list()):
-                    contours = self.world_contours['circles'][color]
-                    cv2.fillPoly(self.frame, contours, BGR_COMMON[color])
-                    cv2.drawContours(self.frame, contours, -1, BGR_COMMON['black'], 1)
-
-                # Draw ball contours
-                ball_contour = self.world_contours.get('ball')
-                cv2.fillPoly(self.frame, ball_contour, BGR_COMMON['red'])
-                cv2.drawContours(self.frame, ball_contour, -1, BGR_COMMON['black'], 1)
+            # Draw ball contours
+            ball_contour = self.world_contours.get('ball')
+            cv2.fillPoly(self.frame, ball_contour, BGR_COMMON['red'])
+            cv2.drawContours(self.frame, ball_contour, -1, BGR_COMMON['black'], 1)
 
 
         # Feed will stop if this is removed and nothing else is shown
@@ -269,11 +269,11 @@ class VisionWrapper:
 
         for r in self.robots:
             if not r.visible: continue
-            clx, cly, x, y = r.get_coordinates()
 
+            clx, cly, x, y = r.get_coordinates()
+            # TODO: Does age still apply? - jsren
             if r.age > 0:
                 # Draw robot circles
-                # print clx, cly
                 if not isnan(clx) and not isnan(cly):
                     if self.draw_robot:
                         # Draw circle
@@ -314,60 +314,3 @@ class VisionWrapper:
 
         if self.draw_GUI:
             self.gui.drawGUI(self.frame)
-
-
-    def averagePositions(self, frames, positions_in):
-        """
-        :param frames: number of frames to average
-        :param positions_in: positions for the current frame
-        :return: averaged positions
-        """
-
-        validFrames = self.frameQueue.__len__() + 1
-
-        positions_out = deepcopy(positions_in)
-        # Check that the incoming positions have legal values
-        for obj in positions_out.items():
-            if (positions_out[obj[0]].velocity is None):
-                positions_out[obj[0]].velocity = 0
-            if positions_out[obj[0]].x is None:
-                positions_out[obj[0]].x = 0
-            if positions_out[obj[0]].y is None:
-                positions_out[obj[0]].y = 0
-            positions_out[obj[0]].angle = positions_in[obj[0]].angle
-
-        # Loop over queue
-        for positions in self.frameQueue:
-            # Loop over each object in the position dictionary
-            isFrameValid = True
-            for obj in positions.items():
-                # Check if the current object's positions have legal values
-                if (obj[1].x is None) or (obj[1].y is None) or (obj[1].angle is None) or (obj[1].velocity is None):
-                    isFrameValid = False
-                else:
-                    positions_out[obj[0]].x += obj[1].x
-                    positions_out[obj[0]].y += obj[1].y
-                    positions_out[obj[0]].velocity += obj[1].velocity
-
-            if not isFrameValid and validFrames > 1:
-                #validFrames -= 1
-                pass
-
-        # Loop over each object in the position dictionary and average the values
-        for obj in positions_out.items():
-            positions_out[obj[0]].velocity /= validFrames
-            positions_out[obj[0]].x /= validFrames
-            positions_out[obj[0]].y /= validFrames
-
-
-        # If frameQueue is already full then pop the top entry off
-        if self.frameQueue.__len__() >= frames:
-            self.frameQueue.pop(0)
-
-        # Add our new positions to the end
-        self.frameQueue.append(positions_in)
-
-        return positions_out
-
-    def saveCalibrations(self):
-        Configuration.write_calibration(self.calibration)
