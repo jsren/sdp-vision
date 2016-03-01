@@ -144,12 +144,17 @@ class RobotTracker(Tracker):
         circle_results = list()
 
         clusters = dict()
-        for color in circles_by_color:
-            clusters[color] = self.find_color_clusters2(circles_by_color[color], 2)
+        for color in ['yellow', 'blue']:
+            clusters[color] = self.find_color_clusters2(nearby[color], 2)
 
+
+        for color in ['yellow', 'blue']:
             for point in clusters[color]:
-                circle_results.append({'clx': point[0], 'cly': point[1], 'x': point[0], 'y': point[1],
-                                       'main_color': color, 'side_color': 'pink'})
+                for color2 in ['green', 'pink']:
+                    for p2 in nearby[color2]:
+                        if (p2[0][0]-point[0])**2 + (p2[0][1]-point[1])**2 < ROBOT_DISTANCE**2:
+                            circle_results.append({'clx': point[0], 'cly': point[1], 'x': p2[0][0], 'y': p2[0][1],
+                                                   'main_color': color, 'side_color': color2})
 
 
         # for color in circles_by_color:
