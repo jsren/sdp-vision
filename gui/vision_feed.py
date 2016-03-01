@@ -9,10 +9,10 @@ try:
 except:
     pass
 
-from ..colors import *
-from ..config import Configuration
+from colors import *
+from config import Configuration
 from math import radians, cos, sin, isnan
-from ..robot_tracker import ROBOT_DISTANCE
+from robot_tracker import ROBOT_DISTANCE
 
 def nothing(x): 
     pass

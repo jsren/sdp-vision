@@ -22,12 +22,13 @@ class Robot(object):
     # Has ball is calculated on an as-needed basis
     _has_ball_delegate = None
 
-    def __init__(self, name, pos, heading, type=RobotType.UNKNOWN,
+    def __init__(self, name, visible, pos, heading, type=RobotType.UNKNOWN,
                  has_ball_func=None):
         self._name     = name
         self._position = pos
         self._heading  = heading
         self._type     = type
+        self._visible  = visible
 
         self._has_ball_delegate = has_ball_func
 
@@ -44,16 +45,17 @@ class Robot(object):
         return self._position
 
     @property
+    def visible(self):
+        """ Gets whether the robot is currently detected. """
+        return self._visible
+
+    @property
     def heading(self):
         """ Gets the robot's current heading in degrees. """
-        angle = self.heading
-        while -180 >= angle or angle > 180:
-            if -180 >= angle:
-                angle += 360
-            else:
-                angle -= 360
-        self.heading = angle
-        return self.heading
+        self._heading %= 360
+        if self._heading > 180:
+            self._heading -= 360
+        return self._heading
 
     @property
     def type(self):

@@ -10,7 +10,7 @@ except:
     cv2 = None
 
 from common import *
-from ..config import Configuration, Calibration
+from config import Configuration, Calibration
 
 import functools
 import numpy as np
