@@ -89,9 +89,11 @@ class GUI:
         if self.draw_contours:
             # Draw robot contours
             for color in wrapper.world_contours.get('circles', list()):
-                contours = wrapper.world_contours['circles'][color]
-                cv2.fillPoly(self.frame, contours, BGR_COMMON[color])
-                cv2.drawContours(self.frame, contours, -1, BGR_COMMON['black'], 1)
+                circles = wrapper.world_contours['circles'][color]
+                for circle in circles:
+                    cv2.circle(self.frame, (int(circle[0][0]), int(circle[0][1])), int(circle[1]), BGR_COMMON['red'], 1)
+                #cv2.fillPoly(self.frame, contours, BGR_COMMON[color])
+                #cv2.drawContours(self.frame, contours, -1, BGR_COMMON['black'], 1)
 
             # Draw ball contours
             ball_contour = wrapper.world_contours.get('ball')

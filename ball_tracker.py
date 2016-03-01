@@ -45,7 +45,7 @@ class BallTracker(Tracker):
             """
 
             color = self.calibration['red']
-            contours, hierarchy, mask = self.get_contours(frame.copy(),
+            contours, hierarchy, mask = self.get_contours(frame,
                                                           self.crop,
                                                           color,
                                                           True)
@@ -58,7 +58,7 @@ class BallTracker(Tracker):
                 # Get center
                 (x, y), radius = cv2.minEnclosingCircle(cnt)
 
-                queue.put({
+                return ({
                     'name': self.name,
                     'x': x,
                     'y': y,
@@ -66,5 +66,6 @@ class BallTracker(Tracker):
                     'velocity': None,
                     'ball_contour': cnt
                 })
-        queue.put(None)
+        #queue.put(None)
+
         pass

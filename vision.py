@@ -1,6 +1,6 @@
-import subprocess
 from collections import namedtuple
 from multiprocessing import Process, Queue
+from threading import Thread
 
 import cv2
 
@@ -84,10 +84,10 @@ class Vision:
             [5-tuple] Location of the robots and the ball
         """
         # Run trackers as processes
-        positions = self._run_trackers(frame)
+        results = self._run_trackers(frame)
 
-        regular_positions = positions[0] if positions[0] is not None else dict()
-        regular_positions.update(positions[1])
+        regular_positions = results[0] if results[0] is not None else dict()
+        regular_positions.update(results[1])
 
         objects = dict()
         if 'x' in regular_positions:
@@ -117,25 +117,30 @@ class Vision:
                    self.ball_tracker,
                    self.circle_tracker]
 
+        return [self.ball_tracker.find(frame, queues[0]),
+        self.circle_tracker.find(frame, queues[1])]
 
         # Creates separate process for each Tracker from objects array, calling
         # 'find' and passing in the current frame and a fresh queue.
-        processes = [
-            Process(target=obj.find, args=(frame, queues[i]))
-                                            for (i, obj)
-                                            in enumerate(objects)]
 
-        # Start processes
-        for process in processes:
-            process.start()
-
-        # Find robots and ball, use queue to
-        # avoid deadlock and share resources
+        # processes = [
+        #     Thread(target=obj.find, args=(frame, queues[i]))
+        #                                     for (i, obj)
+        #                                     in enumerate(objects)]
+        #
+        #
+        #
+        # # Start processes
+        # for process in processes:
+        #     process.start()
+        #
+        # # Find robots and ball, use queue to
+        # # avoid deadlock and share resources
         positions = [q.get() for q in queues]
 
         # Wait for process end
-        for process in processes:
-            process.join()
+        # for process in processes:
+        #     process.join()
         return positions
 
 

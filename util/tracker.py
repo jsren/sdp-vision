@@ -121,6 +121,17 @@ class Tracker(object):
         areas = [cv2.contourArea(c) for c in contours]
         return contours[np.array(areas).argsort()[::-1][:n]]
 
+    @staticmethod
+    def get_n_largest_contours2(n, contours):
+        """
+        Return a numpy array of n largest contours, or less if the array is smaller
+        """
+        contours = np.array(contours)
+        circles = [cv2.minEnclosingCircle(c) for c in contours]
+        circles = [c for c in circles if 0.5 < c[1] < 7]
+        circles.sort(cmp=lambda r1,r2:cmp(abs(r1-4), abs(r2-4)), key=lambda x:x[1])
+        return circles[::-1][:n]
+
     '''
     def get_smallest_contour(self, contours):
         """

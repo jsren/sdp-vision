@@ -42,6 +42,9 @@ class VisionWrapper:
         self.calibration = Configuration.read_calibration(
             pc_name, create_if_missing=True)
 
+        from filters.histogram import HistogramFilter
+        self.hist_filter = HistogramFilter()
+
         # Set up camera for frames
         self.camera = Camera(pitch)
         self.camera.start_capture()
@@ -188,6 +191,9 @@ class VisionWrapper:
     def update(self):
         """ Processes the current frame. """
         self.frame = self.camera.get_frame()
+
+        # Apply initial filter(s)
+        self.hist_filter.apply(self.frame)
 
         # Apply preprocessing methods toggled in the UI
         self.preprocessed = self.preprocessing.run(self.frame, self.preprocessing.options)
