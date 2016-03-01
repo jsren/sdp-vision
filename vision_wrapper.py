@@ -17,7 +17,7 @@ class VisionWrapper:
 
     """
     def __init__(self, pitch, color_settings, our_side, robot_details,
-                 draw_GUI=False, pc_name=None, robots_on_pitch=list()):
+                 enable_gui=False, pc_name=None, robots_on_pitch=list()):
         """
         Entry point for the SDP system.
 
@@ -29,7 +29,7 @@ class VisionWrapper:
             [string] our_side               the side we're on - 'left' or 'right'
             [int] video_port                port number for the camera
 
-            [boolean] draw_GUI              Does not draw the normal image to leave space for GUI.
+            [boolean] enable_gui              Does not draw the normal image to leave space for GUI.
                                             Also forces the trackers to return circle contour positons in addition to robot details.
             [string] pc_name                Name of the PC to load the files from (BUT NOT SAVE TO). Will default to local machine if not specified.
         """
@@ -53,11 +53,8 @@ class VisionWrapper:
 
         # Get machine-specific calibration
 
-        self.draw_GUI = draw_GUI
+        self.enable_gui = enable_gui
         self.gui = None
-        self.color_pick_callback = None
-        if draw_GUI:
-            self.gui = GUI(self.pitch, self.color_settings, self.calibration, self)
 
         # Initialize robots
         self.ball   = []
@@ -79,31 +76,34 @@ class VisionWrapper:
             pitch=pitch, frame_shape=self.frame.shape,
             frame_center=center_point, calibration=self.calibration,
             robots=self.robots,
-            return_circle_contours=draw_GUI, trackers_out=self.trackers)
+            return_circle_contours=enable_gui, trackers_out=self.trackers)
 
-        # Show calibration UI
-        from threading import Thread
-        from gui.calibration import CalibrationUI
-        from gui.trackers import TrackerSettingsUI
-        from gui.common import MainWindow
-        from gui.status import StatusUI
+        if self.enable_gui:
+            self.gui = GUI(self.pitch, self.color_settings, self.calibration, self)
 
-        self.calibration_window      = None
-        self.tracker_settings_window = None
-        self.status_window           = None
+            from threading import Thread
+            from gui.calibration import CalibrationUI
+            from gui.trackers import TrackerSettingsUI
+            from gui.common import MainWindow
+            from gui.status import StatusUI
 
-        def create_windows():
-            self.calibration_window = CalibrationUI(self.calibration)
-            self.tracker_settings_window = TrackerSettingsUI(self.trackers)
-            self.status_window = StatusUI()
-            return [
-                self.calibration_window,
-                self.tracker_settings_window,
-                self.status_window
-            ]
+            self.calibration_window      = None
+            self.tracker_settings_window = None
+            self.status_window           = None
 
-        Thread(name="Tkinter UI", target=MainWindow.create_and_show,
-               args=[create_windows]).start()
+            def create_windows():
+                self.calibration_window = CalibrationUI(self.calibration)
+                self.tracker_settings_window = TrackerSettingsUI(self.trackers)
+                self.status_window = StatusUI()
+                return [
+                    self.calibration_window,
+                    self.tracker_settings_window,
+                    self.status_window
+                ]
+
+            Thread(name="Tkinter UI", target=MainWindow.create_and_show,
+                   args=[create_windows]).start()
+
 
         # Set up preprocessing and postprocessing
         # self.postprocessing = Postprocessing()
@@ -172,13 +172,13 @@ class VisionWrapper:
         :return: nothing
         """
         if key == ord('b'):
-            self.draw_ball = not self.draw_ball
+            self.gui.draw_ball = not self.gui.draw_ball
         elif key == ord('n'):
-            self.draw_contours = not self.draw_contours
+            self.gui.draw_contours = not self.gui.draw_contours
         elif key == ord('j'):
-            self.draw_robot = not self.draw_robot
+            self.gui.draw_robot = not self.gui.draw_robot
         elif key == ord('i'):
-            self.draw_direction = not self.draw_direction
+            self.gui.draw_direction = not self.gui.draw_direction
 
 
     def get_circle_contours(self):
@@ -191,16 +191,14 @@ class VisionWrapper:
 
 
     def update(self):
-        """
-        Gets this frame's positions from the vision system.
-        """
+        """ Processes the current frame. """
         self.frame = self.camera.get_frame()
 
         # Apply preprocessing methods toggled in the UI
         self.preprocessed = self.preprocessing.run(self.frame, self.preprocessing.options)
         self.frame = self.preprocessed['frame']
 
-        if 'background_sub' in self.preprocessed:
+        if 'background_sub' in self.preprocessed and self.enable_gui:
             cv2.imshow('bg sub', self.preprocessed['background_sub'])
 
         # Find object positions
@@ -208,10 +206,6 @@ class VisionWrapper:
         # TODO: is this still the case?
         self.world_objects, self.world_contours = \
             self.vision.perform_locate(self.frame)
-
-        if self.status_window:
-            self.status_window.ball_status_var.value = \
-                'ball' in self.world_objects
 
         # Updates the robot coordinates
         if 'robots' in self.world_objects:
@@ -225,5 +219,10 @@ class VisionWrapper:
                                     r_data['x'], r_data['y']):
                         break
 
-        if self.draw_GUI:
+        # Perform GUI update
+        if self.enable_gui:
             self.gui.update(self)
+
+            if self.status_window:
+                self.status_window.ball_status_var.value = \
+                    'ball' in self.world_objects

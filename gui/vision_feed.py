@@ -19,9 +19,9 @@ def nothing(x):
 
 class GUI:
 
+    counter = 0
     x_ball_prev = 0
     y_ball_prev = 0
-    counter = 0
     x_ball_prev_prev = 0
     y_ball_prev_prev = 0
     x_ball = 0
@@ -65,8 +65,6 @@ class GUI:
 
     def on_mouse_event(self, event, x, y, *_):
         if event == cv2.EVENT_LBUTTONDOWN:
-            #if self.wrapper.color_pick_callback is not None:
-                #self.wrapper.color_pick_callback(self.frame[x, y])
             print "Colour:", self.frame[x, y], "@", (x, y)
 
 
@@ -78,7 +76,8 @@ class GUI:
         elif self.color_settings in [1, "big"]:
             attributes = ["bright", "contrast", "color", "hue"]
         else:
-            raise RuntimeError("StupidTitException: Incorrect color_settings value. Choose from the set [0, small, 1, big]")
+            raise RuntimeError("StupidTitException: Incorrect color_settings value. "
+                               "Choose from the set [0, small, 1, big]")
 
         for att in attributes:
             self.config[att] = cv2.getTrackbarPos(att, 'frame2')
@@ -138,19 +137,18 @@ class GUI:
         if self.draw_ball:
             self.counter += 1
             if 'ball' in wrapper.world_objects:
-                x_ball, y_ball = wrapper.world_objects['ball']
-                cv2.imshow('frame2', cv2.circle(self.frame, (int(x_ball), int(y_ball)), 8, (0, 0, 255), 2, 0))
+                self.x_ball, self.y_ball = wrapper.world_objects['ball']
+                cv2.imshow('frame2', cv2.circle(self.frame, (int(self.x_ball), int(self.y_ball)), 8, (0, 0, 255), 2, 0))
 
-                if self.counter >= 5:
+                if self.counter % 5 == 0:
                     self.x_ball_prev_prev = self.x_ball_prev
                     self.y_ball_prev_prev = self.y_ball_prev
                     self.x_ball_prev      = self.x_ball
                     self.y_ball_prev      = self.y_ball
-                    counter = 0
 
                 cv2.imshow('frame2', cv2.arrowedLine(self.frame, (int(self.x_ball_prev_prev), int(self.y_ball_prev_prev)),
-                    (abs(int(x_ball+(5*(self.x_ball_prev-self.x_ball_prev_prev)))),
-                        abs(int(y_ball+(5*(self.y_ball_prev-self.y_ball_prev_prev))))),
+                    (abs(int(self.x_ball+(5*(self.x_ball_prev-self.x_ball_prev_prev)))),
+                        abs(int(self.y_ball+(5*(self.y_ball_prev-self.y_ball_prev_prev))))),
                     (0, 255, 0), 3, 10))
 
 

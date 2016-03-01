@@ -7,7 +7,7 @@ class Preprocessing(object):
         if not options:
             # Which methods to run
             self.options = {
-                'normalize': False,
+                'normalize'     : False,
                 'background_sub': False
             }
 
