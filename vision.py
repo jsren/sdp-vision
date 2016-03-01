@@ -67,8 +67,6 @@ class Vision:
         trackers_out.append(self.ball_tracker)
         trackers_out.append(self.circle_tracker)
 
-        
-
 
     def _get_zones(self, width, height):
         return [(val[0], val[1], 0, height)
@@ -162,6 +160,16 @@ class Camera(object):
         self.c_matrix = radial_data['camera_matrix']
         self.dist = radial_data['dist']
 
+        self._raw_output = False
+
+    @property
+    def raw_output_mode(self):
+        return self._raw_output
+
+    @raw_output_mode.setter
+    def raw_output_mode(self, value):
+        self._raw_output = bool(value)
+
     def start_capture(self):
         # noinspection PyArgumentList
         self.capture = cv2.VideoCapture(0)
@@ -180,12 +188,18 @@ class Camera(object):
         # Capture frame-by-frame
         status, frame = self.capture.read()
 
-        frame = self.fix_radial_distortion(frame)
-        if status:
-            return frame[
-                self.crop_values[2]:self.crop_values[3],
-                self.crop_values[0]:self.crop_values[1]
-            ]
+        if not self._raw_output:
+            frame = self.fix_radial_distortion(frame)
+            if status:
+                return frame[
+                    self.crop_values[2]:self.crop_values[3],
+                    self.crop_values[0]:self.crop_values[1]
+                ]
+        elif status:
+            return frame
+        else:
+            raise Exception("Unable to read from video stream")
+
 
     def fix_radial_distortion(self, frame):
         return cv2.undistort(

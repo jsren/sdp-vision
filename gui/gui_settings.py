@@ -12,12 +12,18 @@ class GuiSettingsUI(UserControl):
         self.show_ball_var = UserVariable(self, int, True, self.on_show_ball_changed, 500)
         self.show_ballv_var = UserVariable(self, int, True, self.on_show_ballv_changed, 500)
         self.show_robots_var = UserVariable(self, int, True, self.on_show_robots_changed, 500)
+        self.show_raw_var = UserVariable(self, int, True, self.on_show_raw_changed, 500)
 
-        Checkbutton(self, text="Show Ball", variable=self.show_ball_var).pack(side=LEFT, padx=10, pady=10, anchor=N)
-        Checkbutton(self, text="Show Velocity", variable=self.show_ballv_var).pack(side=LEFT, padx=10, pady=10, anchor=N)
-        Checkbutton(self, text="Show Robots", variable=self.show_robots_var).pack(side=LEFT, padx=10, pady=10, anchor=N)
-        Checkbutton(self, text="Show Contours", variable=self.show_contours_var).pack(side=LEFT, padx=10, pady=10, anchor=N)
-
+        Checkbutton(self, text="Show Ball", variable=self.show_ball_var)\
+            .pack(side=LEFT, padx=10, pady=10, anchor=N)
+        Checkbutton(self, text="Show Velocity", variable=self.show_ballv_var)\
+            .pack(side=LEFT, padx=10, pady=10, anchor=N)
+        Checkbutton(self, text="Show Robots", variable=self.show_robots_var)\
+            .pack(side=LEFT, padx=10, pady=10, anchor=N)
+        Checkbutton(self, text="Show Contours", variable=self.show_contours_var)\
+            .pack(side=LEFT, padx=10, pady=10, anchor=N)
+        Checkbutton(self, text="Enable Raw Video", variable=self.show_raw_var)\
+            .pack(side=LEFT, padx=10, pady=10, anchor=N)
 
     def on_show_contours_changed(self, var):
         self.vision.gui.draw_contours = bool(var.value)
@@ -30,3 +36,6 @@ class GuiSettingsUI(UserControl):
 
     def on_show_robots_changed(self, var):
         self.vision.gui.draw_robots = bool(var.value)
+
+    def on_show_raw_changed(self, var):
+        self.vision.camera.raw_output_mode = bool(var.value)

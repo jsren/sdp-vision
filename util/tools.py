@@ -32,14 +32,26 @@ GREEN_HIGHER = np.array([13, 255, 220])
                    
 PITCHES = ['Pitch_0', 'Pitch_1']
 
+def get_pitch_size(pitch):
+    filename = PATH+'/calibrations/croppings.json'
+    crop_top = get_croppings(filename, pitch)['outline']
+
+    x0 = (crop_top[1][0] + crop_top[2][1])/2
+    x1 = (crop_top[0][0] + crop_top[3][0])/2
+
+    y0 = (crop_top[0][1] + crop_top[1][1])/2
+    y1 = (crop_top[2][1] + crop_top[3][1])/2
+
+    return (abs(x1 - x0), abs(y1 - y0))
+
 
 def get_zones(width, height, filename=PATH+'/calibrations/croppings.json', pitch=0):
     calibration = get_croppings(filename, pitch)
     zones_poly = [calibration[key] for key in ['Zone_0', 'Zone_1', 'Zone_2', 'Zone_3']]
 
     maxes = [max(zone, key=lambda x: x[0])[0] for zone in zones_poly[:3]]
-    mins = [min(zone, key=lambda x: x[0])[0] for zone in zones_poly[1:]]
-    mids = [(maxes[i] + mins[i]) / 2 for i in range(3)]
+    mins  = [min(zone, key=lambda x: x[0])[0] for zone in zones_poly[1:]]
+    mids  = [(maxes[i] + mins[i]) / 2 for i in range(3)]
     mids.append(0)
     mids.append(width)
     mids.sort()
@@ -193,9 +205,6 @@ def find_crop_coordinates(frame, keypoints=None, width=520, height=285):
     x_delta = x_max - x_min
     y_delta = y_max - y_min
 
-    # x_remaining = max(0, (width - x_delta) / 2)
-    # y_remaining = max(0, (height - y_delta) / 2)
-
     return (
         x_min, x_max,
         y_min, y_max)
@@ -221,3 +230,7 @@ def crop(frame, size=None):
 
 def time_delta_in_ms(datetime1, datetime2):
     return int((datetime2-datetime1).total_seconds() * 1000)
+
+
+if __name__ == "__main__":
+    print get_pitch_size(0)
