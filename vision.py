@@ -69,48 +69,6 @@ class Vision:
 
         
 
-    def v4l_settings(self):
-        # it would be nice to reset settings after executing the program..
-        video0_old = {}
-
-        # # for faraway room
-        if self.pitch == 1:
-            attributes = ["bright", "contrast", "color", "hue"]
-            video0_new = {"bright": 23296, "contrast": 28384, "color": 65408, "hue": 38072}
-        # #for closest room
-        elif self.pitch == 0:           
-            attributes = ["bright", "contrast", "color", "hue"]
-            video0_new = {"bright": 160, "contrast": 110, "color": 100, "hue": 0,"Red Balance": 0, "Blue Balance" : 5}
-        unknowns = []
-
-        for attr in attributes:
-            output, err = subprocess.Popen(["v4lctl", "show", attr],
-                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
-            if not output.strip():
-                print "[WARNING] Unknown video attribute '"+attr+"'"
-                unknowns.append(attr)
-            else:
-                video0_old[attr] = int(output[len(attr)+1:])
-                if video0_old[attr] != video0_new[attr]:
-                    p = subprocess.Popen(["v4lctl", "setattr", attr, str(video0_new[attr])], stdout=subprocess.PIPE)
-                    output, _ = p.communicate()
-
-        # will only output restore file if any value was different.
-        # this also prevents from resetting the file on each run
-        # to run this bash file, cd to out main dir (where the .sh file is)
-        # type "chmod 755 restore_v4lctl_settings.sh"
-        # and then "./restore_v4lctl_settings.sh"
-        if (video0_old != video0_new):
-            f = open('restore_v4lctl_settings.sh','w')
-            f.write('#!/bin/sh\n')
-            f.write('echo \"restoring v4lctl settings to previous values\"\n')
-            for attr in attributes:
-                if attr in unknowns: continue
-                f.write("v4lctl setattr " + attr + ' ' + str(video0_old[attr]) + "\n")
-                f.write('echo \"setting ' + attr +' to ' + str(video0_old[attr]) + '"\n')
-            f.write('echo \"v4lctl values restored\"')
-            f.close()
-    
 
     def _get_zones(self, width, height):
         return [(val[0], val[1], 0, height)
@@ -118,11 +76,7 @@ class Vision:
                                            height,
                                            pitch=self.pitch)]
 
-    def _get_opponent_color(self, our_color):
-        return (TEAM_COLORS - {our_color}).pop()
-
-
-    def locate1(self, frame):
+    def perform_locate(self, frame):
         """
         Find objects on the pitch using multiprocessing.
 
@@ -135,69 +89,17 @@ class Vision:
         regular_positions = positions[0] if positions[0] is not None else dict()
         regular_positions.update(positions[1])
 
-        return regular_positions
+        objects = dict()
+        if 'x' in regular_positions:
+            objects['ball'] = (regular_positions['x'], regular_positions['y'])
+        if 'robot_coords' in regular_positions:
+            objects['robots'] = regular_positions['robot_coords']
 
-
-    # TODO: Why has this been commented out?
-    # def locate(self, frame):
-    #     """
-    #     Find objects on the pitch using multiprocessing.
-    #
-    #     Returns:
-    #         [5-tuple] Location of the robots and the ball
-    #     """
-    #     # Run trackers as processes
-    #     positions = self._run_trackers(frame)
-    #     # Correct for perspective
-    #     positions = self.get_adjusted_positions(positions)
-    #
-    #     # Wrap list of positions into a dictionary
-    #     keys = ['our_defender',
-    #             'our_attacker',
-    #             'their_defender',
-    #             'their_attacker',
-    #             'ball']
-    #     regular_positions = dict()
-    #     for i, key in enumerate(keys):
-    #         regular_positions[key] = positions[i]
-    #
-    #     # Error check we got a frame
-    #     height, width, channels = frame.shape if frame is not None \
-    #         else (None, None, None)
-    #
-    #     model_positions = {
-    #         'our_attacker': self.to_info(positions[1], height),
-    #         'their_attacker': self.to_info(positions[3], height),
-    #         'our_defender': self.to_info(positions[0], height),
-    #         'their_defender': self.to_info(positions[2], height),
-    #         'ball': self.to_info(positions[4], height)
-    #     }
-    #
-    #     return model_positions, regular_positions
-
-    def get_adjusted_point(self, point):
-        """
-        Given a point on the plane, calculate the
-        adjusted point, by taking into account the
-        height of the robot, the height of the
-        camera and the distance of the point
-        from the center of the lens.
-        """
-        plane_height = 250.0
-        # TWEAK
-        robot_height = 18.0
-        coefficient = robot_height/plane_height
-
-        x = point[0]
-        y = point[1]
-
-        dist_x = float(x - self.frame_center[0])
-        dist_y = float(y - self.frame_center[1])
-
-        delta_x = dist_x * coefficient
-        delta_y = dist_y * coefficient
-
-        return (int(x-delta_x), int(y-delta_y))
+        contours = {
+            'circles': regular_positions.get('circles'),
+            'ball'   : regular_positions.get('ball_contour')
+        }
+        return objects, contours
 
 
     def _run_trackers(self, frame):
@@ -215,11 +117,9 @@ class Vision:
                    self.ball_tracker,
                    self.circle_tracker]
 
-        
-        """
-        Creates separate process for each Tracker from objects array, calling
-        'find' and passing in the current frame and a fresh queue.
-        """
+
+        # Creates separate process for each Tracker from objects array, calling
+        # 'find' and passing in the current frame and a fresh queue.
         processes = [
             Process(target=obj.find, args=(frame, queues[i]))
                                             for (i, obj)
@@ -233,32 +133,10 @@ class Vision:
         # avoid deadlock and share resources
         positions = [q.get() for q in queues]
 
-        # terminate processes
+        # Wait for process end
         for process in processes:
             process.join()
-
         return positions
-
-    def to_info(self, args, height):
-        """
-        Returns a dictionary with object position information
-        """
-        x, y, angle, velocity = None, None, None, None
-        if args is not None:
-            if 'x' in args and 'y' in args:
-                x = args['x']
-                y = args['y']
-                if y is not None:
-                    y = height - y
-
-            if 'angle' in args:
-                angle = args['angle']
-
-            if 'velocity' in args:
-                velocity = args['velocity']
-
-        return {'x': x, 'y': y, 'angle': angle, 'velocity': velocity}
-
 
 
 
@@ -268,8 +146,7 @@ class Camera(object):
     """
 
     def __init__(self, pitch):
-
-        self.pitch = pitch
+        self.pitch   = pitch
         self.capture = None
 
         cropping = tools.get_croppings(pitch=pitch)
@@ -295,8 +172,6 @@ class Camera(object):
             self.capture = None
 
     def get_frame(self):
-        #import numpy as np
-        #return np.uint8([[[]]])
         """
         Retrieve a frame from the camera.
 
@@ -312,13 +187,11 @@ class Camera(object):
                 self.crop_values[0]:self.crop_values[1]
             ]
 
-            # return frame
-
     def fix_radial_distortion(self, frame):
         return cv2.undistort(
             frame, self.c_matrix, self.dist, None, self.nc_matrix)
 
-    def get_adjusted_center(self, frame):
+    def get_adjusted_center(self):
         return 320 - self.crop_values[0], 240 - self.crop_values[2]
 
 

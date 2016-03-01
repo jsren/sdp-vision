@@ -3,12 +3,12 @@ from util import tools
 from datetime import datetime
 from vision_wrapper import VisionWrapper
 from util import time_delta_in_ms
-
+from interface import RobotType
 import threading
 import numpy as np
 
 
-OUR_NAME = "blue + green"
+OUR_NAME = "yellow + green"
 
 goals = {
     'right': np.array([568.0, 232.5]),
@@ -27,6 +27,7 @@ assert OUR_NAME in ROBOT_DESCRIPTIONS
 
 
 class VisionLauncher(object):
+
     """
     Launches the vision wrapper which calibrates the camera based on preset settings, takes care of object tracking
     and can optionally be called to display callibration GUI.
@@ -46,7 +47,6 @@ class VisionLauncher(object):
         self.color_settings = color_settings
         self._started = False
         self._cv = threading.Condition()
-        self._thread = threading.currentThread().getName()
         self.launch_gui = launch_gui
         self.pc_name = pc_name
 
@@ -65,7 +65,16 @@ class VisionLauncher(object):
         self.control_loop()
 
     def get_robots_raw(self):
-        return self.visionwrap.get_robots_raw()
+        listOfRobots = self.visionwrap.get_robots_raw()
+        for robot in listOfRobots:
+            if robot[0] == OUR_NAME:
+                robot[3] = RobotType.OURS
+            elif ROBOT_DESCRIPTIONS[robot[0]]['main_colour'] \
+                == ROBOT_DESCRIPTIONS[OUR_NAME]['main_colour']:
+                robot[3] = RobotType.FRIENDLY
+            else:
+                robot[3] = RobotType.ENEMY
+        return [tuple(r) for r in listOfRobots]
 
     def get_robot_midpoint(self, robot_name=OUR_NAME):
         return self.visionwrap.get_robot_position(robot_name)
@@ -97,17 +106,13 @@ class VisionLauncher(object):
         :return: True if vision system ready, False if timed-out.
         """
         if not self._started:
-            if threading.currentThread().getName() == self._thread:
-                raise Exception("You cannot wait for the vision "
-                                "to start running on the same thread!")
-            else:
-                with self._cv:
-                    start = datetime.now()
-                    self._cv.wait(timeout)
+            with self._cv:
+                start = datetime.now()
+                self._cv.wait(timeout)
 
-                    # If timed-out, then the time taken >= timeout value
-                    return timeout is None or time_delta_in_ms(start, datetime.now()) < \
-                            int(timeout * 1000)
+                # If timed-out, then the time taken >= timeout value
+                return timeout is None or time_delta_in_ms(start, datetime.now()) < \
+                        int(timeout * 1000)
 
     def control_loop(self):
         """
@@ -126,8 +131,6 @@ class VisionLauncher(object):
                 # update the vision system with the next frame
                 self.visionwrap.update()
 
-                #self.visionwrap.vision.v4l_settings()
-
                 # Wait until robot detected
                 if not self._started and self.get_robot_midpoint() is not None \
                     and not np.isnan(self.get_robot_midpoint()[0]) \
@@ -138,8 +141,6 @@ class VisionLauncher(object):
             self.visionwrap.end()
         finally:
             self.visionwrap.camera.stop_capture()
-            #print self.visionwrap.do_we_have_ball(OUR_NAME)
-            #tools.save_colors(self.pitch, self.visionwrap.calibration)
 
     def _atexit(self, *args):
         try:

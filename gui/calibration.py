@@ -10,10 +10,11 @@ except:
     cv2 = None
 
 from common import *
-from config import Configuration, Calibration
+from ..config import Configuration, Calibration
 
 import functools
 import numpy as np
+import ttk
 
 
 class CalibrationUI(UserControl):
@@ -98,7 +99,9 @@ class CalibrationUI(UserControl):
         Button(self.button_frame, text="Quit", command=self.close,
                 padx=10, pady=10, width=15).pack(side=RIGHT)
 
-        Label(self.text_frame, text="Press 'q' to quit").pack()
+
+
+        Label(self.text_frame, text="Press 'q' to quit").pack(side=LEFT)
 
         # Perform initial update
         self.on_colour_selected()
