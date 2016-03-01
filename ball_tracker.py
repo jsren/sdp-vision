@@ -23,10 +23,10 @@ class BallTracker(Tracker):
                                 crop  crop coordinates
             [int] offset        how much to offset the coordinates
         """
-        self.crop   = crop
-        self.color  = calibration['red']
-        self.offset = offset
-        self.name   = name
+        self.crop        = crop
+        self.calibration = calibration
+        self.offset      = offset
+        self.name        = name
 
     def find(self, frame, queue):
         #for color in self.color:
@@ -44,14 +44,13 @@ class BallTracker(Tracker):
             )
             """
 
+            color = self.calibration['red']
             contours, hierarchy, mask = self.get_contours(frame.copy(),
                                                           self.crop,
-                                                          self.color,
+                                                          color,
                                                           True)
             if len(contours) <= 0:
-                #print 'No ball found.'
                 pass
-                # queue.put(None)
             else:
                 # Trim contours matrix
                 cnt = self.get_largest_contour(contours)

@@ -1,6 +1,7 @@
 from util import Tracker, RobotInstance
 
 from scipy.cluster.vq import kmeans
+from Tkinter import *
 
 import cv2
 import numpy as np
@@ -14,12 +15,18 @@ ROBOT_DISTANCE = 30
 
 
 class RobotTracker(Tracker):
+
+    @property
+    def hasUI(self):
+        return True
+
     def __init__(self,
                  main_colors,
                  side_colors,
                  crop,
                  pitch,
                  calibration,
+                 robots,
                  return_circles=False):
         """
         Tracks all circles of given colors and calls k-nn to find the robots. Maps each one into a different set,
@@ -39,7 +46,7 @@ class RobotTracker(Tracker):
         self.pitch          = pitch
         self.calibration    = calibration
         self.return_circles = return_circles
-        self.robots         = []
+        self.robots         = robots
 
 
 
@@ -70,27 +77,6 @@ class RobotTracker(Tracker):
         return circles
 
 
-    def initialize_robots(self, frame):
-        circles = self.find_all_circles(frame)
-
-        clusters = []
-        # Use k-means to find cluster centres for main colors
-        for m_color in self.main_colors:
-
-            cls = self.find_color_clusters(circles[m_color], 1)
-            if cls.any() and len(cls) == 1: # and np.linalg.norm(cls[0] - cls[1]) > 20:
-                cls.append(m_color)
-                clusters.append(cls)
-
-        for c in xrange(len(clusters)):
-            x = clusters[c][0]
-            y = clusters[c][1]
-            m_color = clusters[c][2]
-            self.robots[c] = RobotInstance(x, y, m_color)
-
-
-
-
 
     def find_color_clusters(self, circles_of_one_color, k, iter=20):
         """
@@ -103,7 +89,7 @@ class RobotTracker(Tracker):
         """
         circles = []
         for crc in circles_of_one_color:
-            (x, y), radius = cv2.minEnclosingCircle(crc)
+            (x, y), _ = cv2.minEnclosingCircle(crc)
             circles.append((x, y))
         circles = np.array(circles)
 
@@ -117,7 +103,6 @@ class RobotTracker(Tracker):
     def find(self, frame, queue):
         # Array of contours found.
         circles = self.find_all_circles(frame)
-
 
         # Use k-means to find cluster centres for main colors
         circle_results = []
@@ -137,9 +122,6 @@ class RobotTracker(Tracker):
                             # Convert contour into circle
                             (x0, y0), _ = cv2.minEnclosingCircle(circle)
 
-                            d2 = ((x0-cl[0])**2 + (y0-cl[1])**2)
-                            # if d2 < 50 ** 2:
-                            #     print "[INFO] Circle distances: " + str(d2**0.5), color
                             if (x0-cl[0])**2 + (y0-cl[1])**2 < ROBOT_DISTANCE**2:
                                 near_circles[color].append(circle)
 
@@ -154,7 +136,7 @@ class RobotTracker(Tracker):
                         significant_circle = self.get_largest_contour(near_circles[self.side_colors[0]])
                         s_color = self.side_colors[0]
 
-                    (x, y), radius = cv2.minEnclosingCircle(significant_circle)
+                    (x, y), _ = cv2.minEnclosingCircle(significant_circle)
                     circle_results.append({'clx': cl[0], 'cly': cl[1], 'x': x, 'y': y, 'main_color': m_color, 'side_color': s_color})
 
         results = dict(robot_coords=circle_results)
@@ -162,8 +144,35 @@ class RobotTracker(Tracker):
             results["circles"] = circles
         queue.put(results)
 
-
         # 1) returns the most relevant circles found.
         # queue.put({
         #     "circles":circles
         # })
+
+    def update_settings(self):
+        for i in range(0, len(self.robots)):
+            self.robots[i].present = self.robot_present_vars[i].get()
+
+
+    def draw_ui(self, parent):
+        host = Frame(parent)
+        host.pack()
+
+        from os import path
+        from PIL import ImageTk, Image
+        imgdir = path.join(path.dirname(__file__), "images")
+
+        self.images = list()
+        self.robot_present_vars = list()
+
+        for robot in self.robots:
+            img = ImageTk.PhotoImage(Image.open(path.join(imgdir, robot.name+".bmp")))
+
+            self.images.append(img)
+            self.robot_present_vars.append(BooleanVar(host, robot.present))
+
+            Checkbutton(parent, image=img, variable=self.robot_present_vars[-1],
+                        command=self.update_settings).pack(side=LEFT)
+
+
+

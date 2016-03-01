@@ -8,18 +8,18 @@ import threading
 import numpy as np
 
 
-OUR_NAME = "blue + pink"
+OUR_NAME = "blue + green"
 
 goals = {
     'right': np.array([568.0, 232.5]),
-    'left': np.array([5.5, 226.0])
+    'left' : np.array([5.5, 226.0])
 }
 
 ROBOT_DESCRIPTIONS = {
-    'blue + green'  : {'main_colour': 'blue', 'side_colour': 'green'},
-    # 'yellow + green': {'main_colour': 'yellow', 'side_colour': 'green'},
-    'blue + pink'   : {'main_colour': 'blue', 'side_colour': 'pink'},
-    # 'yellow + pink' : {'main_colour': 'yellow', 'side_colour': 'pink'}
+    'blue + green'  : {'main_colour': 'blue',   'side_colour': 'green'},
+    'yellow + green': {'main_colour': 'yellow', 'side_colour': 'green'},
+    'blue + pink'   : {'main_colour': 'blue',   'side_colour': 'pink'},
+    'yellow + pink' : {'main_colour': 'yellow', 'side_colour': 'pink'}
 }
 
 assert OUR_NAME in ROBOT_DESCRIPTIONS
@@ -32,27 +32,34 @@ class VisionLauncher(object):
     Launches the vision wrapper which calibrates the camera based on preset settings, takes care of object tracking
     and can optionally be called to display callibration GUI.
     """
-    def __init__(self, pitch, launch_gui=False):
+    def __init__(self, pitch, color_settings, launch_gui=False, pc_name=None):
         """
-        :param pitch: [0, 1]            0 is the one, closer to the door.
-        :param launch_GUI: boolean      Set to True if you want to calibrate the colors.
+        :param pitch: [0, 1]                        0 is the one, closer to the door.
+        :param color_settings: [0, small, 1, big]   0 or small for pitch color settings with small numbers (previously - pitch 0)
+                                                    1 or big - pitch color settings with big numbers (previously - pitch 1)
+        :param launch_GUI: boolean                  Set to True if you want to calibrate the colors.
+        :param pc_name: String                      Loads camera and color settings from given PC (BUT NOT SAVE TO) file if its naem is given
         :return:
         """
         self.visionwrap = None
         self.vision1 = None
         self.pitch = pitch
+        self.color_settings = color_settings
         self._started = False
         self._cv = threading.Condition()
         self.launch_gui = launch_gui
+        self.pc_name = pc_name
 
         import signal
         for sig in (signal.SIGABRT, signal.SIGILL,
                     signal.SIGINT, signal.SIGSEGV, signal.SIGTERM):
             signal.signal(sig, self._atexit)
 
-    def launch_vision(self):
+    def launch_vision(self, robots_on_pitch=list()):
         print "[INFO] Configuring vision"
-        self.visionwrap = VisionWrapper(self.pitch, OUR_NAME, ROBOT_DESCRIPTIONS, self.launch_gui)
+        self.visionwrap = VisionWrapper(self.pitch, self.color_settings,
+                                        OUR_NAME, ROBOT_DESCRIPTIONS, self.launch_gui,
+                                        self.pc_name, robots_on_pitch)
 
         print "[INFO] Beginning vision loop"
         self.control_loop()
@@ -118,10 +125,12 @@ class VisionLauncher(object):
                 #self.visionwrap.vision.v4l_settings()
 
                 # Wait until robot detected
-                if not self._started and self.get_robot_midpoint() is not None:
+                if not self._started and self.get_robot_midpoint() is not None \
+                    and not np.isnan(self.get_robot_midpoint()[0]):
                     self._started = True
                     with self._cv:
                         self._cv.notifyAll()
+            self.visionwrap.end()
         finally:
             self.visionwrap.camera.stop_capture()
             #print self.visionwrap.do_we_have_ball(OUR_NAME)
@@ -139,17 +148,23 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument("pitch", help="[0] Pitch next to door, [1] Pitch farther from the door")
+    parser.add_argument("color_settings", help="pitch room color settings. One of (small, big) or (0, 1)")
     parser.add_argument("plan", help="Task no. to execute. 'GUI' to launch calibration GUI.")
     parser.add_argument("goal", help="Which goal to target - one of (left, right)")
+    parser.add_argument("--override", help="loads color and camera settings from a file with specified computer name. STILL SAVES THE DATA FOR LOCAL MACHINE")
 
     args = parser.parse_args()
 
     if args.plan == 'GUI':
-        vision_launcher = VisionLauncher(int(args.pitch), True)
+        if args.override:
+            pc_name = args.override + ".inf.ed.ac.uk"
+        else:
+            pc_name = None
+        vision_launcher = VisionLauncher(int(args.pitch), args.color_settings, True, pc_name)
 
     else:
         # TODO: Need to configure for pitch
-        vision_launcher = VisionLauncher(int(args.pitch))
+        vision_launcher = VisionLauncher(int(args.pitch), args.color_settings)
 
         # Create planner
         """
