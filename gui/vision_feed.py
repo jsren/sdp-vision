@@ -107,6 +107,10 @@ class GUI:
 
                 clx, cly, x, y = r.get_coordinates()
                 # TODO: Does age still apply? - jsren
+
+                # TODO: Yes, it resets the robot if it's not been seen for a while.
+                # TODO: Otherwise we'd have a black circle stuck somewhere on the field. With old values.
+                # TODO: Unless you're passing in None sometimes, which I might have seen somewhere. - linas
                 if r.age > 0:
                     # Draw robot circles
                     if not isnan(clx) and not isnan(cly):
@@ -119,6 +123,9 @@ class GUI:
                         cv2.imshow('frame2', cv2.putText(self.frame, r.name,
                                                          (int(clx)-15, int(cly)+40),
                                                          cv2.FONT_HERSHEY_COMPLEX, 0.45, (100, 150, 200)))
+
+                        cv2.imshow('frame2', cv2.polylines(self.frame, r.get_other_coordinates(), True,
+                                                           BGR_COMMON['black'], 1))
 
                         if self.draw_direction:
                             # Draw angle in degrees

@@ -178,10 +178,6 @@ class RobotTracker(Tracker):
             results["circles"] = circles
         queue.put(results)
 
-        # 1) returns the most relevant circles found.
-        # queue.put({
-        #     "circles":circles
-        # })
 
     def update_settings(self):
         for i in range(0, len(self.robots)):

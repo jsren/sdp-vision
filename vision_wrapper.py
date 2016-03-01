@@ -209,12 +209,18 @@ class VisionWrapper:
                     # Only update robots we've set as being present
                     if not robot.present: continue
 
+                    # Adds the side marker coordinates
+                    other_circle_coords = []
+                    for marker in topplate.markers[1:]:
+                        other_circle_coords.append((marker['pos'][0], marker['pos'][1]))
+
                     if robot.update(topplate.naive_midpoint[0], topplate.naive_midpoint[1],
                                     topplate.primary_color, topplate.secondary_color,
                                     topplate.markers[0]['pos'][0] if any(topplate.markers)
                                         else None,
                                     topplate.markers[0]['pos'][1] if any(topplate.markers)
-                                        else None
+                                        else None,
+                                    other_circle_coords
                                     ):
                         break
 
