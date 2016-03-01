@@ -22,8 +22,8 @@ class Robot(object):
     # Has ball is calculated on an as-needed basis
     _has_ball_delegate = None
 
-    def __init__(self, name, pos, heading, has_ball_func=None,
-                 type=RobotType.UNKNOWN):
+    def __init__(self, name, pos, heading, type=RobotType.UNKNOWN,
+                 has_ball_func=None):
         self._name     = name
         self._position = pos
         self._heading  = heading
@@ -46,7 +46,7 @@ class Robot(object):
     @property
     def heading(self):
         """ Gets the robot's current heading in degrees. """
-        return self.heading
+        return self._heading
 
     @property
     def type(self):
@@ -80,7 +80,7 @@ class VisionInterface(object):
         """ Gets the robots currently visible on the pitch.
         :return: A list of `Robot` instances.
         """
-        return [ Robot(r[0], r[1], r[2], self._launcher.do_we_have_ball)
+        return [ Robot(r[0], r[1], r[2], r[3], self._launcher.do_we_have_ball)
             for r in self._launcher.get_robots_raw() ]
 
     def wait_for_start(self, timeout=None):

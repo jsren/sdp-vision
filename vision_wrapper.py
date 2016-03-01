@@ -8,7 +8,7 @@ from preprocessing.preprocessing import Preprocessing
 from util import RobotInstance
 from vision import Vision, Camera
 from config import Configuration
-
+from interface import RobotType
 
 
 class VisionWrapper:
@@ -121,7 +121,7 @@ class VisionWrapper:
 
     def get_robots_raw(self):
         # Filter robots that have no position
-        return [(r.name, r.position, r.heading)
+        return [[r.name, r.position, r.heading, RobotType.UNKNOWN]
                 for r in self.robots if list(r.x)]
 
     def get_robot_position(self, robot_name):
