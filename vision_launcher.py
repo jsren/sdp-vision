@@ -3,7 +3,7 @@ from util import tools
 from datetime import datetime
 from vision_wrapper import VisionWrapper
 from util import time_delta_in_ms
-
+from interface import RobotType
 import threading
 import numpy as np
 
@@ -65,7 +65,16 @@ class VisionLauncher(object):
         self.control_loop()
 
     def get_robots_raw(self):
-        return self.visionwrap.get_robots_raw()
+        listOfRobots = self.visionwrap.get_robots_raw()
+        for robot in listOfRobots:
+            if robot[0] == OUR_NAME:
+                robot[3] = RobotType.OURS
+            elif ROBOT_DESCRIPTIONS[robot[0]]['main_colour'] \
+                == ROBOT_DESCRIPTIONS[OUR_NAME]['main_colour']:
+                robot[3] = RobotType.FRIENDLY
+            else:
+                robot[3] = RobotType.ENEMY
+        return [tuple(r) for r in listOfRobots]
 
     def get_robot_midpoint(self, robot_name=OUR_NAME):
         return self.visionwrap.get_robot_position(robot_name)
