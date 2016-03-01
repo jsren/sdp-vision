@@ -116,8 +116,8 @@ class VisionWrapper:
 
     def get_robots_raw(self):
         # Filter robots that have no position
-        return [[r.name, r.position, r.heading, RobotType.UNKNOWN]
-                for r in self.robots if list(r.x)]
+        return [[r.name, r.visible, r.position, r.heading, RobotType.UNKNOWN]
+                for r in self.robots]
 
     def get_robot_position(self, robot_name):
         return filter(lambda r: r.name == robot_name, self.robots)[0].position

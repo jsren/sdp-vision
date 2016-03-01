@@ -68,12 +68,12 @@ class VisionLauncher(object):
         listOfRobots = self.visionwrap.get_robots_raw()
         for robot in listOfRobots:
             if robot[0] == OUR_NAME:
-                robot[3] = RobotType.OURS
+                robot[4] = RobotType.OURS
             elif ROBOT_DESCRIPTIONS[robot[0]]['main_colour'] \
                 == ROBOT_DESCRIPTIONS[OUR_NAME]['main_colour']:
-                robot[3] = RobotType.FRIENDLY
+                robot[4] = RobotType.FRIENDLY
             else:
-                robot[3] = RobotType.ENEMY
+                robot[4] = RobotType.ENEMY
         return [tuple(r) for r in listOfRobots]
 
     def get_robot_midpoint(self, robot_name=OUR_NAME):
