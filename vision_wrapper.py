@@ -241,7 +241,7 @@ class VisionWrapper:
                 'ball' in self.world_objects
 
         # Updates the robot coordinates
-        if self.world_objects['robots']:
+        if 'robots' in self.world_objects:
             for r_data in self.world_objects['robots']:
                 for robot in self.robots:
                     # Only update robots we've set as being present
@@ -303,8 +303,8 @@ class VisionWrapper:
                 cv2.imshow('frame2', cv2.circle(self.frame, (int(x_ball), int(y_ball)), 8, (0, 0, 255), 2, 0))
 
                 if counter >= 5:
-                    x_ball_prev_prev=x_ball_prev
-                    y_ball_prev_prev=y_ball_prev
+                    x_ball_prev_prev = x_ball_prev
+                    y_ball_prev_prev = y_ball_prev
                     x_ball_prev = x_ball
                     y_ball_prev = y_ball
                     counter = 0

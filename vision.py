@@ -89,10 +89,12 @@ class Vision:
         regular_positions = positions[0] if positions[0] is not None else dict()
         regular_positions.update(positions[1])
 
-        objects = {
-            'ball'  : (regular_positions.get('x'), regular_positions.get('y')),
-            'robots': regular_positions.get('robot_coords')
-        }
+        objects = dict()
+        if 'x' in regular_positions:
+            objects['ball'] = (regular_positions['x'], regular_positions['y'])
+        if 'robot_coords' in regular_positions:
+            objects['robots'] = regular_positions['robot_coords']
+
         contours = {
             'circles': regular_positions.get('circles'),
             'ball'   : regular_positions.get('ball_contour')

@@ -9,7 +9,7 @@ try:
 except:
     pass
 
-from config import Configuration
+from ..config import Configuration
 
 def nothing(x): 
     pass

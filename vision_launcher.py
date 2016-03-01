@@ -8,7 +8,7 @@ import threading
 import numpy as np
 
 
-OUR_NAME = "blue + green"
+OUR_NAME = "yellow + green"
 
 goals = {
     'right': np.array([568.0, 232.5]),
@@ -122,8 +122,6 @@ class VisionLauncher(object):
                 # update the vision system with the next frame
                 self.visionwrap.update()
 
-                #self.visionwrap.vision.v4l_settings()
-
                 # Wait until robot detected
                 if not self._started and self.get_robot_midpoint() is not None \
                     and not np.isnan(self.get_robot_midpoint()[0]):
@@ -133,8 +131,6 @@ class VisionLauncher(object):
             self.visionwrap.end()
         finally:
             self.visionwrap.camera.stop_capture()
-            #print self.visionwrap.do_we_have_ball(OUR_NAME)
-            #tools.save_colors(self.pitch, self.visionwrap.calibration)
 
     def _atexit(self, *args):
         try:
