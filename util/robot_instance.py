@@ -92,8 +92,9 @@ class RobotInstance(object):
         Do not use for calculations. These coords don't use the median.
         :return: [(x0, y0), (x1, y1), (x2, y2)]. Might be smaller if less circles are found.
         """
-        return self.other_coords
-
+        stuff = np.array(self.other_coords, np.int32)
+        stuff = stuff.reshape((-1,1,2))
+        return stuff
     def reset(self):
         self.x = list()
         self.y = list()

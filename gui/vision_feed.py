@@ -13,7 +13,7 @@ from colors import *
 from config import Configuration
 from math import radians, cos, sin, isnan
 from robot_tracker import ROBOT_DISTANCE
-
+import numpy as np
 def nothing(x): 
     pass
 
@@ -123,6 +123,7 @@ class GUI:
                         cv2.imshow('frame2', cv2.putText(self.frame, r.name,
                                                          (int(clx)-15, int(cly)+40),
                                                          cv2.FONT_HERSHEY_COMPLEX, 0.45, (100, 150, 200)))
+
 
                         cv2.imshow('frame2', cv2.polylines(self.frame, r.get_other_coordinates(), True,
                                                            BGR_COMMON['black'], 1))
