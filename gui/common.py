@@ -1,21 +1,40 @@
 from Tkinter import *
+from threading import current_thread
 
-class UserVariable(object):
+class UserVariable(Variable, object):
 
-    def __init__(self, window, value=None, callback=None, poll_interval=100):
+    def __init__(self, window, type, value=None, callback=None, poll_interval=100):
+        Variable.__init__(self, window, value=value)
+
         self.interval = int(poll_interval)
         self.window   = window
         self.callback = callback
         self._value   = value
         self._changed = False
+        self._thread  = current_thread().name
+        self.type     = type
+
         window.after(poll_interval, self._update)
+        self.trace_variable('w', self._tcl_callback)
 
     def _update(self):
         if self._changed and self.callback:
+            Variable.set(self, self._value)
+            self._changed = False
             self.callback(self)
 
-        self._changed = False
         self.window.after(self.interval, self._update)
+
+    def __del__(self):
+        if not hasattr(self, '_thread') or \
+                        current_thread().name == self._thread:
+            Variable.__del__(self)
+        else:
+            raise Exception("Cannot delete Tcl variable "
+                            "from different thread")
+
+    def _tcl_callback(self, *_):
+        self.value = self.type(Variable.get(self))
 
     @property
     def value(self):
@@ -23,13 +42,26 @@ class UserVariable(object):
 
     @value.setter
     def value(self, value):
-        self._value = value
+        assert isinstance(value, self.type)
+        self._value   = value
         self._changed = True
+
+    def set(self, value):
+        if hasattr(self, '_thread'):
+            if not current_thread().name == self._thread:
+                raise Exception("Cannot set Tcl variable "
+                                "from different thread.")
+        Variable.set(self, value)
+
+    def get(self):
+        return self.value
 
 
 class UserControl(Frame):
 
     def __init__(self, master=None, title=None):
+        self._title = title
+
         if master is None:
             master = self.window = Toplevel()
             master.wm_title(title)
@@ -40,7 +72,6 @@ class UserControl(Frame):
 
         Frame.__init__(self, master)
 
-
     def show(self):
         self.pack()
 
@@ -49,6 +80,10 @@ class UserControl(Frame):
             self.window.destroy()
         else:
             self.destroy()
+
+    @property
+    def title(self):
+        return self._title
 
 
 class MainWindow(Tk):

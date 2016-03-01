@@ -82,22 +82,17 @@ class VisionWrapper:
             self.gui = GUI(self.pitch, self.color_settings, self.calibration, self)
 
             from threading import Thread
-            from gui.calibration import CalibrationUI
-            from gui.trackers import TrackerSettingsUI
             from gui.common import MainWindow
-            from gui.status import StatusUI
+            from gui.status_control import StatusUI
+            from gui.main import MainUI
 
-            self.calibration_window      = None
-            self.tracker_settings_window = None
-            self.status_window           = None
+            self.status_window = None
 
             def create_windows():
-                self.calibration_window = CalibrationUI(self.calibration)
-                self.tracker_settings_window = TrackerSettingsUI(self.trackers)
+                self.main_window = MainUI(self)
                 self.status_window = StatusUI()
                 return [
-                    self.calibration_window,
-                    self.tracker_settings_window,
+                    self.main_window,
                     self.status_window
                 ]
 
