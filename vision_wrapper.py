@@ -42,6 +42,9 @@ class VisionWrapper:
         self.calibration = Configuration.read_calibration(
             pc_name, create_if_missing=True)
 
+        self.video_settings = Configuration.read_video_config(
+            pc_name, create_if_missing=True)
+
         # Set up camera for frames
         self.camera = Camera(pitch)
         self.camera.start_capture()
@@ -50,6 +53,8 @@ class VisionWrapper:
 
         # Set up vision
         self.trackers = list()
+
+        self.world_objects = dict()
 
         # Get machine-specific calibration
 
@@ -90,14 +95,11 @@ class VisionWrapper:
 
             def create_windows():
                 self.main_window = MainUI(self)
-                self.status_window = StatusUI()
-                return [
-                    self.main_window,
-                    self.status_window
-                ]
+                return [ self.main_window ]
 
             Thread(name="Tkinter UI", target=MainWindow.create_and_show,
                    args=[create_windows]).start()
+
 
 
         # Set up preprocessing and postprocessing
@@ -108,12 +110,6 @@ class VisionWrapper:
         self.frameQueue = []
 
 
-    def end(self):
-        self.gui.commit_settings()
-
-    def saveCalibrations(self):
-        Configuration.write_calibration(self.calibration)
-
     def get_robots_raw(self):
         # Filter robots that have no position
         return [[r.name, r.visible, r.position, r.heading, RobotType.UNKNOWN]
@@ -122,11 +118,23 @@ class VisionWrapper:
     def get_robot_position(self, robot_name):
         return filter(lambda r: r.name == robot_name, self.robots)[0].position
 
+    def get_robot_headings(self):
+        headings = dict()
+        for r in self.robots:
+            headings[r.name] = r.heading
+        return headings
+
 
     def get_circle_position(self, robot_name):
         for r in self.robots:
             if r.name == robot_name:
                 return r.side_x, r.side_y
+
+    def get_all_robots(self):
+        robots = dict()
+        for r in self.robots:
+            robots[r.name] = self.get_robot_position(r.name)
+        return robots
 
     def get_ball_position(self):
         return self.world_objects.get('ball')
@@ -209,12 +217,18 @@ class VisionWrapper:
                     # Only update robots we've set as being present
                     if not robot.present: continue
 
+                    # Adds the side marker coordinates
+                    other_circle_coords = []
+                    for marker in topplate.markers[1:]:
+                        other_circle_coords.append((marker['pos'][0], marker['pos'][1]))
+
                     if robot.update(topplate.naive_midpoint[0], topplate.naive_midpoint[1],
                                     topplate.primary_color, topplate.secondary_color,
                                     topplate.markers[0]['pos'][0] if any(topplate.markers)
                                         else None,
                                     topplate.markers[0]['pos'][1] if any(topplate.markers)
-                                        else None
+                                        else None,
+                                    other_circle_coords
                                     ):
                         break
 
@@ -222,6 +236,5 @@ class VisionWrapper:
         if self.enable_gui:
             self.gui.update(self)
 
-            if self.status_window:
-                self.status_window.ball_status_var.value = \
-                    'ball' in self.world_objects
+
+

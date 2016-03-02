@@ -5,7 +5,6 @@ from Tkinter import *
 
 import cv2
 import numpy as np
-import tools
 
 
 NUMBER_OF_MAIN_CIRCLES_PER_COLOR = 2
@@ -184,10 +183,6 @@ class RobotTracker(Tracker):
             results["circles"] = circles
         queue.put(results)
 
-        # 1) returns the most relevant circles found.
-        # queue.put({
-        #     "circles":circles
-        # })
 
     def update_settings(self):
         for i in range(0, len(self.robots)):

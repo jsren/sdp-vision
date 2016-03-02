@@ -202,6 +202,11 @@ class Configuration(object):
     calibration_colors = \
     [ 'blue', 'yellow', 'red', 'green', 'pink' ]
 
+    video_settings_max = {
+        'big': {"bright": 40000, "contrast": 40000, "color":100000, "hue": 60000},
+        'small': { "bright": 255, "contrast": 127, "color": 40, "hue": 255, "Red Balance":15, "Blue Balance": 15}
+    }
+
 
     @staticmethod
     def read_calibration(machine_name=None, create_if_missing=False):
@@ -222,6 +227,10 @@ class Configuration(object):
         with open(calib_file, 'r') as file:
             return Calibration(machine_name, json.load(file))
 
+
+
+
+    #winfow(after)
 
     @staticmethod
     def write_calibration(calibration, machine_name=None):

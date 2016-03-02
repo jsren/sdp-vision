@@ -14,6 +14,9 @@ from config import Configuration
 from math import radians, cos, sin, isnan
 from robot_tracker import ROBOT_DISTANCE
 
+from Tkinter import *
+
+import numpy as np
 def nothing(x): 
     pass
 
@@ -44,47 +47,21 @@ class GUI:
 
         # create GUI
         # The first numerical value is the starting point for the vision feed
-        cv2.namedWindow('frame2')
+        #cv2.namedWindow('frame2')
 
         # Handle mouse clicks
-        cv2.setMouseCallback('frame2', self.on_mouse_event)
+        #cv2.setMouseCallback('frame2', self.on_mouse_event)
 
-        if self.color_settings in [0, "small"]:
-            cv2.createTrackbar('bright','frame2',self.config.brightness,255,nothing)
-            cv2.createTrackbar('contrast','frame2',self.config.contrast,127,nothing)
-            cv2.createTrackbar('color','frame2',self.config.color,255,nothing)
-            cv2.createTrackbar('hue','frame2',self.config.hue,30,nothing)
-            cv2.createTrackbar('Red Balance','frame2',self.config.red_balance,20,nothing)
-            cv2.createTrackbar('Blue Balance','frame2',self.config.blue_balance,20,nothing)
-            cv2.createTrackbar('Gaussian blur','frame2',0,1,nothing)
-
-        if self.color_settings in [1, "big"]:
-            cv2.createTrackbar('bright','frame2',self.config.brightness,40000,nothing)
-            cv2.createTrackbar('contrast','frame2',self.config.contrast,40000,nothing)
-            cv2.createTrackbar('color','frame2',self.config.color,100000,nothing)
-            cv2.createTrackbar('hue','frame2',self.config.hue,60000,nothing)
-            cv2.createTrackbar('Gaussian blur','frame2',0,1,nothing)
 
     def on_mouse_event(self, event, x, y, *_):
-        if event == cv2.EVENT_LBUTTONDOWN:
-            print "Colour:", self.frame[x, y], "@", (x, y)
+        pass
+        # if event == cv2.EVENT_LBUTTONDOWN:
+        #     print "Colour:", self.frame[x, y], "@", (x, y)
+
 
     def update(self, wrapper):
 
         self.frame = wrapper.frame
-
-        if self.color_settings in [0, "small"]:
-            attributes = ["bright", "contrast", "color", "hue", "Red Balance", "Blue Balance"]
-        elif self.color_settings in [1, "big"]:
-            attributes = ["bright", "contrast", "color", "hue"]
-        else:
-            raise RuntimeError("StupidTitException: Incorrect color_settings value. "
-                               "Choose from the set [0, small, 1, big]")
-
-        for att in attributes:
-            self.config[att] = cv2.getTrackbarPos(att, 'frame2')
-        self.config.commit()
-
 
         if self.draw_contours:
             # Draw robot contours
@@ -106,7 +83,8 @@ class GUI:
                 if not r.visible: continue
 
                 clx, cly, x, y = r.get_coordinates()
-                # TODO: Does age still apply? - jsren
+
+                # Resets the robot if it's not been seen for a while.
                 if r.age > 0:
                     # Draw robot circles
                     if not isnan(clx) and not isnan(cly):
@@ -119,6 +97,10 @@ class GUI:
                         cv2.imshow('frame2', cv2.putText(self.frame, r.name,
                                                          (int(clx)-15, int(cly)+40),
                                                          cv2.FONT_HERSHEY_COMPLEX, 0.45, (100, 150, 200)))
+
+
+                        cv2.imshow('frame2', cv2.polylines(self.frame, r.get_other_coordinates(), True,
+                                                           BGR_COMMON['black'], 1))
 
                         if self.draw_direction:
                             # Draw angle in degrees
@@ -157,10 +139,6 @@ class GUI:
                                                      (0,255,0), 3, 10))
 
 
-    def commit_settings(self):
-        for attr in self.config:
-            self.config[attr] = cv2.getTrackbarPos(attr, 'frame2')
-        Configuration.write_video_config(self.config, self.config.machine_name)
 
 
     def warp_image(self, frame):
@@ -172,11 +150,11 @@ class GUI:
         :param frame: frame
         :return: preprocessed frame
         """
-        blur = cv2.getTrackbarPos('Gaussian blur', 'frame2')
+       # blur = cv2.getTrackbarPos('Gaussian blur', 'frame2')
 
-        if blur >= 1:
-            if blur % 2 == 0:
-                blur += 1
-            frame = cv2.GaussianBlur(frame, (121, 121), 0)
+        #if blur >= 1:
+        #    if blur % 2 == 0:
+        #        blur += 1
+        #    frame = cv2.GaussianBlur(frame, (121, 121), 0)
 
         return frame

@@ -42,7 +42,7 @@ class Tracker(object):
             if is_ball:
                 frame = frame[crop[2]:crop[3], crop[0]:crop[1]]
             if frame is None:
-                return None
+                return [None, None, None]
 
             # hp = adjustments['highpass']
             # if hp is None: hp = 0
@@ -120,19 +120,6 @@ class Tracker(object):
         contours = np.array(contours)
         areas = [cv2.contourArea(c) for c in contours]
         return contours[np.array(areas).argsort()[::-1][:n]]
-
-    '''
-    def get_smallest_contour(self, contours):
-        """
-        Find the smallest of all contours.
-        """
-        areas = [cv2.contourArea(c) for c in contours]
-        ind = np.argsort(areas)
-        # for i in range(len(ind)):
-        #     if areas[ind[i]] > 5:
-        #         return areas[ind[i]]
-        return contours[np.argmin(areas)]
-    '''
 
     @staticmethod
     def get_contour_centre(contour):

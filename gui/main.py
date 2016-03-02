@@ -25,6 +25,9 @@ class MainUI(UserControl):
         self.guiUI = GuiSettingsUI(vision_wrapper, self.tab_host)
         self.tab_host.add(self.guiUI, text=self.guiUI.title)
 
+        self.status_ui = StatusUI(vision_wrapper, self.tab_host)
+        self.tab_host.add(self.status_ui, text=self.status_ui.title)
+
         self.tab_host.pack()
 
 
