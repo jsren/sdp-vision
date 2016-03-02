@@ -12,6 +12,10 @@ NUMBER_OF_SIDE_CIRCLES_PER_COLOR = 16
 
 ROBOT_DISTANCE = 30
 
+CORRECTION_STEP = 2             # Green
+CORRECTION_MAX_DISTANCE = 3     # Blue
+CORRECTION_AREA_RADIUS = 4      # Yellow
+
 
 class TopPlate(object):
 
@@ -164,16 +168,17 @@ class RobotTracker(Tracker):
                         s_color = self.side_colors[0]
                         o_color = self.side_colors[1]
 
-                    # self, x, y, x0, img, distance, circle_radius, target_color_val, iteration, max_iter=15
                     pos, r = cv2.minEnclosingCircle(significant_circle)
-                    # pos = tools.correct_circle(pos[0], pos[1], pos[0], pos[1], frame,
-                    #                            5, 2, frame[pos[0], pos[1]], 0)
+                    # pos = Tracker.correct_circle_contour(pos[0], pos[1], pos[0], pos[1], frame,
+                    #                                      CORRECTION_STEP, CORRECTION_MAX_DISTANCE,
+                    #                                      CORRECTION_AREA_RADIUS, frame[pos[0], pos[1]], 0)
                     markers = [ dict(color=s_color, pos=pos, rad=r) ]
 
                     for marker in other_markers:
                         pos, r = cv2.minEnclosingCircle(marker)
-                        # pos = tools.correct_circle(pos[0], pos[1], pos[0], pos[1], frame,
-                        #                            5, 2, frame[pos[0], pos[1]], 0)
+                        # pos = Tracker.correct_circle_contour(pos[0], pos[1], pos[0], pos[1], frame,
+                        #                                      CORRECTION_STEP, CORRECTION_MAX_DISTANCE,
+                        #                                      CORRECTION_AREA_RADIUS, frame[pos[0], pos[1]], 0)
                         markers.append(dict(color=o_color, pos=pos, rad=r))
 
                     robot_results.append(TopPlate(dict(pos=cl,color=m_color), markers))

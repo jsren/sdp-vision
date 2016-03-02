@@ -44,6 +44,7 @@ class GUI:
         self.draw_ball          = True
         self.draw_ball_velocity = True
         self.draw_contours      = True
+        self.draw_correction    = True
 
         # create GUI
         # The first numerical value is the starting point for the vision feed
@@ -93,6 +94,16 @@ class GUI:
                         cv2.imshow('frame2', cv2.circle(self.frame, (int(clx), int(cly)),
                                                         ROBOT_DISTANCE, BGR_COMMON['black'], 2, 0))
 
+                        # Only for debugging circle corrector. Comment out afterwards. ALSO THIS CRASHES HORRIBLY SOMETIMES
+                        if self.draw_correction:
+                            from robot_tracker import CORRECTION_MAX_DISTANCE, CORRECTION_STEP, CORRECTION_AREA_RADIUS
+                            cv2.imshow('frame2', cv2.circle(self.frame, (int(clx), int(cly)), CORRECTION_AREA_RADIUS,
+                                                            BGR_COMMON['yellow'], 1, 0))
+                            cv2.imshow('frame2', cv2.circle(self.frame, (int(clx), int(cly)), CORRECTION_STEP,
+                                                            BGR_COMMON['green'], 1, 0))
+                            cv2.imshow('frame2', cv2.circle(self.frame, (int(clx), int(cly)), CORRECTION_MAX_DISTANCE,
+                                                            BGR_COMMON['blue'], 1, 0))
+
                         # Draw Names
                         cv2.imshow('frame2', cv2.putText(self.frame, r.name,
                                                          (int(clx)-15, int(cly)+40),
@@ -101,6 +112,11 @@ class GUI:
 
                         cv2.imshow('frame2', cv2.polylines(self.frame, r.get_other_coordinates(), True,
                                                            BGR_COMMON['black'], 1))
+
+                        for val in r.get_latest_values():
+                            cv2.imshow('frame2', cv2.circle(self.frame, (int(val[0]), int(val[1])), 1,
+                                                        BGR_COMMON['red'], 2, 0))
+
 
                         if self.draw_direction:
                             # Draw angle in degrees

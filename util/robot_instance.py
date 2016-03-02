@@ -23,6 +23,7 @@ class RobotInstance(object):
         self.age = 0
         self.angle = list()
         self.other_coords = list()
+        self.latest_values = list()
 
         self._visible = False
         self._present = bool(present)
@@ -35,6 +36,7 @@ class RobotInstance(object):
             self.side_x.insert(0, side_x); self.side_x = self.side_x[:self.queue_size]
             self.angle.insert(0, self._get_angle()); self.angle = self.angle[:self.queue_size]
             self.other_coords = other_coords
+            self.latest_values = other_coords + [(x, y), (side_x, side_y)]
             self._visible = True
             self.age = 30
             return True
@@ -67,6 +69,9 @@ class RobotInstance(object):
     @property
     def heading(self):
         return np.median(self.angle)
+
+    def get_latest_values(self):
+        return self.latest_values
 
     def get_coordinates(self):
         return np.median(self.x), np.median(self.y), \
