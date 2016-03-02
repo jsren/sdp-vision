@@ -54,6 +54,8 @@ class VisionWrapper:
         # Set up vision
         self.trackers = list()
 
+        self.world_objects = dict()
+
         # Get machine-specific calibration
 
         self.enable_gui = enable_gui
@@ -234,6 +236,5 @@ class VisionWrapper:
         if self.enable_gui:
             self.gui.update(self)
 
-            if self.status_window:
-                self.status_window.ball_status_var.value = \
-                    'ball' in self.world_objects
+
+

@@ -138,7 +138,6 @@ class VisionLauncher(object):
                     self._started = True
                     with self._cv:
                         self._cv.notifyAll()
-            self.visionwrap.end()
         finally:
             self.visionwrap.camera.stop_capture()
 

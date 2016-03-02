@@ -47,15 +47,16 @@ class GUI:
 
         # create GUI
         # The first numerical value is the starting point for the vision feed
-        cv2.namedWindow('frame2')
+        #cv2.namedWindow('frame2')
 
         # Handle mouse clicks
-        cv2.setMouseCallback('frame2', self.on_mouse_event)
+        #cv2.setMouseCallback('frame2', self.on_mouse_event)
 
 
     def on_mouse_event(self, event, x, y, *_):
-        if event == cv2.EVENT_LBUTTONDOWN:
-            print "Colour:", self.frame[x, y], "@", (x, y)
+        pass
+        # if event == cv2.EVENT_LBUTTONDOWN:
+        #     print "Colour:", self.frame[x, y], "@", (x, y)
 
 
     def update(self, wrapper):

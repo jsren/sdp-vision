@@ -42,7 +42,7 @@ class Tracker(object):
             if is_ball:
                 frame = frame[crop[2]:crop[3], crop[0]:crop[1]]
             if frame is None:
-                return None
+                return [None, None, None]
 
             # hp = adjustments['highpass']
             # if hp is None: hp = 0
