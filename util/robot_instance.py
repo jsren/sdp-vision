@@ -91,7 +91,7 @@ class RobotInstance(object):
         angle = self.angleOfLine(np.array([x, y]),
                                  np.array([sx, sy]))
         # Correct for marker offset
-        return angle + marker_angle_offset + self.offset_angle + 90
+        return (angle + marker_angle_offset + self.offset_angle + 90) % 360
 
 
     def get_other_coordinates(self):
