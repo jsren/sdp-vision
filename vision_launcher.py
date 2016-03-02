@@ -148,6 +148,11 @@ class VisionLauncher(object):
         except:
             pass
 
+    def get_pitch_dimensions(self):
+        from util.tools import get_pitch_size
+        return get_pitch_size()
+
+
 if __name__ == '__main__':
     import argparse
 

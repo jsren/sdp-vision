@@ -120,4 +120,8 @@ class VisionInterface(object):
         """
         return self._launcher.get_ball_position()
 
+    @property
+    def pitch_dimensions(self):
+        return self._launcher.get_pitch_dimensions()
+
 
