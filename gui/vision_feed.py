@@ -46,18 +46,26 @@ class GUI:
         self.draw_contours      = True
         self.draw_correction    = True
 
+        self.input_mode = None
+        self.p1         = None
+
         # create GUI
         # The first numerical value is the starting point for the vision feed
         #cv2.namedWindow('frame2')
 
         # Handle mouse clicks
-        #cv2.setMouseCallback('frame2', self.on_mouse_event)
+        cv2.setMouseCallback('frame2', self.on_mouse_event)
 
 
     def on_mouse_event(self, event, x, y, *_):
-        pass
-        # if event == cv2.EVENT_LBUTTONDOWN:
-        #     print "Colour:", self.frame[x, y], "@", (x, y)
+        if self.input_mode == 'color_picker':
+            self.p1 = (x, y)
+        if event == cv2.EVENT_LBUTTONDOWN:
+            if self.input_mode == 'measure':
+                if self.p1 is not None:
+                    self.p2 = (x, y)
+
+        print "Colour:", self.frame[x, y], "@", (x, y)
 
 
     def update(self, wrapper):
@@ -78,6 +86,15 @@ class GUI:
 
         # Draw frame
         cv2.imshow('frame2', self.frame)
+
+        if self.input_mode == 'color_picker':
+            img = self.frame[np.array(self.p1) - np.array([5, 5]),
+                             np.array(self.p1) + np.array([5, 5])]
+
+        # TODO:
+        for
+
+
 
         if self.draw_robots:
             for r in wrapper.robots:

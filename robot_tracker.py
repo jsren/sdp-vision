@@ -4,6 +4,7 @@ from scipy.cluster.vq import kmeans
 from Tkinter import *
 
 from gui.common import UserVariable
+from functools import partial
 
 import cv2
 import numpy as np
@@ -220,11 +221,14 @@ class RobotTracker(Tracker):
             Checkbutton(parent, image=img, variable=self.robot_present_vars[-1],
                         command=self.update_settings).pack(side=LEFT)
 
-        angle_offset_var = UserVariable(parent, float, callback=self.on_angle_offset_changed)
-        Scale(parent, variable=angle_offset_var, to=50, orient=HORIZONTAL,
-              label="Robot Heading Offset", length=280)
+            angle_offset_var = UserVariable(parent, float,
+                        callback=partial(self.on_angle_offset_changed, robot.name))
 
-    def on_angle_offset_changed(self, var):
+            Scale(parent, variable=angle_offset_var, to=50, orient=HORIZONTAL,
+                  label="Robot Heading Offset", length=280)
+
+
+    def on_angle_offset_changed(self, robot, var):
         # TODO
         print "TODO: change robot angle offset to", var.value
         pass
