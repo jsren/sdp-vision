@@ -171,7 +171,7 @@ class Tracker(object):
         :return:                        new x, y of a point
         """
 
-        # Get mean values in an array7
+        # Get mean values in an array
         pass
 
     @staticmethod
@@ -182,17 +182,15 @@ class Tracker(object):
         :param x:           mask x coordinate
         :param y:           mask y coordinate
         :param data:        dataset [[k0, k1, ..., kn]]
-        :return:            calculated mean
+        :return:            calculated mean. -1 if all points masked.
         """
         kernel = np.zeros_like(data)
-        #y,x = np.ogrid[-x:radius+x, -y:radius+y]
+        a, b = kernel.shape
         y,x = np.ogrid[-x:radius+x, -y:radius+y]
         mask = x**2 + y**2 <= radius**2
-        kernel[mask] = 1.
-        print kernel
-        return kernel.size / np.count_nonzero(kernel) * np.mean(kernel * data)
-
-    b = [[1,2,3],
-          [1,2,3],
-          [2,3,7],
-          [2,2,3]]
+        mask = mask[:a, :b]
+        data = data[mask]
+        if data.size > 0:
+            return kernel.size / max(np.count_nonzero(kernel), 1) * np.mean(data)
+        else:
+            return -1
