@@ -1,7 +1,6 @@
 from common import *
 from Tkinter import *
 from config import Configuration
-from ttk import *
 
 from functools import partial
 
@@ -31,9 +30,9 @@ class GuiSettingsUI(UserControl):
 
         self._vars = list()
 
-        max_values = Configuration.video_settings_max.big \
+        max_values = Configuration.video_settings_max['big'] \
                         if self.vision.color_settings in [0, "small"] \
-                        else Configuration.video_settings_max.small
+                        else Configuration.video_settings_max['small']
 
 
         for att in self.vision.video_settings:
@@ -41,7 +40,7 @@ class GuiSettingsUI(UserControl):
             self._vars.append(var)
 
             Scale(self.selector_frame, variable=var, to=max_values[att],
-                  orient=HORIZONTAL, label=att.title(), length=300).pack(anchor=W)
+                  orient=HORIZONTAL, label=att.title(), length=300).pack(anchor=W, padx=5, pady=5)
 
 
         self.button_frame = Frame(self)

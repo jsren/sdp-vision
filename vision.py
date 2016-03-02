@@ -178,6 +178,9 @@ class Camera(object):
         Returns the frame if available, otherwise returns None.
         """
         # Capture frame-by-frame
+        import numpy as np
+        return np.array([[[]]])
+
         status, frame = self.capture.read()
 
         frame = self.fix_radial_distortion(frame)

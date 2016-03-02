@@ -203,7 +203,7 @@ class Configuration(object):
     [ 'blue', 'yellow', 'red', 'green', 'pink' ]
 
     video_settings_max = {
-        'big': {"bright": 40000, "contrast": 40000, "color":100000, "hue": 60000}
+        'big': {"bright": 40000, "contrast": 40000, "color":100000, "hue": 60000},
         'small': { "bright": 255, "contrast": 127, "color": 40, "hue": 255, "Red Balance":15, "Blue Balance": 15}
     }
 
