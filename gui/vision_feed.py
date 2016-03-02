@@ -91,11 +91,6 @@ class GUI:
             img = self.frame[np.array(self.p1) - np.array([5, 5]),
                              np.array(self.p1) + np.array([5, 5])]
 
-        # TODO:
-        for
-
-
-
         if self.draw_robots:
             for r in wrapper.robots:
                 if not r.visible: continue
