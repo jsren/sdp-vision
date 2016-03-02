@@ -3,6 +3,8 @@ from util import Tracker, RobotInstance
 from scipy.cluster.vq import kmeans
 from Tkinter import *
 
+from gui.common import UserVariable
+
 import cv2
 import numpy as np
 
@@ -47,6 +49,10 @@ class RobotTracker(Tracker):
     @property
     def hasUI(self):
         return True
+
+    @property
+    def title(self):
+        return "Robot Tracker Settings"
 
     def __init__(self,
                  main_colors,
@@ -213,6 +219,15 @@ class RobotTracker(Tracker):
 
             Checkbutton(parent, image=img, variable=self.robot_present_vars[-1],
                         command=self.update_settings).pack(side=LEFT)
+
+        angle_offset_var = UserVariable(parent, float, callback=self.on_angle_offset_changed)
+        Scale(parent, variable=angle_offset_var, to=50, orient=HORIZONTAL,
+              label="Robot Heading Offset", length=280)
+
+    def on_angle_offset_changed(self, var):
+        # TODO
+        print "TODO: change robot angle offset to", var.value
+        pass
 
 
 
