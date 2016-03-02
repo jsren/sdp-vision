@@ -44,8 +44,11 @@ class StatusUI(UserControl):
             image=self.img_ball if var.value else self.img_noball)
 
     def update_vision_values(self, *_):
+        ballpos = (None, None) if self.vision.get_ball_position() is None \
+                else self.vision.get_ball_position()
+
         self.ball_loc_label.configure(text = "Ball Location: ({:5.2f}, {:5.2f})"
-                                      .format(*self.vision.get_ball_position()))
+                                      .format(*ballpos))
 
         robot_str = "\n".join(("[%s\t] ({:5.2f}, {:5.2f})"%n).format(*p)
                   for (n, p) in self.vision.get_all_robots().items())
