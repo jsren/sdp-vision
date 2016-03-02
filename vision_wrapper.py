@@ -69,6 +69,7 @@ class VisionWrapper:
             self.robots.append(RobotInstance(r_name,
                                              robot_details[r_name]['main_colour'],
                                              robot_details[r_name]['side_colour'],
+                                             robot_details[r_name]['offset_angle'],
                                              r_name in robots_on_pitch))
 
         # Draw various things on the image

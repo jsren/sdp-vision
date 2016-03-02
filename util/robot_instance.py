@@ -8,7 +8,7 @@ marker_angle_offset = 34.509
 
 class RobotInstance(object):
 
-    def __init__(self, name, m_color, s_color, present=False):
+    def __init__(self, name, m_color, s_color, offset_angle, present=False):
         """
         DO NOT USE OTHER CIRCLE COORDINATES FOR CALCULATIONS - THEY'RE NOT IN A QUEUE
         """
@@ -17,6 +17,7 @@ class RobotInstance(object):
         self.y = list()
         self.main_color = m_color
         self.side_color = s_color
+        self.offset_angle = offset_angle  # individual error offset
         self.name = name
         self.side_x = list()
         self.side_y = list()
@@ -70,6 +71,9 @@ class RobotInstance(object):
     def heading(self):
         return np.median(self.angle)
 
+    def get_robot_heading(self):
+        return np.median(self.angle)
+
     def get_latest_values(self):
         return self.latest_values
 
@@ -87,10 +91,8 @@ class RobotInstance(object):
         angle = self.angleOfLine(np.array([x, y]),
                                  np.array([sx, sy]))
         # Correct for marker offset
-        return angle + marker_angle_offset + 90
+        return angle + marker_angle_offset + self.offset_angle + 90
 
-    def get_robot_heading(self):
-        return np.median(self.angle)
 
     def get_other_coordinates(self):
         """
