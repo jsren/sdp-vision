@@ -81,6 +81,15 @@ class UserControl(Frame):
         else:
             self.destroy()
 
+    def disintegrate(self, *args, **kwargs):
+        self.destroy()
+        self.__class__(*args, **kwargs).show()
+
+    def reintegrate(self, parent, *args, **kwargs):
+        self.destroy()
+        kwargs['parent'] = parent
+        self.__class__(*args, **kwargs).show()
+
     @property
     def title(self):
         return self._title

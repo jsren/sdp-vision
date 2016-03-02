@@ -8,7 +8,7 @@ import threading
 import numpy as np
 
 
-OUR_NAME = "yellow + green"
+OUR_NAME = "blue + green"
 
 goals = {
     'right': np.array([568.0, 232.5]),
@@ -150,7 +150,7 @@ class VisionLauncher(object):
 
     def get_pitch_dimensions(self):
         from util.tools import get_pitch_size
-        return get_pitch_size()
+        return get_pitch_size(self.pitch)
 
 
 if __name__ == '__main__':
