@@ -228,6 +228,10 @@ class Configuration(object):
             return Calibration(machine_name, json.load(file))
 
 
+
+
+    #winfow(after)
+
     @staticmethod
     def write_calibration(calibration, machine_name=None):
         assert type(calibration) == Calibration

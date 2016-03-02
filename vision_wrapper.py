@@ -93,14 +93,11 @@ class VisionWrapper:
 
             def create_windows():
                 self.main_window = MainUI(self)
-                self.status_window = StatusUI()
-                return [
-                    self.main_window,
-                    self.status_window
-                ]
+                return [ self.main_window ]
 
             Thread(name="Tkinter UI", target=MainWindow.create_and_show,
                    args=[create_windows]).start()
+
 
 
         # Set up preprocessing and postprocessing
@@ -119,11 +116,23 @@ class VisionWrapper:
     def get_robot_position(self, robot_name):
         return filter(lambda r: r.name == robot_name, self.robots)[0].position
 
+    def get_robot_headings(self):
+        headings = dict()
+        for r in self.robots:
+            headings[r.name] = r.heading
+        return headings
+
 
     def get_circle_position(self, robot_name):
         for r in self.robots:
             if r.name == robot_name:
                 return r.side_x, r.side_y
+
+    def get_all_robots(self):
+        robots = dict()
+        for r in self.robots:
+            robots[r.name] = self.get_robot_position(r.name)
+        return robots
 
     def get_ball_position(self):
         return self.world_objects.get('ball')
