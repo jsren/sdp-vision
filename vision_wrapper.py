@@ -42,6 +42,9 @@ class VisionWrapper:
         self.calibration = Configuration.read_calibration(
             pc_name, create_if_missing=True)
 
+        self.video_settings = Configuration.read_video_config(
+            pc_name, create_if_missing=True)
+
         # Set up camera for frames
         self.camera = Camera(pitch)
         self.camera.start_capture()
@@ -107,12 +110,6 @@ class VisionWrapper:
         self.side = our_side
         self.frameQueue = []
 
-
-    def end(self):
-        self.gui.commit_settings()
-
-    def saveCalibrations(self):
-        Configuration.write_calibration(self.calibration)
 
     def get_robots_raw(self):
         # Filter robots that have no position
