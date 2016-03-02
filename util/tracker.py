@@ -1,5 +1,6 @@
 import numpy as np
 import cv2
+from scipy.ndimage.filters import generic_filter as gf
 
 # Turn off warnings for PolynomialFit
 import warnings
@@ -153,5 +154,45 @@ class Tracker(object):
         angle = np.arctan2(diff_y, diff_x) * 180 /  np.pi
         return angle
 
+    @staticmethod
+    def correct_circle_contour(self, x, y, distance, circle_radius, target_color_val, iteration, max_iter=15):
+        """
+        Iteratively corrects a circular contour by checking values around it.
 
+        Gets the mean value of color around a point.
+        Moves point if this ratio is better nearby.
+        :param x:                       x coordinate of starting point
+        :param y:                       y coordinate of starting point
+        :param distance:                step distance to new points
+        :param circle_radius:           distance of a circle to check
+        :param target_color_val:        [h, s, v] of the color to find
+        :param iteration:               current number of iteration
+        :param max_iter:                will stop after this many recursive calls
+        :return:                        new x, y of a point
+        """
 
+        # Get mean values in an array7
+        pass
+
+    @staticmethod
+    def get_circular_mean(radius, y, x, data):
+        """
+        Returns the mean value of given 2D dataset in a circle using a mask
+        :param radius:      mask radius
+        :param x:           mask x coordinate
+        :param y:           mask y coordinate
+        :param data:        dataset [[k0, k1, ..., kn]]
+        :return:            calculated mean
+        """
+        kernel = np.zeros_like(data)
+        #y,x = np.ogrid[-x:radius+x, -y:radius+y]
+        y,x = np.ogrid[-x:radius+x, -y:radius+y]
+        mask = x**2 + y**2 <= radius**2
+        kernel[mask] = 1.
+        print kernel
+        return kernel.size / np.count_nonzero(kernel) * np.mean(kernel * data)
+
+    b = [[1,2,3],
+          [1,2,3],
+          [2,3,7],
+          [2,2,3]]
