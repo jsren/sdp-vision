@@ -142,7 +142,7 @@ class Tracker(object):
         return angle
 
     @staticmethod
-    def correct_circle_contour(self, x, y, distance, circle_radius, target_color_val, iteration, max_iter=15):
+    def correct_circle_contour(self, x, y, x0, img, distance, circle_radius, target_color_val, iteration, max_iter=15):
         """
         Iteratively corrects a circular contour by checking values around it.
 
@@ -151,6 +151,8 @@ class Tracker(object):
         :param x:                       x coordinate of starting point
         :param y:                       y coordinate of starting point
         :param distance:                step distance to new points
+        :param x0:                      original x
+        :param img:                     image from which colours need to be found
         :param circle_radius:           distance of a circle to check
         :param target_color_val:        [h, s, v] of the color to find
         :param iteration:               current number of iteration
@@ -158,8 +160,43 @@ class Tracker(object):
         :return:                        new x, y of a point
         """
 
-        # Get mean values in an array
-        pass
+        h, s, v = cv2.split(img)
+
+        # Target co-ordinates
+        h_mean = get_circular_mean(distance, x, y, h)
+        s_mean = get_circular_mean(distance, x, y, s)
+        v_mean = get_circular_mean(distance, x, y, v)
+
+        top_h_mean = get_circular_mean(distance, x, y+distance, h)
+        top_s_mean = get_circular_mean(distance, x, y+distance, s)
+        top_v_mean = get_circular_mean(distance, x, y+distance, v)
+
+        bottom_h_mean = get_circular_mean(distance, x, y-distance, h)
+        bottom_s_mean = get_circular_mean(distance, x, y-distance, s)
+        bottom_v_mean = get_circular_mean(distance, x, y-distance, v)
+
+        left_h_mean = get_circular_mean(distance, x-distance, y, h)
+        left_s_mean = get_circular_mean(distance, x-distance, y, s)
+        left_v_mean = get_circular_mean(distance, x-distance, y, v)
+
+        right_h_mean = get_circular_mean(distance, x+distance, y, h)
+        right_s_mean = get_circular_mean(distance, x+distance, y, s)
+        right_v_mean = get_circular_mean(distance, x+distance, y, v)
+
+        means = {
+            'top_mean': abs(h_mean-top_h_mean) + abs(s_mean-top_s_mean) + abs(v_mean-top_v_mean),
+            'bottom_mean': abs(h_mean-bottom_h_mean) + abs(s_mean-bottom_s_mean) + abs(v_mean-bottom_v_mean),
+            'left_mean': abs(h_mean-left_h_mean) + abs(s_mean-left_s_mean) + abs(v_mean-left_v_mean),
+            'right_mean': abs(h_mean-right_h_mean) + abs(s_mean-right_s_mean) + abs(v_mean-right_v_mean)}
+        if max(means, key=means.get()) == "top_mean":
+            return (x, y+distance)
+        elif max(means, key=means.get()) == "bottom_mean":
+            return (x, y-distance)
+        elif max(means, key=means.get()) == "left_mean":
+            return (x-distance, y)
+        elif max(means, key=means.get()) == "right_mean":
+            return (x+distance, y)
+
 
     @staticmethod
     def get_circular_mean(radius, y, x, data):
