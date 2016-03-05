@@ -9,6 +9,7 @@ from util import RobotInstance
 from vision import Vision, Camera
 from config import Configuration
 from interface import RobotType
+from time import time
 
 
 class VisionWrapper:
@@ -83,6 +84,11 @@ class VisionWrapper:
             frame_center=center_point, calibration=self.calibration,
             robots=self.robots,
             return_circle_contours=enable_gui, trackers_out=self.trackers)
+
+        # Used for latency calculations
+        self.t0 = time()
+        self.delta_t = 0
+
 
         if self.enable_gui:
             self.gui = GUI(self.pitch, self.color_settings, self.calibration, self)
@@ -179,8 +185,9 @@ class VisionWrapper:
             self.gui.draw_ball = not self.gui.draw_ball
         elif key == ord('n'):
             self.gui.draw_contours = not self.gui.draw_contours
-        elif key == ord('j'):
-            self.gui.draw_robot = not self.gui.draw_robot
+        # TODO: this was crashing everything
+        # elif key == ord('j'):
+        #     self.gui.draw_robot = not self.gui.draw_robot
         elif key == ord('i'):
             self.gui.draw_direction = not self.gui.draw_direction
 
@@ -193,6 +200,8 @@ class VisionWrapper:
         """
         return self.world_objects.get('circles')
 
+    def get_latency_seconds(self):
+        return self.delta_t
 
     def update(self):
         """ Processes the current frame. """
@@ -232,6 +241,11 @@ class VisionWrapper:
                                     other_circle_coords
                                     ):
                         break
+
+        # Recalculate the latency time
+        t = time()
+        self.delta_t = t - self.t0
+        self.t0 = t
 
         # Perform GUI update
         if self.enable_gui:

@@ -44,7 +44,7 @@ class GUI:
         self.draw_ball          = True
         self.draw_ball_velocity = True
         self.draw_contours      = True
-        self.draw_correction    = True
+        self.draw_correction    = False  # Correction crashes things sometimes due to getting out of image bounds
 
         self.input_mode = None
         self.p1         = None
@@ -95,7 +95,7 @@ class GUI:
             for r in wrapper.robots:
                 if not r.visible: continue
 
-                clx, cly, x, y = r.get_coordinates()
+                clx, cly, x, y = r.coordinates
 
                 # Resets the robot if it's not been seen for a while.
                 if r.age > 0:
@@ -107,6 +107,7 @@ class GUI:
                                                         ROBOT_DISTANCE, BGR_COMMON['black'], 2, 0))
 
                         # Only for debugging circle corrector. Comment out afterwards. ALSO THIS CRASHES HORRIBLY SOMETIMES
+                        # due to getting out of bounds when robot is near the edge.
                         if self.draw_correction:
                             from robot_tracker import CORRECTION_MAX_DISTANCE, CORRECTION_STEP, CORRECTION_AREA_RADIUS
                             cv2.imshow('frame2', cv2.circle(self.frame, (int(clx), int(cly)), CORRECTION_AREA_RADIUS,
@@ -125,7 +126,7 @@ class GUI:
                         cv2.imshow('frame2', cv2.polylines(self.frame, r.get_other_coordinates(), True,
                                                            BGR_COMMON['black'], 1))
 
-                        for val in r.get_latest_values():
+                        for val in r.latest_values():
                             cv2.imshow('frame2', cv2.circle(self.frame, (int(val[0]), int(val[1])), 1,
                                                         BGR_COMMON['red'], 2, 0))
 

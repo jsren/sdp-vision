@@ -176,6 +176,7 @@ class RobotTracker(Tracker):
                         o_color = self.side_colors[1]
 
                     pos, r = cv2.minEnclosingCircle(significant_circle)
+                    # Commented out -> crashes when robot is near edge + slows down vision
                     # pos = Tracker.correct_circle_contour(pos[0], pos[1], pos[0], pos[1], frame,
                     #                                      CORRECTION_STEP, CORRECTION_MAX_DISTANCE,
                     #                                      CORRECTION_AREA_RADIUS, frame[pos[0], pos[1]], 0)
@@ -183,6 +184,7 @@ class RobotTracker(Tracker):
 
                     for marker in other_markers:
                         pos, r = cv2.minEnclosingCircle(marker)
+                        # Commented out -> crashes when robot is near edge + slows down vision
                         # pos = Tracker.correct_circle_contour(pos[0], pos[1], pos[0], pos[1], frame,
                         #                                      CORRECTION_STEP, CORRECTION_MAX_DISTANCE,
                         #                                      CORRECTION_AREA_RADIUS, frame[pos[0], pos[1]], 0)
@@ -231,6 +233,7 @@ class RobotTracker(Tracker):
     def on_angle_offset_changed(self, robot, var):
         # TODO
         print "TODO: change robot angle offset to", var.value
+        # robot.offset_angle = var.value? Or is 'robot' only its name?
         pass
 
 
