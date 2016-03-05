@@ -73,34 +73,34 @@ class RobotInstance(object):
         return self._present and self._visible
 
     @property
-    def position(self, median_size=None, auto_median=True):
+    def position(self, median_size=None, auto_median=False):
         if auto_median:
             median_size = self.median_selector(median_size)
-        _latest_coords = (np.median(self.x[:median_size]), np.median(self.y[:median_size]))
-        return _latest_coords
+        self._latest_coords = (np.median(self.x[:median_size]), np.median(self.y[:median_size]))
+        return self._latest_coords
 
     @property
-    def marker_position(self, median_size=None, auto_median=True):
+    def marker_position(self, median_size=None, auto_median=False):
         if auto_median:
             median_size = self.median_selector(median_size)
         return np.median(self.side_x[:median_size]), np.median(self.side_y[:median_size])
 
     @property
-    def heading(self, median_size=None, auto_median=True):
+    def heading(self, median_size=None, auto_median=False):
         if auto_median:
             median_size = self.median_selector(median_size)
-        _latest_angle = np.median(self.angle[:median_size]) % 360
-        return _latest_angle
+        self._latest_angle = np.median(self.angle[:median_size]) % 360
+        return self._latest_angle
 
     @property
     def latest_values(self):
         return self._latest_values
 
     @property
-    def coordinates(self, median_size=None, auto_median=True):
+    def coordinates(self, median_size=None, auto_median=False):
         if auto_median:
             median_size = self.median_selector(median_size)
-        _latest_coords = (np.median(self.x[:median_size]), np.median(self.y[:median_size]))
+        self._latest_coords = (np.median(self.x[:median_size]), np.median(self.y[:median_size]))
         return np.median(self.x[:median_size]), np.median(self.y[:median_size]), \
                np.median(self.side_x[:median_size]), np.median(self.side_y[:median_size])
 
