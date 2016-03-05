@@ -12,7 +12,7 @@ class RobotInstance(object):
         """
         DO NOT USE OTHER CIRCLE COORDINATES FOR CALCULATIONS - THEY'RE NOT IN A QUEUE
         """
-        self.queue_size = 4
+        self.queue_size = 5
         self.x = list()
         self.y = list()
         self.main_color = m_color
@@ -31,6 +31,7 @@ class RobotInstance(object):
 
     def update(self, x, y, m_color, s_color, side_x, side_y, other_coords):
         if self.main_color == m_color and self.side_color == s_color:
+            # Elements are inserted into the beginning of the queue
             self.x.insert(0, x); self.x = self.x[:self.queue_size]
             self.y.insert(0, y); self.y = self.y[:self.queue_size]
             self.side_y.insert(0, side_y); self.side_y = self.side_y[:self.queue_size]
@@ -60,26 +61,26 @@ class RobotInstance(object):
         return self._present and self._visible
 
     @property
-    def position(self):
-        return np.median(self.x), np.median(self.y)
+    def position(self, median_size=None):
+        return np.median(self.x[:median_size]), np.median(self.y[:median_size])
 
     @property
-    def marker_position(self):
-        return np.median(self.side_x), np.median(self.side_y)
+    def marker_position(self, median_size=None):
+        return np.median(self.side_x[:median_size]), np.median(self.side_y[:median_size])
 
     @property
-    def heading(self):
-        return np.median(self.angle)
+    def heading(self, median_size=None):
+        return np.median(self.angle[:median_size])
 
-    def get_robot_heading(self):
-        return np.median(self.angle)
+    def get_robot_heading(self, median_size=None):
+        return np.median(self.angle[:median_size])
 
     def get_latest_values(self):
         return self.latest_values
 
-    def get_coordinates(self):
-        return np.median(self.x), np.median(self.y), \
-               np.median(self.side_x), np.median(self.side_y)
+    def get_coordinates(self, median_size=None):
+        return np.median(self.x[:median_size]), np.median(self.y[:median_size]), \
+               np.median(self.side_x[:median_size]), np.median(self.side_y[:median_size])
 
     def angleOfLine(self, point1, point2):
         point2 = list(point2-point1)
