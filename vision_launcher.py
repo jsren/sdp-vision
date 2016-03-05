@@ -46,14 +46,10 @@ class VisionLauncher(object):
         self.pitch = pitch
         self.color_settings = color_settings
         self._started = False
+        self._closed = True
         self._cv = threading.Condition()
         self.launch_gui = launch_gui
         self.pc_name = pc_name
-
-        import signal
-        for sig in (signal.SIGABRT, signal.SIGILL,
-                    signal.SIGINT, signal.SIGSEGV, signal.SIGTERM):
-            signal.signal(sig, self._atexit)
 
     def launch_vision(self, robots_on_pitch=list()):
         print "[INFO] Configuring vision"
@@ -124,7 +120,8 @@ class VisionLauncher(object):
         """
         keypress = -1
         try:
-            while keypress != ord('q'):  # the 'q' key
+            self._closed = False
+            while keypress != ord('q') and not self._closed:  # the 'q' key
                 keypress = waitKey(1) & 0xFF
                 self.visionwrap.change_drawing(keypress)
 
@@ -139,18 +136,17 @@ class VisionLauncher(object):
                     with self._cv:
                         self._cv.notifyAll()
         finally:
-            self.visionwrap.camera.stop_capture()
+            # TODO - close the tk window here?
 
-    def _atexit(self, *args):
-        try:
-            self.visionwrap.camera.stop_capture()
             print "[INFO] Releasing camera"
-        except:
-            pass
+            self.visionwrap.camera.stop_capture()
 
     def get_pitch_dimensions(self):
         from util.tools import get_pitch_size
         return get_pitch_size(self.pitch)
+
+    def close(self):
+        self._closed = True
 
 
 if __name__ == '__main__':

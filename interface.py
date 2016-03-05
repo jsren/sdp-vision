@@ -124,4 +124,7 @@ class VisionInterface(object):
     def pitch_dimensions(self):
         return self._launcher.get_pitch_dimensions()
 
+    def close(self):
+        self._launcher.close()
+
 
