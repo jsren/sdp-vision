@@ -12,7 +12,7 @@ class RobotInstance(object):
         """
         DO NOT USE OTHER CIRCLE COORDINATES FOR CALCULATIONS - THEY'RE NOT IN A QUEUE
         """
-        self.queue_size = 5
+        self.queue_size = 1
         self.x = list()
         self.y = list()
         self.main_color = m_color
@@ -24,7 +24,7 @@ class RobotInstance(object):
         self.age = 0
         self.angle = list()
         self.other_coords = list()
-        self.latest_values = list()
+        self._latest_values = list()
 
         self._visible = False
         self._present = bool(present)
@@ -38,7 +38,7 @@ class RobotInstance(object):
             self.side_x.insert(0, side_x); self.side_x = self.side_x[:self.queue_size]
             self.angle.insert(0, self._get_angle()); self.angle = self.angle[:self.queue_size]
             self.other_coords = other_coords
-            self.latest_values = other_coords + [(x, y), (side_x, side_y)]
+            self._latest_values = other_coords + [(x, y), (side_x, side_y)]
             self._visible = True
             self.age = 30
             return True
@@ -70,30 +70,32 @@ class RobotInstance(object):
 
     @property
     def heading(self, median_size=None):
-        return np.median(self.angle[:median_size])
+        return np.median(self.angle[:median_size]) % 360
 
-    def get_robot_heading(self, median_size=None):
-        return np.median(self.angle[:median_size])
+    @property
+    def latest_values(self):
+        return self._latest_values
 
-    def get_latest_values(self):
-        return self.latest_values
-
-    def get_coordinates(self, median_size=None):
+    @property
+    def coordinates(self, median_size=None):
         return np.median(self.x[:median_size]), np.median(self.y[:median_size]), \
                np.median(self.side_x[:median_size]), np.median(self.side_y[:median_size])
 
-    def angleOfLine(self, point1, point2):
+    def angle_of_line(self, point1, point2):
         point2 = list(point2-point1)
         return degrees(atan2(point2[1], point2[0]))
 
+
     def _get_angle(self):
-        # Get angle between points
-        x, y, sx, sy = self.get_coordinates()
-        angle = self.angleOfLine(np.array([x, y]),
+        """
+        Gets angle between 2 points.
+        :return: angle, from 0 to 360 degrees
+        """
+        x, y, sx, sy = self.coordinates
+        angle = self.angle_of_line(np.array([x, y]),
                                  np.array([sx, sy]))
         # Correct for marker offset
         return (angle + marker_angle_offset + self.offset_angle + 90) % 360
-
 
     def get_other_coordinates(self):
         """
@@ -103,6 +105,7 @@ class RobotInstance(object):
         stuff = np.array(self.other_coords, np.int32)
         stuff = stuff.reshape((-1,1,2))
         return stuff
+
     def reset(self):
         self.x = list()
         self.y = list()

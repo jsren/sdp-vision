@@ -95,7 +95,7 @@ class GUI:
             for r in wrapper.robots:
                 if not r.visible: continue
 
-                clx, cly, x, y = r.get_coordinates()
+                clx, cly, x, y = r.coordinates
 
                 # Resets the robot if it's not been seen for a while.
                 if r.age > 0:
@@ -126,7 +126,7 @@ class GUI:
                         cv2.imshow('frame2', cv2.polylines(self.frame, r.get_other_coordinates(), True,
                                                            BGR_COMMON['black'], 1))
 
-                        for val in r.get_latest_values():
+                        for val in r.latest_values():
                             cv2.imshow('frame2', cv2.circle(self.frame, (int(val[0]), int(val[1])), 1,
                                                         BGR_COMMON['red'], 2, 0))
 
