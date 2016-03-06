@@ -5,8 +5,8 @@ import numpy as np
 # Not sure if clockwise or anti-clockwise.
 marker_angle_offset = 34.509
 
-MEDIAN_SWITCH_ANGLE_THRESHOLD = 45
-MEDIAN_SWITCH_DISTANCE_THRESHOLD = 20
+MEDIAN_SWITCH_ANGLE_THRESHOLD = 25
+MEDIAN_SWITCH_DISTANCE_THRESHOLD = 30
 
 class RobotInstance(object):
 
@@ -14,7 +14,7 @@ class RobotInstance(object):
         """
         DO NOT USE OTHER CIRCLE COORDINATES FOR CALCULATIONS - THEY'RE NOT IN A QUEUE
         """
-        self.queue_size = 1
+        self.queue_size = 5
         self.x = list()
         self.y = list()
         self.main_color = m_color
@@ -30,7 +30,7 @@ class RobotInstance(object):
 
         # Used for median selector
         self._latest_angle = 0
-        self._latest_coords = None
+        self._latest_coords = (None, None)
 
         self._visible = False
         self._present = bool(present)
@@ -73,20 +73,20 @@ class RobotInstance(object):
         return self._present and self._visible
 
     @property
-    def position(self, median_size=None, auto_median=False):
+    def position(self, median_size=None, auto_median=True):
         if auto_median:
             median_size = self.median_selector(median_size)
         self._latest_coords = (np.median(self.x[:median_size]), np.median(self.y[:median_size]))
         return self._latest_coords
 
     @property
-    def marker_position(self, median_size=None, auto_median=False):
+    def marker_position(self, median_size=None, auto_median=True):
         if auto_median:
             median_size = self.median_selector(median_size)
         return np.median(self.side_x[:median_size]), np.median(self.side_y[:median_size])
 
     @property
-    def heading(self, median_size=None, auto_median=False):
+    def heading(self, median_size=None, auto_median=True):
         if auto_median:
             median_size = self.median_selector(median_size)
         self._latest_angle = np.median(self.angle[:median_size]) % 360
@@ -97,7 +97,7 @@ class RobotInstance(object):
         return self._latest_values
 
     @property
-    def coordinates(self, median_size=None, auto_median=False):
+    def coordinates(self, median_size=None, auto_median=True):
         if auto_median:
             median_size = self.median_selector(median_size)
         self._latest_coords = (np.median(self.x[:median_size]), np.median(self.y[:median_size]))
@@ -167,9 +167,7 @@ class RobotInstance(object):
         # Loop over medians until you find an acceptable one or reach the end
         for m in xrange(1, q_size):
             if abs(np.median(self.angle[:m]) % 360 - l_angle) < MEDIAN_SWITCH_ANGLE_THRESHOLD and \
-                (np.median(self.x)[:m] - l_x)**2 + (np.median(self.y)[:m] - l_y)**2 < MEDIAN_SWITCH_DISTANCE_THRESHOLD**2:
-                    print "best median:", m
+                (np.median(self.x[:m]) - l_x)**2 + (np.median(self.y[:m]) - l_y)**2 < MEDIAN_SWITCH_DISTANCE_THRESHOLD**2:
                     return m
 
-        print "best median:", q_size
         return q_size

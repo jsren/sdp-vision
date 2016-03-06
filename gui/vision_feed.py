@@ -102,7 +102,7 @@ class GUI:
                     # Draw robot circles
                     if not isnan(clx) and not isnan(cly):
 
-                        # Draw circle
+                        # Draw robot circle
                         cv2.imshow('frame2', cv2.circle(self.frame, (int(clx), int(cly)),
                                                         ROBOT_DISTANCE, BGR_COMMON['black'], 2, 0))
 
@@ -123,12 +123,10 @@ class GUI:
                                                          cv2.FONT_HERSHEY_COMPLEX, 0.45, (100, 150, 200)))
 
 
-                        cv2.imshow('frame2', cv2.polylines(self.frame, r.get_other_coordinates(), True,
-                                                           BGR_COMMON['black'], 1))
-
+                        # Show centroids of found circles (contours)
                         for val in r.latest_values:
                             cv2.imshow('frame2', cv2.circle(self.frame, (int(val[0]), int(val[1])), 1,
-                                                        BGR_COMMON['red'], 2, 0))
+                                                        BGR_COMMON['black'], 1, 0))
 
 
                         if self.draw_direction:
@@ -138,9 +136,9 @@ class GUI:
                                                          cv2.FONT_HERSHEY_COMPLEX, 0.45, (100, 150, 200)))
 
                             cv2.imshow('frame2', cv2.line(self.frame, (int(clx), int(cly)),
-                                                                 (int(x), int(y)), BGR_COMMON['red'], 3, 0))
+                                                                 (int(x), int(y)), BGR_COMMON['red'], 2, 0))
 
-                            # Draw line
+                            # Draw heading line
                             angle = r.heading
                             new_x = clx + 30 * cos(radians(angle))
                             new_y = cly + 30 * sin(radians(angle))
