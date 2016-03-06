@@ -138,7 +138,7 @@ class VisionLauncher(object):
         finally:
             # TODO - close the tk window here?
 
-            print "[INFO] Releasing camera"
+            print "[VISION] Releasing camera"
             self.visionwrap.camera.stop_capture()
 
     def get_pitch_dimensions(self):
