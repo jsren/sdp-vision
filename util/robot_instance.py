@@ -8,6 +8,10 @@ marker_angle_offset = 34.509
 MEDIAN_SWITCH_ANGLE_THRESHOLD = 25
 MEDIAN_SWITCH_DISTANCE_THRESHOLD = 30
 
+MIDPOINT_TO_BALL_ZONE = 10
+BALL_ZONE_HEIGHT = 10
+BALL_ZONE_WIDTH = 20
+
 class RobotInstance(object):
 
     def __init__(self, name, m_color, s_color, offset_angle, present=False):
@@ -103,6 +107,20 @@ class RobotInstance(object):
         self._latest_coords = (np.median(self.x[:median_size]), np.median(self.y[:median_size]))
         return np.median(self.x[:median_size]), np.median(self.y[:median_size]), \
                np.median(self.side_x[:median_size]), np.median(self.side_y[:median_size])
+
+    @property
+    def grabbing_zone(self, median_size=None, auto_median=True):
+        # TODO: check this when changing properties
+        heading = self.heading
+        x, y = self.position
+        point_bottom_left_x = x + MIDPOINT_TO_BALL_ZONE * np.cos(heading) - 0.5 * BALL_ZONE_WIDTH * np.cos(heading + 90)
+        point_bottom_left_y = y + MIDPOINT_TO_BALL_ZONE * np.sin(heading) - 0.5 * BALL_ZONE_WIDTH * np.sin(heading + 90)
+        point_bottom_right_x = x + (MIDPOINT_TO_BALL_ZONE + BALL_ZONE_HEIGHT) * np.cos(heading) + 0.5 * BALL_ZONE_WIDTH * np.cos(heading + 90)
+        point_bottom_right_y = y + MIDPOINT_TO_BALL_ZONE * np.sin(heading) + 0.5 * BALL_ZONE_WIDTH * np.sin(heading + 90)
+        return (point_bottom_left_x, point_bottom_left_y),(point_bottom_right_x, point_bottom_right_y)
+
+
+
 
     def angle_of_line(self, point1, point2):
         point2 = list(point2-point1)
