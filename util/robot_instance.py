@@ -129,6 +129,22 @@ class RobotInstance(object):
         return (center_x, center_y), (BALL_ZONE_WIDTH, BALL_ZONE_HEIGHT), heading + 90
 
 
+    @property
+    def predicted_ball_pos(self, median_size=None, auto_median=True):
+        """
+        returns a tuple of predicted position where the robot might be holding the ball.
+        :return: ball_x, ball_y
+        """
+        # TODO: check this when changing properties
+        heading = self.heading
+        x, y = self.position
+
+        ball_x = x + MIDPOINT_TO_BALL_ZONE * cos(radians(heading))
+        ball_y = y + MIDPOINT_TO_BALL_ZONE * sin(radians(heading))
+
+        return ball_x, ball_y
+
+
     def is_point_in_grabbing_zone(self, x, y):
         """
         Checks that the given coordinates are in the hardcoded grabbing zone.

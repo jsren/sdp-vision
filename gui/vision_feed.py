@@ -49,6 +49,7 @@ class GUI:
         self.input_mode = None
         self.p1         = None
 
+        self.see_ball = False
         # create GUI
         # The first numerical value is the starting point for the vision feed
         #cv2.namedWindow('frame2')
@@ -197,10 +198,13 @@ class GUI:
 
         self.counter += 1
         if 'ball' in wrapper.world_objects:
-            self.x_ball, self.y_ball = wrapper.world_objects['ball']
+            self.x_ball, self.y_ball, self.see_ball = wrapper.world_objects['ball']
 
             if self.draw_ball:
-                cv2.imshow('frame2', cv2.circle(self.frame, (int(self.x_ball), int(self.y_ball)), 8, (0, 0, 255), 2, 0))
+                color = BGR_COMMON['red']
+                if not self.see_ball:
+                    color = BGR_COMMON['dark_red']
+                cv2.imshow('frame2', cv2.circle(self.frame, (int(self.x_ball), int(self.y_ball)), 8, color, 2, 0))
 
             if self.counter % 5 == 0:
                 self.x_ball_prev_prev = self.x_ball_prev

@@ -51,8 +51,10 @@ class StatusUI(UserControl):
         if self.vision.get_ball_position() is None:
             self.ball_loc_label.configure(text="Ball Location: (  NaN,  NaN)")
         else:
+
+            ball_x, ball_y, _ = self.vision.get_ball_position()
             self.ball_loc_label.configure(text="Ball Location: ({:5.2f}, {:5.2f})"
-                                      .format(*self.vision.get_ball_position()))
+                                      .format(*(ball_x, ball_y)))
 
         # Display latency
         self.latency_label.configure(text="Vision latency: {:5.3f} ms"

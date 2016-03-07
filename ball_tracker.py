@@ -50,7 +50,15 @@ class BallTracker(Tracker):
                                                           color,
                                                           True)
             if len(contours) <= 0:
-                pass
+                queue.put({
+                    'name': self.name,
+                    'x': 42,
+                    'y': 42,
+                    'angle': None,
+                    'velocity': None,
+                    'ball_contour': None,
+                    'found': False
+                })
             else:
                 # Trim contours matrix
                 cnt = self.get_largest_contour(contours)
@@ -64,7 +72,8 @@ class BallTracker(Tracker):
                     'y': y,
                     'angle': None,
                     'velocity': None,
-                    'ball_contour': cnt
+                    'ball_contour': cnt,
+                    'found': True
                 })
         queue.put(None)
         pass
