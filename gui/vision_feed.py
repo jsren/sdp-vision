@@ -167,8 +167,15 @@ class GUI:
                                                         BGR_COMMON['black'], 1, 0))
 
 
+                        # Draw Grabber zone
+                        box = cv2.boxPoints(r.grabbing_zone)
+                        box = np.int32(box)
+                        cv2.imshow('frame2', cv2.drawContours(self.frame, [box], 0, BGR_COMMON['red'], 1))
+
+
+                        # Draw heading
                         if self.draw_direction:
-                            # Draw angle in degrees
+                            # Write angle in degrees
                             cv2.imshow('frame2', cv2.putText(self.frame, str(int(r.heading)),
                                                              (int(clx) - 15, int(cly) + 30),
                                                          cv2.FONT_HERSHEY_COMPLEX, 0.45, (100, 150, 200)))
@@ -184,8 +191,8 @@ class GUI:
                                                                  (int(new_x), int(new_y)),
                                                           (200, 150, 50), 3, 0))
 
-                        # Draw Grabber zone
-                        cv2.imshow('frame2', cv2.rectangle(self.frame, r.grabbing_zone, BGR_COMMON['red'], 1))
+
+
 
         self.counter += 1
         if 'ball' in wrapper.world_objects:

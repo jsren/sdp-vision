@@ -1,5 +1,6 @@
 from math import degrees, atan2
 import numpy as np
+from math import radians, cos, sin
 
 # Angle offset of marker on top plate.
 # Not sure if clockwise or anti-clockwise.
@@ -9,8 +10,8 @@ MEDIAN_SWITCH_ANGLE_THRESHOLD = 25
 MEDIAN_SWITCH_DISTANCE_THRESHOLD = 30
 
 MIDPOINT_TO_BALL_ZONE = 10
-BALL_ZONE_HEIGHT = 10
-BALL_ZONE_WIDTH = 20
+BALL_ZONE_HEIGHT = 25
+BALL_ZONE_WIDTH = 40
 
 class RobotInstance(object):
 
@@ -110,17 +111,41 @@ class RobotInstance(object):
 
     @property
     def grabbing_zone(self, median_size=None, auto_median=True):
+        """
+        SLIGHTLY OUTDATED:
+        Returns x, y for the bottom left point of the rectangular grabber zone (p0_x) and
+        x, y for top right point of the grabber zone.
+        :param median_size: optional. defaults to queue_size
+        :param auto_median: optional. defaults to True, to use automatic median selection.
+        :return: p0_x, p0_y, p1_x, p1_y
+        """
         # TODO: check this when changing properties
         heading = self.heading
         x, y = self.position
-        point_bottom_left_x = x + MIDPOINT_TO_BALL_ZONE * np.cos(heading) - 0.5 * BALL_ZONE_WIDTH * np.cos(heading + 90)
-        point_bottom_left_y = y + MIDPOINT_TO_BALL_ZONE * np.sin(heading) - 0.5 * BALL_ZONE_WIDTH * np.sin(heading + 90)
-        point_bottom_right_x = x + (MIDPOINT_TO_BALL_ZONE + BALL_ZONE_HEIGHT) * np.cos(heading) + 0.5 * BALL_ZONE_WIDTH * np.cos(heading + 90)
-        point_bottom_right_y = y + MIDPOINT_TO_BALL_ZONE * np.sin(heading) + 0.5 * BALL_ZONE_WIDTH * np.sin(heading + 90)
-        return (point_bottom_left_x, point_bottom_left_y),(point_bottom_right_x, point_bottom_right_y)
 
+        center_x = x + (MIDPOINT_TO_BALL_ZONE + BALL_ZONE_HEIGHT * 0.5) * cos(radians(heading))
+        center_y = y + (MIDPOINT_TO_BALL_ZONE + BALL_ZONE_HEIGHT * 0.5) * sin(radians(heading))
 
+        return (center_x, center_y), (BALL_ZONE_WIDTH, BALL_ZONE_HEIGHT), heading + 90
+        # return (x, y), (BALL_ZONE_WIDTH, BALL_ZONE_HEIGHT), heading
 
+        # # Bottom left
+        # p_blx = x + MIDPOINT_TO_BALL_ZONE * np.cos(heading) - 0.5 * BALL_ZONE_WIDTH * np.cos(heading + 90)
+        # p_bly = y + MIDPOINT_TO_BALL_ZONE * np.sin(heading) - 0.5 * BALL_ZONE_WIDTH * np.sin(heading + 90)
+        #
+        # # Bottom right
+        # p_brx = x + MIDPOINT_TO_BALL_ZONE * np.cos(heading) + 0.5 * BALL_ZONE_WIDTH * np.cos(heading + 90)
+        # p_bry = y + MIDPOINT_TO_BALL_ZONE * np.sin(heading) + 0.5 * BALL_ZONE_WIDTH * np.sin(heading + 90)
+        #
+        # # Top left
+        # p_tlx = x + (MIDPOINT_TO_BALL_ZONE + BALL_ZONE_HEIGHT) * np.cos(heading) - 0.5 * BALL_ZONE_WIDTH * np.cos(heading + 90)
+        # p_tly = x + (MIDPOINT_TO_BALL_ZONE + BALL_ZONE_HEIGHT) * np.sin(heading) - 0.5 * BALL_ZONE_WIDTH * np.sin(heading + 90)
+        #
+        # # Top right
+        # p_trx = x + (MIDPOINT_TO_BALL_ZONE + BALL_ZONE_HEIGHT) * np.cos(heading) + 0.5 * BALL_ZONE_WIDTH * np.cos(heading + 90)
+        # p_try = x + (MIDPOINT_TO_BALL_ZONE + BALL_ZONE_HEIGHT) * np.sin(heading) + 0.5 * BALL_ZONE_WIDTH * np.sin(heading + 90)
+        #
+        # return (p_blx, p_bly), (p_brx, p_bry), (p_trx, p_try), (p_tlx, p_tly)
 
     def angle_of_line(self, point1, point2):
         point2 = list(point2-point1)
