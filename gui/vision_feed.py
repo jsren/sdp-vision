@@ -38,7 +38,7 @@ class GUI:
 
         self.calibration = calibration
         self.config      = Configuration.read_video_config(create_if_missing=True)
-
+        self.background_sub = None
         self.draw_robots        = True
         self.draw_direction     = True
         self.draw_ball          = True
@@ -85,6 +85,44 @@ class GUI:
             cv2.drawContours(self.frame, ball_contour, -1, BGR_COMMON['black'], 1)
 
         # Draw frame
+
+        kernel_val = 3
+        kernel = np.ones((kernel_val,kernel_val),np.uint8)
+        #erode
+        #frame_mod = cv2.erode(self.frame,kernel,iterations = 1)
+
+        # dilate
+        #self.frame = cv2.dilate(self.frame,kernel,iterations = 1)
+
+        # opening == erode -> dilute
+        #self.frame = cv2.morphologyEx(self.frame, cv2.MORPH_OPEN, kernel)
+
+        # closing == dilute -> erode
+        #self.frame = cv2.morphologyEx(self.frame, cv2.MORPH_CLOSE, kernel)
+
+        # morphological gradient == outlines - nothing good
+        # frame_mod = cv2.morphologyEx(self.frame, cv2.MORPH_GRADIENT, kernel)
+
+        # top hat == difference between opening and original image - might be useful for kernel values > 9
+        # frame_mod = cv2.morphologyEx(self.frame, cv2.MORPH_TOPHAT, kernel)
+
+        # black hat == difference between closing and original image - useless. Just produces lame outlines
+        # frame_mod = cv2.morphologyEx(self.frame, cv2.MORPH_BLACKHAT, kernel)
+
+        # if self.background_sub is not None:
+        #     self.frame = self.background_sub.apply(self.frame)
+        # else:
+        #     b,g,r = cv2.split(self.frame)
+        #     self.background_sub = cv2.createBackgroundSubtractorMOG2()
+        #     b = self.background_sub.apply(b)
+        #     g = self.background_sub.apply(g)
+        #     r = self.background_sub.apply(r)
+        #     self.frame = cv2.merge((b,g,r))
+        #
+        #     # self.frame = self.background_sub.apply(self.frame)
+        #     print self.frame
+        #cv2.imshow('frame3', frame_mod)
+        #cv2.imshow('bgsub',bg_mask)
         cv2.imshow('frame2', self.frame)
 
         if self.input_mode == 'color_picker':
