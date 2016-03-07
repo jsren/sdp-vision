@@ -150,7 +150,8 @@ class VisionWrapper:
         return filter(lambda r: r.name == robot_name, self.robots)[0]
 
     def do_we_have_ball(self, robot_name):
-        if 'ball' not in self.world_objects: return None
+        if 'ball' not in self.world_objects:
+            return None
 
         for r in self.robots:
             if r.name == robot_name:
@@ -158,16 +159,43 @@ class VisionWrapper:
                 robot_x, robot_y = r.position
                 heading = r.heading
 
-                assert heading <= 360
+                # TODO fix these values
+
+                width = 10
+                depth = 10
 
                 if heading < 90:
-                    return robot_x-10 < ball_x < robot_x+30 and robot_y-10 < ball_y < robot_y+30
-                elif heading >= 90 and heading < 180:
-                    return robot_x-30 < ball_x < robot_x+10 and robot_y-10 < ball_y < robot_y+30
-                elif heading >= 180 and heading < 270:
-                    return robot_x-30 < ball_x < robot_x+10 and robot_y-30 < ball_y < robot_y+10
+                    return robot_x-width < ball_x < robot_x+depth and robot_y-width < ball_y < robot_y+depth
+                elif 90 <= heading < 180:
+                    return robot_x-depth < ball_x < robot_x+width and robot_y-width < ball_y < robot_y+depth
+                elif 180 <= heading < 270:
+                    return robot_x-depth < ball_x < robot_x+width and robot_y-30 < ball_y < robot_y+width
                 else:
-                    return robot_x-10 < ball_x < robot_x+30 and robot_y-30 < ball_y < robot_y+10
+                    return robot_x-width < ball_x < robot_x+depth and robot_y-30 < ball_y < robot_y+width
+
+    def is_ball_in_range(self, robot_name):
+        if 'ball' not in self.world_objects:
+            return None
+
+        for r in self.robots:
+            if r.name == robot_name:
+                ball_x, ball_y = self.world_objects['ball']
+                robot_x, robot_y = r.position
+                heading = r.heading
+
+                # TODO confirm these values (display on vision feed)
+
+                width = 10
+                depth = 30
+
+                if heading < 90:
+                    return robot_x-width < ball_x < robot_x+depth and robot_y-width < ball_y < robot_y+depth
+                elif 90 <= heading < 180:
+                    return robot_x-depth < ball_x < robot_x+width and robot_y-width < ball_y < robot_y+depth
+                elif 180 <= heading < 270:
+                    return robot_x-depth < ball_x < robot_x+width and robot_y-30 < ball_y < robot_y+width
+                else:
+                    return robot_x-width < ball_x < robot_x+depth and robot_y-30 < ball_y < robot_y+width
 
 
     def change_drawing(self, key):

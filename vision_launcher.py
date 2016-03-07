@@ -16,7 +16,7 @@ goals = {
 }
 
 ROBOT_DESCRIPTIONS = {
-    'blue + green'  : {'main_colour': 'blue',   'side_colour': 'green', 'offset_angle': 0},
+    'blue + green'  : {'main_colour': 'blue',   'side_colour': 'green', 'offset_angle': 15},
     'yellow + green': {'main_colour': 'yellow', 'side_colour': 'green', 'offset_angle': 0},
     'blue + pink'   : {'main_colour': 'blue',   'side_colour': 'pink',  'offset_angle': 0},
     'yellow + pink' : {'main_colour': 'yellow', 'side_colour': 'pink',  'offset_angle': 0}
@@ -86,6 +86,9 @@ class VisionLauncher(object):
 
     def do_we_have_ball(self, robot_name=OUR_NAME):
         return self.visionwrap.do_we_have_ball(robot_name)
+
+    def is_ball_in_range(self, robot_name=OUR_NAME):
+        return self.visionwrap.is_ball_in_range(robot_name)
 
     def get_circle_contours(self):
         return self.visionwrap.get_circle_contours()

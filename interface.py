@@ -23,7 +23,7 @@ class Robot(object):
     _has_ball_delegate = None
 
     def __init__(self, name, visible, pos, heading, type=RobotType.UNKNOWN,
-                 has_ball_func=None):
+                 has_ball_func=None, ball_in_range_func=None):
         self._name     = name
         self._position = pos
         self._heading  = heading
@@ -31,6 +31,7 @@ class Robot(object):
         self._visible  = visible
 
         self._has_ball_delegate = has_ball_func
+        self._ball_in_range_delegate = ball_in_range_func
 
     @property
     def name(self):
@@ -72,6 +73,12 @@ class Robot(object):
         else:
             return None
 
+    @property
+    def ball_in_range(self):
+        if self._ball_in_range_delegate is not None:
+            return self._ball_in_range_delegate(self.name)
+        else:
+            return None
 
 
 # TODO: Test me
@@ -89,7 +96,7 @@ class VisionInterface(object):
         """ Gets the robots currently visible on the pitch.
         :return: A list of `Robot` instances.
         """
-        return [ Robot(r[0], r[1], r[2], r[3], r[4], self._launcher.do_we_have_ball)
+        return [ Robot(r[0], r[1], r[2], r[3], r[4], self._launcher.do_we_have_ball, self._launcher.is_ball_in_range)
             for r in self._launcher.get_robots_raw() ]
 
     def wait_for_start(self, timeout=None):
