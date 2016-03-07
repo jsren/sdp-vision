@@ -185,7 +185,7 @@ class GUI:
                                                           (200, 150, 50), 3, 0))
 
                         # Draw Grabber zone
-                        cv2.imshow('frame2', cv2.rectangle(self.frame, r.grabbing_zone, ))
+                        cv2.imshow('frame2', cv2.rectangle(self.frame, r.grabbing_zone, BGR_COMMON['red'], 1))
 
         self.counter += 1
         if 'ball' in wrapper.world_objects:
