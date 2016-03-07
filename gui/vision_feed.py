@@ -49,6 +49,7 @@ class GUI:
         self.input_mode = None
         self.p1         = None
 
+        self.see_ball = False
         # create GUI
         # The first numerical value is the starting point for the vision feed
         #cv2.namedWindow('frame2')
@@ -167,14 +168,22 @@ class GUI:
                                                         BGR_COMMON['black'], 1, 0))
 
 
+                        # Draw Grabber zone
+                        box = cv2.boxPoints(r.grabbing_zone)
+                        box = np.int32(box)
+                        cv2.imshow('frame2', cv2.drawContours(self.frame, [box], 0, BGR_COMMON['red'], 1))
+
+
+                        # Draw heading
                         if self.draw_direction:
-                            # Draw angle in degrees
+                            # Write angle in degrees
                             cv2.imshow('frame2', cv2.putText(self.frame, str(int(r.heading)),
                                                              (int(clx) - 15, int(cly) + 30),
                                                          cv2.FONT_HERSHEY_COMPLEX, 0.45, (100, 150, 200)))
 
                             cv2.imshow('frame2', cv2.line(self.frame, (int(clx), int(cly)),
                                                                  (int(x), int(y)), BGR_COMMON['red'], 2, 0))
+
 
                             # Draw heading line
                             angle = r.heading
@@ -184,12 +193,18 @@ class GUI:
                                                                  (int(new_x), int(new_y)),
                                                           (200, 150, 50), 3, 0))
 
+
+
+
         self.counter += 1
         if 'ball' in wrapper.world_objects:
-            self.x_ball, self.y_ball = wrapper.world_objects['ball']
+            self.x_ball, self.y_ball, self.see_ball = wrapper.world_objects['ball']
 
             if self.draw_ball:
-                cv2.imshow('frame2', cv2.circle(self.frame, (int(self.x_ball), int(self.y_ball)), 8, (0, 0, 255), 2, 0))
+                color = BGR_COMMON['red']
+                if not self.see_ball:
+                    color = BGR_COMMON['dark_red']
+                cv2.imshow('frame2', cv2.circle(self.frame, (int(self.x_ball), int(self.y_ball)), 8, color, 2, 0))
 
             if self.counter % 5 == 0:
                 self.x_ball_prev_prev = self.x_ball_prev
@@ -202,8 +217,6 @@ class GUI:
                     (abs(int(self.x_ball+(5*(self.x_ball_prev-self.x_ball_prev_prev)))),
                         abs(int(self.y_ball+(5*(self.y_ball_prev-self.y_ball_prev_prev))))),
                                                      (0,255,0), 3, 10))
-
-
 
 
     def warp_image(self, frame):

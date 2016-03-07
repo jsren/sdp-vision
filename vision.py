@@ -89,7 +89,7 @@ class Vision:
 
         objects = dict()
         if 'x' in regular_positions:
-            objects['ball'] = (regular_positions['x'], regular_positions['y'])
+            objects['ball'] = (regular_positions['x'], regular_positions['y'], regular_positions['found'])
         if 'robot_coords' in regular_positions:
             objects['robots'] = regular_positions['robot_coords']
 

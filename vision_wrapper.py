@@ -63,8 +63,12 @@ class VisionWrapper:
         self.gui = None
 
         # Initialize robots
-        self.ball   = []
         self.robots = []
+
+        # Initialize ball states - which robot had the ball previously.
+        self.ball_median_size = 5
+        self.ball_index = 0
+        self.ball_states = [None] * self.ball_median_size
 
         for r_name in robot_details.keys():
             self.robots.append(RobotInstance(r_name,
@@ -144,7 +148,23 @@ class VisionWrapper:
         return robots
 
     def get_ball_position(self):
-        return self.world_objects.get('ball')
+        """
+        :return: Actual ball position or predicted ball position if the robot was near it. Might return None.
+        """
+        # TODO: call methods here to get robot region if new one will be used.
+        if not self.world_objects['ball'][2]:
+            r_name, _ = self._mode(self.ball_states)
+            if r_name:
+                for r in self.robots:
+                    if r.name == r_name:
+                        x, y = r.predicted_ball_pos
+                        self.world_objects['ball'] = (x, y, True)
+
+        if self.world_objects['ball'][2]:
+            return self.world_objects['ball']
+        else:
+            return None
+
 
     def get_robot_direction(self, robot_name):
         return filter(lambda r: r.name == robot_name, self.robots)[0]
@@ -228,8 +248,19 @@ class VisionWrapper:
         """
         return self.world_objects.get('circles')
 
+
     def get_latency_seconds(self):
         return self.delta_t
+
+
+    def _mode(self, array):
+        """
+        :param array:   some array
+        :return: m, c   the first mode found and the number of occurences
+        """
+        m = max(array, key = array.count)
+        return m, array.count(m)
+
 
     def update(self):
         """ Processes the current frame. """
@@ -243,10 +274,7 @@ class VisionWrapper:
             cv2.imshow('bg sub', self.preprocessed['background_sub'])
 
         # Find object positions
-        # model_positions have their y coordinate inverted
-        # TODO: is this still the case?
-        self.world_objects, self.world_contours = \
-            self.vision.perform_locate(self.frame)
+        self.world_objects, self.world_contours = self.vision.perform_locate(self.frame)
 
         # Updates the robot coordinates
         if 'robots' in self.world_objects:
@@ -268,7 +296,12 @@ class VisionWrapper:
                                         else None,
                                     other_circle_coords
                                     ):
+                        # Add new ball state if robot has the ball.
+                        ball = self.get_ball_position()
+                        if ball and ball[2] and robot.is_point_in_grabbing_zone(ball[0], ball[1]):
+                            self.ball_states[self.ball_index] = robot.name
                         break
+            self.ball_index = (self.ball_index + 1) % self.ball_median_size
 
         # Recalculate the latency time
         t = time()

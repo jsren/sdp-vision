@@ -1,5 +1,6 @@
 from math import degrees, atan2
 import numpy as np
+from math import radians, cos, sin
 
 # Angle offset of marker on top plate.
 # Not sure if clockwise or anti-clockwise.
@@ -7,6 +8,10 @@ marker_angle_offset = 34.509
 
 MEDIAN_SWITCH_ANGLE_THRESHOLD = 25
 MEDIAN_SWITCH_DISTANCE_THRESHOLD = 30
+
+MIDPOINT_TO_BALL_ZONE = 10
+BALL_ZONE_HEIGHT = 25
+BALL_ZONE_WIDTH = 40
 
 class RobotInstance(object):
 
@@ -103,6 +108,80 @@ class RobotInstance(object):
         self._latest_coords = (np.median(self.x[:median_size]), np.median(self.y[:median_size]))
         return np.median(self.x[:median_size]), np.median(self.y[:median_size]), \
                np.median(self.side_x[:median_size]), np.median(self.side_y[:median_size])
+
+    @property
+    def grabbing_zone(self, median_size=None, auto_median=True):
+        """
+        SLIGHTLY OUTDATED:
+        Returns x, y for the bottom left point of the rectangular grabber zone (p0_x) and
+        x, y for top right point of the grabber zone.
+        :param median_size: optional. defaults to queue_size
+        :param auto_median: optional. defaults to True, to use automatic median selection.
+        :return: p0_x, p0_y, p1_x, p1_y
+        """
+        # TODO: check this when changing properties
+        heading = self.heading
+        x, y = self.position
+
+        center_x = x + (MIDPOINT_TO_BALL_ZONE + BALL_ZONE_HEIGHT * 0.5) * cos(radians(heading))
+        center_y = y + (MIDPOINT_TO_BALL_ZONE + BALL_ZONE_HEIGHT * 0.5) * sin(radians(heading))
+
+        return (center_x, center_y), (BALL_ZONE_WIDTH, BALL_ZONE_HEIGHT), heading + 90
+
+
+    @property
+    def predicted_ball_pos(self, median_size=None, auto_median=True):
+        """
+        returns a tuple of predicted position where the robot might be holding the ball.
+        :return: ball_x, ball_y
+        """
+        # TODO: check this when changing properties
+        heading = self.heading
+        x, y = self.position
+
+        ball_x = x + MIDPOINT_TO_BALL_ZONE * cos(radians(heading))
+        ball_y = y + MIDPOINT_TO_BALL_ZONE * sin(radians(heading))
+
+        return ball_x, ball_y
+
+
+    def is_point_in_grabbing_zone(self, x, y):
+        """
+        Checks that the given coordinates are in the hardcoded grabbing zone.
+        :param x:
+        :param y:
+        :return: True or False
+        """
+
+        (z_x, z_y), (w, h), heading = self.grabbing_zone
+        heading = radians(heading - 90)
+
+        # Top left
+        ax = z_x + h/2. * cos(heading) + w/2. * cos(heading - radians(90))
+        ay = z_y + h/2. * sin(heading) + w/2. * sin(heading - radians(90))
+
+        # Top left
+        bx = z_x + h/2. * cos(heading) + w/2. * cos(heading + radians(90))
+        by = z_y + h/2. * sin(heading) + w/2. * sin(heading + radians(90))
+
+        # Bottom right
+        dx = z_x - h/2. * cos(heading) + w/2. * cos(heading - radians(90))
+        dy = z_y - h/2. * sin(heading) + w/2. * sin(heading - radians(90))
+
+        # Pseudo-magically calculate if the point is in the rectangle
+        # http://stackoverflow.com/questions/2752725/finding-whether-a-point-lies-inside-a-rectangle-or-not
+
+        bax = bx - ax
+        bay = by - ay
+        dax = dx - ax
+        day = dy - ay
+
+        if (x - ax) * bax + (y - ay) * bay < 0.0: return False
+        if (x - bx) * bax + (y - by) * bay > 0.0: return False
+        if (x - ax) * dax + (y - ay) * day < 0.0: return False
+        if (x - dx) * dax + (y - dy) * day > 0.0: return False
+
+        return True
 
     def angle_of_line(self, point1, point2):
         point2 = list(point2-point1)
