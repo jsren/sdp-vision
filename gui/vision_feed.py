@@ -183,6 +183,7 @@ class GUI:
                             cv2.imshow('frame2', cv2.line(self.frame, (int(clx), int(cly)),
                                                                  (int(x), int(y)), BGR_COMMON['red'], 2, 0))
 
+
                             # Draw heading line
                             angle = r.heading
                             new_x = clx + 30 * cos(radians(angle))
@@ -212,8 +213,6 @@ class GUI:
                     (abs(int(self.x_ball+(5*(self.x_ball_prev-self.x_ball_prev_prev)))),
                         abs(int(self.y_ball+(5*(self.y_ball_prev-self.y_ball_prev_prev))))),
                                                      (0,255,0), 3, 10))
-
-
 
 
     def warp_image(self, frame):

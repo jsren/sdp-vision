@@ -127,25 +127,45 @@ class RobotInstance(object):
         center_y = y + (MIDPOINT_TO_BALL_ZONE + BALL_ZONE_HEIGHT * 0.5) * sin(radians(heading))
 
         return (center_x, center_y), (BALL_ZONE_WIDTH, BALL_ZONE_HEIGHT), heading + 90
-        # return (x, y), (BALL_ZONE_WIDTH, BALL_ZONE_HEIGHT), heading
 
-        # # Bottom left
-        # p_blx = x + MIDPOINT_TO_BALL_ZONE * np.cos(heading) - 0.5 * BALL_ZONE_WIDTH * np.cos(heading + 90)
-        # p_bly = y + MIDPOINT_TO_BALL_ZONE * np.sin(heading) - 0.5 * BALL_ZONE_WIDTH * np.sin(heading + 90)
-        #
-        # # Bottom right
-        # p_brx = x + MIDPOINT_TO_BALL_ZONE * np.cos(heading) + 0.5 * BALL_ZONE_WIDTH * np.cos(heading + 90)
-        # p_bry = y + MIDPOINT_TO_BALL_ZONE * np.sin(heading) + 0.5 * BALL_ZONE_WIDTH * np.sin(heading + 90)
-        #
-        # # Top left
-        # p_tlx = x + (MIDPOINT_TO_BALL_ZONE + BALL_ZONE_HEIGHT) * np.cos(heading) - 0.5 * BALL_ZONE_WIDTH * np.cos(heading + 90)
-        # p_tly = x + (MIDPOINT_TO_BALL_ZONE + BALL_ZONE_HEIGHT) * np.sin(heading) - 0.5 * BALL_ZONE_WIDTH * np.sin(heading + 90)
-        #
-        # # Top right
-        # p_trx = x + (MIDPOINT_TO_BALL_ZONE + BALL_ZONE_HEIGHT) * np.cos(heading) + 0.5 * BALL_ZONE_WIDTH * np.cos(heading + 90)
-        # p_try = x + (MIDPOINT_TO_BALL_ZONE + BALL_ZONE_HEIGHT) * np.sin(heading) + 0.5 * BALL_ZONE_WIDTH * np.sin(heading + 90)
-        #
-        # return (p_blx, p_bly), (p_brx, p_bry), (p_trx, p_try), (p_tlx, p_tly)
+
+    def is_point_in_grabbing_zone(self, x, y):
+        """
+        Checks that the given coordinates are in the hardcoded grabbing zone.
+        :param x:
+        :param y:
+        :return: True or False
+        """
+
+        (z_x, z_y), (w, h), heading = self.grabbing_zone
+        heading = radians(heading - 90)
+
+        # Top left
+        ax = z_x + h/2. * cos(heading) + w/2. * cos(heading - radians(90))
+        ay = z_y + h/2. * sin(heading) + w/2. * sin(heading - radians(90))
+
+        # Top left
+        bx = z_x + h/2. * cos(heading) + w/2. * cos(heading + radians(90))
+        by = z_y + h/2. * sin(heading) + w/2. * sin(heading + radians(90))
+
+        # Bottom right
+        dx = z_x - h/2. * cos(heading) + w/2. * cos(heading - radians(90))
+        dy = z_y - h/2. * sin(heading) + w/2. * sin(heading - radians(90))
+
+        # Pseudo-magically calculate if the point is in the rectangle
+        # http://stackoverflow.com/questions/2752725/finding-whether-a-point-lies-inside-a-rectangle-or-not
+
+        bax = bx - ax
+        bay = by - ay
+        dax = dx - ax
+        day = dy - ay
+
+        if (x - ax) * bax + (y - ay) * bay < 0.0: return False
+        if (x - bx) * bax + (y - by) * bay > 0.0: return False
+        if (x - ax) * dax + (y - ay) * day < 0.0: return False
+        if (x - dx) * dax + (y - dy) * day > 0.0: return False
+
+        return True
 
     def angle_of_line(self, point1, point2):
         point2 = list(point2-point1)
