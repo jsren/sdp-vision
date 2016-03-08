@@ -169,9 +169,14 @@ class GUI:
 
 
                         # Draw Grabber zone
-                        box = cv2.boxPoints(r.grabbing_zone)
+                        box = cv2.boxPoints(r.grabbing_zone())
                         box = np.int32(box)
                         cv2.imshow('frame2', cv2.drawContours(self.frame, [box], 0, BGR_COMMON['red'], 1))
+
+                        # Draw robot holding area
+                        box = cv2.boxPoints(r.grabbing_zone(scale=wrapper.BALL_HOLDING_AREA_SCALE))
+                        box = np.int32(box)
+                        cv2.imshow('frame2', cv2.drawContours(self.frame, [box], 0, BGR_COMMON['green'], 1))
 
                         ball = wrapper.world_objects['ball']
                         # if ball and ball[2]:
@@ -179,6 +184,12 @@ class GUI:
                         #         print "YYYYEEEEEEEEEEEEEEEEEEESSSSSS"
                         #     else:
                         #         print "NO. ;("
+
+                        if ball and ball[2]:
+                            if r.is_point_in_grabbing_zone(ball[0], ball[1], scale=wrapper.BALL_HOLDING_AREA_SCALE):
+                                print "YYYYEEEEEEEEEEEEEEEEEEESSSSSS"
+                            else:
+                                print "NO. ;("
 
 
                         # Draw heading
@@ -205,7 +216,6 @@ class GUI:
 
         self.counter += 1
         ball = wrapper.get_ball_position()
-        print ball
 
         if self.draw_ball and ball and ball[2]:
             self.x_ball, self.y_ball, self.see_ball = ball
