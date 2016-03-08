@@ -173,6 +173,13 @@ class GUI:
                         box = np.int32(box)
                         cv2.imshow('frame2', cv2.drawContours(self.frame, [box], 0, BGR_COMMON['red'], 1))
 
+                        ball = wrapper.world_objects['ball']
+                        # if ball and ball[2]:
+                        #     if r.is_point_in_grabbing_zone(ball[0], ball[1]):
+                        #         print "YYYYEEEEEEEEEEEEEEEEEEESSSSSS"
+                        #     else:
+                        #         print "NO. ;("
+
 
                         # Draw heading
                         if self.draw_direction:
@@ -197,14 +204,15 @@ class GUI:
 
 
         self.counter += 1
-        if 'ball' in wrapper.world_objects:
-            self.x_ball, self.y_ball, self.see_ball = wrapper.world_objects['ball']
+        ball = wrapper.get_ball_position()
+        print ball
 
-            if self.draw_ball:
-                color = BGR_COMMON['red']
-                if not self.see_ball:
-                    color = BGR_COMMON['dark_red']
-                cv2.imshow('frame2', cv2.circle(self.frame, (int(self.x_ball), int(self.y_ball)), 8, color, 2, 0))
+        if self.draw_ball and ball and ball[2]:
+            self.x_ball, self.y_ball, self.see_ball = ball
+            color = BGR_COMMON['red']
+            if self.see_ball == 2:
+                color = BGR_COMMON['dark_red']
+            cv2.imshow('frame2', cv2.circle(self.frame, (int(self.x_ball), int(self.y_ball)), 8, color, 2, 0))
 
             if self.counter % 5 == 0:
                 self.x_ball_prev_prev = self.x_ball_prev
