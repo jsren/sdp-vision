@@ -90,7 +90,7 @@ class GUI:
         kernel_val = 3
         kernel = np.ones((kernel_val,kernel_val),np.uint8)
         #erode
-        #frame_mod = cv2.erode(self.frame,kernel,iterations = 1)
+        #self.frame = cv2.erode(self.frame,kernel,iterations = 1)
 
         # dilate
         #self.frame = cv2.dilate(self.frame,kernel,iterations = 1)
@@ -102,13 +102,21 @@ class GUI:
         #self.frame = cv2.morphologyEx(self.frame, cv2.MORPH_CLOSE, kernel)
 
         # morphological gradient == outlines - nothing good
-        # frame_mod = cv2.morphologyEx(self.frame, cv2.MORPH_GRADIENT, kernel)
+        # self.frame = cv2.morphologyEx(self.frame, cv2.MORPH_GRADIENT, kernel)
 
         # top hat == difference between opening and original image - might be useful for kernel values > 9
-        # frame_mod = cv2.morphologyEx(self.frame, cv2.MORPH_TOPHAT, kernel)
+        # self.frame = cv2.morphologyEx(self.frame, cv2.MORPH_TOPHAT, kernel)
 
         # black hat == difference between closing and original image - useless. Just produces lame outlines
-        # frame_mod = cv2.morphologyEx(self.frame, cv2.MORPH_BLACKHAT, kernel)
+        # self.frame = cv2.morphologyEx(self.frame, cv2.MORPH_BLACKHAT, kernel)
+
+        # normalisation
+
+        self.frame = cv2.cvtColor(self.frame, cv2.COLOR_BGR2HSV)
+        self.frame[:, :, 1] = cv2.equalizeHist(self.frame[:, :, 1])
+        self.frame = cv2.cvtColor(self.frame, cv2.COLOR_HSV2BGR);
+
+
 
         # if self.background_sub is not None:
         #     self.frame = self.background_sub.apply(self.frame)
