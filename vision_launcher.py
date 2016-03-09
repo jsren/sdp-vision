@@ -6,6 +6,7 @@ from util import time_delta_in_ms
 from interface import RobotType
 import threading
 import numpy as np
+import os
 
 
 OUR_NAME = "blue + green"
@@ -50,7 +51,7 @@ class VisionLauncher(object):
         self._cv = threading.Condition()
         self.launch_gui = launch_gui
         self.pc_name = pc_name
-
+        print self.get_goal_positions()
     def launch_vision(self, robots_on_pitch=list()):
         print "[INFO] Configuring vision"
         self.visionwrap = VisionWrapper(self.pitch, self.color_settings,
@@ -93,10 +94,15 @@ class VisionLauncher(object):
     def get_circle_contours(self):
         return self.visionwrap.get_circle_contours()
 
-    # TODO: Implement somehow
-    def get_goal_positions(self):
-        raise NotImplementedError()
 
+    def get_goal_positions(self):
+        PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)))
+        filename = PATH+'/calibrations/croppings.json'
+        croppings = tools.get_croppings(filename, self.pitch)['outline']
+        if self.pitch == 1:
+            return [[croppings[0][0] - 50, int(croppings[3][1]/2) - 60],[croppings[0][0] - 50, int(croppings[3][1]/2) + 50],[croppings[1][0] - 60, int(croppings[2][1]/2) - 50],[croppings[1][0] - 60, int(croppings[2][1]/2 + 60)]]
+        else:
+            return [[croppings[0][0] - 50, int(croppings[3][1]/2) - 60],[croppings[0][0] - 50, int(croppings[3][1]/2) + 50],[croppings[1][0] - 60, int(croppings[2][1]/2) - 70],[croppings[1][0] - 60, int(croppings[2][1]/2 + 40)]]
     def wait_for_start(self, timeout=None):
         """
         Sleeps the current thread until the vision system is ready
