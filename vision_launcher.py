@@ -51,7 +51,6 @@ class VisionLauncher(object):
         self._cv = threading.Condition()
         self.launch_gui = launch_gui
         self.pc_name = pc_name
-        print self.get_goal_positions()
     def launch_vision(self, robots_on_pitch=list()):
         print "[INFO] Configuring vision"
         self.visionwrap = VisionWrapper(self.pitch, self.color_settings,
@@ -96,6 +95,10 @@ class VisionLauncher(object):
 
 
     def get_goal_positions(self):
+        """
+        Takes the pitch croppings and estimates the goal corners
+        :return: [tuple(x,y),tuple(x,y),tuple(x,y),tuple(x,y)]
+        """
         PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)))
         filename = PATH+'/calibrations/croppings.json'
         croppings = tools.get_croppings(filename, self.pitch)['outline']
@@ -103,6 +106,7 @@ class VisionLauncher(object):
             return [[croppings[0][0] - 50, int(croppings[3][1]/2) - 60],[croppings[0][0] - 50, int(croppings[3][1]/2) + 50],[croppings[1][0] - 60, int(croppings[2][1]/2) - 50],[croppings[1][0] - 60, int(croppings[2][1]/2 + 60)]]
         else:
             return [[croppings[0][0] - 50, int(croppings[3][1]/2) - 60],[croppings[0][0] - 50, int(croppings[3][1]/2) + 50],[croppings[1][0] - 60, int(croppings[2][1]/2) - 70],[croppings[1][0] - 60, int(croppings[2][1]/2 + 40)]]
+
     def wait_for_start(self, timeout=None):
         """
         Sleeps the current thread until the vision system is ready
