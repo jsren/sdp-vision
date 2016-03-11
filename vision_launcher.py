@@ -51,6 +51,7 @@ class VisionLauncher(object):
         self._cv = threading.Condition()
         self.launch_gui = launch_gui
         self.pc_name = pc_name
+	
     def launch_vision(self, robots_on_pitch=list()):
         print "[INFO] Configuring vision"
         self.visionwrap = VisionWrapper(self.pitch, self.color_settings,
