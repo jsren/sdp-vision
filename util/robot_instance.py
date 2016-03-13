@@ -170,12 +170,25 @@ class RobotInstance(object):
         return ball_x, ball_y
 
 
-    def is_point_in_grabbing_zone(self, x, y, scale=1.):
+    def is_pos_in_close_distance_to_robot(self, x, y):
+        """
+        :param x:
+        :param y:
+        :return: True, if (x, y) is closer to robot than (MIDPOINT_TO_BALL_ZONE + BALL_ZONE_HEIGHT)
+        """
+        robot_x, robot_y = self.position
+        if (robot_x - x)**2 + (robot_y - y)**2 > (MIDPOINT_TO_BALL_ZONE + BALL_ZONE_HEIGHT)**2:
+            return False
+        return True
+
+    def is_point_in_grabbing_zone(self, x, y, scale=1., circular=True):
         """
         Checks that the given coordinates are in the hardcoded grabbing zone.
         :param x:
         :param y:
-        :param scale:   scale of the grabbing zone.
+        :param scale:       scale of the grabbing zone.
+        :param circular:    True if semicircular zone is required. It's furthest point coincides with old zone's.
+            Effectively, zone is smaller because of that.
         :return: True or False
         """
 
@@ -233,6 +246,9 @@ class RobotInstance(object):
         if (x + 4.2 - bx) * bax + (y - by) * bay > 0.0: return False
         if (x + 4.2 - ax) * dax + (y - ay) * day < 0.0: return False
         if (x + 4.2 - dx) * dax + (y - dy) * day > 0.0: return False
+
+        if circular and not self.is_pos_in_close_distance_to_robot(x, y):
+            return False
 
         return True
 
