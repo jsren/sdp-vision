@@ -184,19 +184,12 @@ class GUI:
                         #cv2.imshow('frame2', cv2.ellipse(self.frame,(200,200),(80,50),0,180,360,(0,0,255),1))
                         cv2.imshow('frame2', cv2.drawContours(self.frame, [box], 0, BGR_COMMON['green'], 1))
 
-                        #ball = wrapper.world_objects['ball']
-                        # if ball and ball[2]:
-                        #     if r.is_point_in_grabbing_zone(ball[0], ball[1]):
-                        #         print "YYYYEEEEEEEEEEEEEEEEEEESSSSSS"
-                        #     else:
-                        #         print "NO. ;("
-
+                        # ball = wrapper.world_objects['ball']
                         # if ball and ball[2]:
                         #     if r.is_point_in_grabbing_zone(ball[0], ball[1], scale=wrapper.BALL_HOLDING_AREA_SCALE):
                         #         print "YYYYEEEEEEEEEEEEEEEEEEESSSSSS"
                         #     else:
                         #         print "NO. ;("
-
 
                         # Draw heading
                         if self.draw_direction:
@@ -208,7 +201,6 @@ class GUI:
                             cv2.imshow('frame2', cv2.line(self.frame, (int(clx), int(cly)),
                                                                  (int(x), int(y)), BGR_COMMON['red'], 2, 0))
 
-
                             # Draw heading line
                             angle = r.heading
                             new_x = clx + 30 * cos(radians(angle))
@@ -216,9 +208,6 @@ class GUI:
                             cv2.imshow('frame2', cv2.line(self.frame, (int(clx), int(cly)),
                                                                  (int(new_x), int(new_y)),
                                                           (200, 150, 50), 3, 0))
-
-
-
 
         self.counter += 1
         ball = wrapper.get_ball_position()

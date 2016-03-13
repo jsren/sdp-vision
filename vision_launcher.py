@@ -9,9 +9,6 @@ import numpy as np
 import os
 
 
-OUR_NAME = 'blue + pink'
-
-
 # Dont think we need this
 
 # goals = {
@@ -25,10 +22,6 @@ ROBOT_DESCRIPTIONS = {
     'blue + pink'   : {'main_colour': 'blue',   'side_colour': 'pink',  'offset_angle': 0},
     'yellow + pink' : {'main_colour': 'yellow', 'side_colour': 'pink',  'offset_angle': 0}
 }
-
-
-
-
 
 class VisionLauncher(object):
 
@@ -46,7 +39,6 @@ class VisionLauncher(object):
         :return:
         """
 
-
         self.visionwrap = None
         self.vision1 = None
         self.pitch = pitch
@@ -57,13 +49,13 @@ class VisionLauncher(object):
         self.launch_gui = launch_gui
         self.pc_name = pc_name
 
-        OUR_NAME = team_colour + ' + ' + our_colour
-        assert OUR_NAME in ROBOT_DESCRIPTIONS
+        self.OUR_NAME = team_colour + ' + ' + our_colour
+        assert self.OUR_NAME in ROBOT_DESCRIPTIONS
 
     def launch_vision(self, robots_on_pitch=list()):
         print "[INFO] Configuring vision"
         self.visionwrap = VisionWrapper(self.pitch, self.color_settings,
-                                        OUR_NAME, ROBOT_DESCRIPTIONS, self.launch_gui,
+                                        self.OUR_NAME, ROBOT_DESCRIPTIONS, self.launch_gui,
                                         self.pc_name, robots_on_pitch)
 
         print "[INFO] Beginning vision loop"
@@ -72,39 +64,38 @@ class VisionLauncher(object):
     def get_robots_raw(self):
         listOfRobots = self.visionwrap.get_robots_raw()
         for robot in listOfRobots:
-            if robot[0] == OUR_NAME:
+            if robot[0] == self.OUR_NAME:
                 robot[4] = RobotType.OURS
             elif ROBOT_DESCRIPTIONS[robot[0]]['main_colour'] \
-                == ROBOT_DESCRIPTIONS[OUR_NAME]['main_colour']:
+                == ROBOT_DESCRIPTIONS[self.OUR_NAME]['main_colour']:
                 robot[4] = RobotType.FRIENDLY
             else:
                 robot[4] = RobotType.ENEMY
         return [tuple(r) for r in listOfRobots]
 
-    def get_robot_midpoint(self, robot_name=OUR_NAME):
+    def get_robot_midpoint(self, robot_name):
         return self.visionwrap.get_robot_position(robot_name)
 
-    def get_side_circle(self, robot_name=OUR_NAME):
+    def get_side_circle(self, robot_name):
         return self.visionwrap.get_circle_position(robot_name)
 
     def get_ball_position(self):
         return self.visionwrap.get_ball_position()
 
-    def get_robot_direction(self, robot_name=OUR_NAME):
+    def get_robot_direction(self, robot_name):
         return self.visionwrap.get_robot_direction(robot_name)
 
-    def do_we_have_ball(self, robot_name=OUR_NAME):
+    def do_we_have_ball(self, robot_name):
         return self.visionwrap.do_we_have_ball(robot_name)
 
-    def is_ball_in_range(self, robot_name=OUR_NAME):
+    def is_ball_in_range(self, robot_name):
         return self.visionwrap.is_ball_in_range(robot_name)
 
-    def is_ball_close(self, robot_name=OUR_NAME):
+    def is_ball_close(self, robot_name):
         return self.visionwrap.is_ball_close_but_not_grabbable(robot_name)
 
     def get_circle_contours(self):
         return self.visionwrap.get_circle_contours()
-
 
     def get_goal_positions(self):
         """
@@ -115,9 +106,9 @@ class VisionLauncher(object):
         filename = PATH+'/calibrations/croppings.json'
         croppings = tools.get_croppings(filename, self.pitch)['outline']
         if self.pitch == 1:
-            return [[croppings[0][0] - 50, int(croppings[3][1]/2) - 60],[croppings[0][0] - 50, int(croppings[3][1]/2) + 50],[croppings[1][0] - 60, int(croppings[2][1]/2) - 50],[croppings[1][0] - 60, int(croppings[2][1]/2 + 60)]]
+            return [(croppings[0][0] - 50, int(croppings[3][1]/2) - 60), (croppings[0][0] - 50, int(croppings[3][1]/2) + 50), (croppings[1][0] - 60, int(croppings[2][1]/2) - 50), (croppings[1][0] - 60, int(croppings[2][1]/2 + 60))]
         else:
-            return [[croppings[0][0] - 50, int(croppings[3][1]/2) - 60],[croppings[0][0] - 50, int(croppings[3][1]/2) + 50],[croppings[1][0] - 60, int(croppings[2][1]/2) - 70],[croppings[1][0] - 60, int(croppings[2][1]/2 + 40)]]
+            return [(croppings[0][0] - 50, int(croppings[3][1]/2) - 60), (croppings[0][0] - 50, int(croppings[3][1]/2) + 50), (croppings[1][0] - 60, int(croppings[2][1]/2) - 70), (croppings[1][0] - 60, int(croppings[2][1]/2 + 40))]
 
     def wait_for_start(self, timeout=None):
         """
@@ -154,8 +145,8 @@ class VisionLauncher(object):
                 self.visionwrap.update()
 
                 # Wait until robot detected
-                if not self._started and self.get_robot_midpoint() is not None \
-                    and not np.isnan(self.get_robot_midpoint()[0]) \
+                if not self._started and self.get_robot_midpoint(self.OUR_NAME) is not None \
+                    and not np.isnan(self.get_robot_midpoint(self.OUR_NAME)[0]) \
                     and self.get_ball_position() is not None:
                     self._started = True
                     with self._cv:

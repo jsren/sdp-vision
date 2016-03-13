@@ -247,7 +247,7 @@ class RobotInstance(object):
         if (x + 4.2 - ax) * dax + (y - ay) * day < 0.0: return False
         if (x + 4.2 - dx) * dax + (y - dy) * day > 0.0: return False
 
-        if circular and not self.is_pos_in_close_distance_to_robot(x, y, scale):
+        if circular and not self.is_pos_in_close_distance_to_robot(x, y):
             return False
 
         return True
