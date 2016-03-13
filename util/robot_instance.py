@@ -12,6 +12,11 @@ MEDIAN_SWITCH_DISTANCE_THRESHOLD = 30
 MIDPOINT_TO_BALL_ZONE = 10
 BALL_ZONE_HEIGHT = 25
 BALL_ZONE_WIDTH = 40
+SIDE_ZONE_HEIGHT = 25
+SIDE_ZONE_WIDTH = 40
+BACK_ZONE_HEIGHT = 25
+BACK_ZONE_WIDTH = 40
+
 
 class RobotInstance(object):
 
@@ -129,6 +134,25 @@ class RobotInstance(object):
 
         return (center_x, center_y), (BALL_ZONE_WIDTH * scale, BALL_ZONE_HEIGHT * scale), heading + 90
 
+    def ball_at_side(self, median_size=None, auto_median=True, scale=1.):
+        # TODO: change to check for left and right zones
+        heading = self.heading
+        x, y = self.position
+
+        center_x = x + (MIDPOINT_TO_BALL_ZONE + SIDE_ZONE_HEIGHT * 0.5 * scale) * cos(radians(heading))
+        center_y = y + (MIDPOINT_TO_BALL_ZONE + SIDE_ZONE_HEIGHT * 0.5 * scale) * sin(radians(heading))
+
+        return (center_x, center_y), (SIDE_ZONE_WIDTH * scale, SIDE_ZONE_HEIGHT * scale), heading + 90
+
+    def ball_behind_robot(self, median_size=None, auto_median=True, scale=1.):
+        # TODO: change to check for zone behind robot
+        heading = self.heading
+        x, y = self.position
+
+        center_x = x + (MIDPOINT_TO_BALL_ZONE + SIDE_ZONE_HEIGHT * 0.5 * scale) * cos(radians(heading))
+        center_y = y + (MIDPOINT_TO_BALL_ZONE + SIDE_ZONE_HEIGHT * 0.5 * scale) * sin(radians(heading))
+
+        return (center_x, center_y), (SIDE_ZONE_WIDTH * scale, SIDE_ZONE_HEIGHT * scale), heading + 90
 
     @property
     def predicted_ball_pos(self, median_size=None, auto_median=True):
