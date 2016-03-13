@@ -212,6 +212,7 @@ class VisionWrapper:
 
     def is_ball_in_range(self, robot_name, scale=1.):
         ball = self.get_ball_position()
+        print ball
         if ball and ball[2]:
             for r in self.robots:
                 if r.name == robot_name:

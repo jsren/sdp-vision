@@ -38,7 +38,6 @@ class GUI:
 
         self.calibration = calibration
         self.config      = Configuration.read_video_config(create_if_missing=True)
-        self.background_sub = None
         self.draw_robots        = True
         self.draw_direction     = True
         self.draw_ball          = True
@@ -87,8 +86,8 @@ class GUI:
 
         # Draw frame
 
-        kernel_val = 3
-        kernel = np.ones((kernel_val,kernel_val),np.uint8)
+       # kernel_val = 3
+        #kernel = np.ones((kernel_val,kernel_val),np.uint8)
         #erode
         #frame_mod = cv2.erode(self.frame,kernel,iterations = 1)
 
@@ -102,28 +101,19 @@ class GUI:
         #self.frame = cv2.morphologyEx(self.frame, cv2.MORPH_CLOSE, kernel)
 
         # morphological gradient == outlines - nothing good
-        # frame_mod = cv2.morphologyEx(self.frame, cv2.MORPH_GRADIENT, kernel)
+        # self.frame = cv2.morphologyEx(self.frame, cv2.MORPH_GRADIENT, kernel)
 
         # top hat == difference between opening and original image - might be useful for kernel values > 9
-        # frame_mod = cv2.morphologyEx(self.frame, cv2.MORPH_TOPHAT, kernel)
+        # self.frame = cv2.morphologyEx(self.frame, cv2.MORPH_TOPHAT, kernel)
 
         # black hat == difference between closing and original image - useless. Just produces lame outlines
-        # frame_mod = cv2.morphologyEx(self.frame, cv2.MORPH_BLACKHAT, kernel)
+        # self.frame = cv2.morphologyEx(self.frame, cv2.MORPH_BLACKHAT, kernel)
 
-        # if self.background_sub is not None:
-        #     self.frame = self.background_sub.apply(self.frame)
-        # else:
-        #     b,g,r = cv2.split(self.frame)
-        #     self.background_sub = cv2.createBackgroundSubtractorMOG2()
-        #     b = self.background_sub.apply(b)
-        #     g = self.background_sub.apply(g)
-        #     r = self.background_sub.apply(r)
-        #     self.frame = cv2.merge((b,g,r))
-        #
-        #     # self.frame = self.background_sub.apply(self.frame)
-        #     print self.frame
-        #cv2.imshow('frame3', frame_mod)
-        #cv2.imshow('bgsub',bg_mask)
+        # Normalisation, this doesn't work. I don't know why. Works on other file...
+        # self.frame = cv2.cvtColor(self.frame, cv2.COLOR_BGR2HSV)
+        # self.frame[:, :, 1] = cv2.equalizeHist(self.frame[:, :, 1])
+        # self.frame = cv2.cvtColor(self.frame, cv2.COLOR_HSV2BGR);
+
         cv2.imshow('frame2', self.frame)
 
         if self.input_mode == 'color_picker':
@@ -176,20 +166,21 @@ class GUI:
                         # Draw robot holding area
                         box = cv2.boxPoints(r.grabbing_zone(scale=wrapper.BALL_HOLDING_AREA_SCALE))
                         box = np.int32(box)
+                        #cv2.imshow('frame2', cv2.ellipse(self.frame,(200,200),(80,50),0,180,360,(0,0,255),1))
                         cv2.imshow('frame2', cv2.drawContours(self.frame, [box], 0, BGR_COMMON['green'], 1))
 
-                        ball = wrapper.world_objects['ball']
+                        #ball = wrapper.world_objects['ball']
                         # if ball and ball[2]:
                         #     if r.is_point_in_grabbing_zone(ball[0], ball[1]):
                         #         print "YYYYEEEEEEEEEEEEEEEEEEESSSSSS"
                         #     else:
                         #         print "NO. ;("
 
-                        if ball and ball[2]:
-                            if r.is_point_in_grabbing_zone(ball[0], ball[1], scale=wrapper.BALL_HOLDING_AREA_SCALE):
-                                print "YYYYEEEEEEEEEEEEEEEEEEESSSSSS"
-                            else:
-                                print "NO. ;("
+                        # if ball and ball[2]:
+                        #     if r.is_point_in_grabbing_zone(ball[0], ball[1], scale=wrapper.BALL_HOLDING_AREA_SCALE):
+                        #         print "YYYYEEEEEEEEEEEEEEEEEEESSSSSS"
+                        #     else:
+                        #         print "NO. ;("
 
 
                         # Draw heading

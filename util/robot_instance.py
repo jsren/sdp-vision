@@ -178,10 +178,37 @@ class RobotInstance(object):
         dax = dx - ax
         day = dy - ay
 
-        if (x - ax) * bax + (y - ay) * bay < 0.0: return False
-        if (x - bx) * bax + (y - by) * bay > 0.0: return False
-        if (x - ax) * dax + (y - ay) * day < 0.0: return False
-        if (x - dx) * dax + (y - dy) * day > 0.0: return False
+        # Could maybe check if a range of values from this coord is in grabbing zone, ball radius 4.2
+
+        # Midpoint
+        # if (x - ax) * bax + (y - ay) * bay < 0.0: return False
+        # if (x - bx) * bax + (y - by) * bay > 0.0: return False
+        # if (x - ax) * dax + (y - ay) * day < 0.0: return False
+        # if (x - dx) * dax + (y - dy) * day > 0.0: return False
+
+         # Top
+        if (x - ax) * bax + (y + 4.2 - ay) * bay < 0.0: return False
+        if (x - bx) * bax + (y + 4.2 - by) * bay > 0.0: return False
+        if (x - ax) * dax + (y + 4.2 - ay) * day < 0.0: return False
+        if (x - dx) * dax + (y + 4.2 - dy) * day > 0.0: return False
+
+         # Bottom
+        if (x - ax) * bax + (y - 4.2 - ay) * bay < 0.0: return False
+        if (x - bx) * bax + (y - 4.2 - by) * bay > 0.0: return False
+        if (x - ax) * dax + (y - 4.2 - ay) * day < 0.0: return False
+        if (x - dx) * dax + (y - 4.2 - dy) * day > 0.0: return False
+
+         # Left
+        if (x - 4.2 - ax) * bax + (y - ay) * bay < 0.0: return False
+        if (x - 4.2 - bx) * bax + (y - by) * bay > 0.0: return False
+        if (x - 4.2 - ax) * dax + (y - ay) * day < 0.0: return False
+        if (x - 4.2 - dx) * dax + (y - dy) * day > 0.0: return False
+
+         # Right
+        if (x + 4.2 - ax) * bax + (y - ay) * bay < 0.0: return False
+        if (x + 4.2 - bx) * bax + (y - by) * bay > 0.0: return False
+        if (x + 4.2 - ax) * dax + (y - ay) * day < 0.0: return False
+        if (x + 4.2 - dx) * dax + (y - dy) * day > 0.0: return False
 
         return True
 

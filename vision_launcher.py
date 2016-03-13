@@ -3,18 +3,20 @@ from util import tools
 from datetime import datetime
 from vision_wrapper import VisionWrapper
 from util import time_delta_in_ms
-from interface import RobotType
+from interface import RobotType, Robot
 import threading
 import numpy as np
 import os
 
 
-OUR_NAME = "blue + green"
+OUR_NAME = 'blue + pink'
 
-goals = {
-    'right': np.array([568.0, 232.5]),
-    'left' : np.array([5.5, 226.0])
-}
+
+# Dont think we need this
+# goals = {
+#     'right': np.array([568.0, 232.5]),
+#     'left' : np.array([5.5, 226.0])
+# }
 
 ROBOT_DESCRIPTIONS = {
     'blue + green'  : {'main_colour': 'blue',   'side_colour': 'green', 'offset_angle': 15},
