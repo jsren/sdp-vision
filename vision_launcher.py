@@ -9,15 +9,11 @@ import numpy as np
 import os
 
 
-<<<<<<< HEAD
-OUR_NAME = "blue + pink"
-
-=======
 OUR_NAME = 'blue + pink'
 
 
 # Dont think we need this
->>>>>>> 83f0da90802fd7e4f17329d00daf98ae7b0cc7ac
+
 # goals = {
 #     'right': np.array([568.0, 232.5]),
 #     'left' : np.array([5.5, 226.0])
@@ -60,13 +56,9 @@ class VisionLauncher(object):
         self._cv = threading.Condition()
         self.launch_gui = launch_gui
         self.pc_name = pc_name
-<<<<<<< HEAD
+
         
         assert OUR_NAME in ROBOT_DESCRIPTIONS
-
-=======
-	
->>>>>>> 83f0da90802fd7e4f17329d00daf98ae7b0cc7ac
     def launch_vision(self, robots_on_pitch=list()):
         print "[INFO] Configuring vision"
         self.visionwrap = VisionWrapper(self.pitch, self.color_settings,

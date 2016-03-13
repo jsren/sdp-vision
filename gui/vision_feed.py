@@ -86,11 +86,8 @@ class GUI:
 
         # Draw frame
 
-<<<<<<< HEAD
-        #kernel_val = 3
-=======
+
        # kernel_val = 3
->>>>>>> 83f0da90802fd7e4f17329d00daf98ae7b0cc7ac
         #kernel = np.ones((kernel_val,kernel_val),np.uint8)
         #erode
         #frame_mod = cv2.erode(self.frame,kernel,iterations = 1)
