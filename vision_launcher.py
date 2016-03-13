@@ -99,6 +99,9 @@ class VisionLauncher(object):
     def is_ball_in_range(self, robot_name=OUR_NAME):
         return self.visionwrap.is_ball_in_range(robot_name)
 
+    def is_ball_close(self, robot_name=OUR_NAME):
+        return self.visionwrap.is_ball_close_but_not_grabbable(robot_name)
+
     def get_circle_contours(self):
         return self.visionwrap.get_circle_contours()
 
