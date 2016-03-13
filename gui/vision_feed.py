@@ -87,8 +87,8 @@ class GUI:
 
         # Draw frame
 
-        kernel_val = 3
-        kernel = np.ones((kernel_val,kernel_val),np.uint8)
+        #kernel_val = 3
+        #kernel = np.ones((kernel_val,kernel_val),np.uint8)
         #erode
         #frame_mod = cv2.erode(self.frame,kernel,iterations = 1)
 
@@ -171,6 +171,20 @@ class GUI:
                         # Draw Grabber zone
                         box = cv2.boxPoints(r.grabbing_zone)
                         box = np.int32(box)
+                        height, width = self.frame.shape[0:2]
+                        # Ellipse parameters
+                        radius = 100
+                        center = (width / 2, height - 25)
+                        axes = (radius, radius)
+                        angle = 0
+                        startAngle = 180
+                        endAngle = 360
+                        BLACK = (0, 0, 0)
+                        thickness = 10
+
+                        # http://docs.opencv.org/modules/core/doc/drawing_functions.html#ellipse
+                        #cv2.imshow('frame2', cv2.ellipse(self.frame, center, axes, angle, startAngle, endAngle, BLACK, thickness))
+
                         cv2.imshow('frame2', cv2.drawContours(self.frame, [box], 0, BGR_COMMON['red'], 1))
 
                         ball = wrapper.world_objects['ball']
