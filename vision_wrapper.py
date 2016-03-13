@@ -70,6 +70,8 @@ class VisionWrapper:
         self.ball_index = 0
         self.ball_states = [None] * self.ball_median_size
 
+        self.BALL_HOLDING_AREA_SCALE = 0.5
+
         for r_name in robot_details.keys():
             self.robots.append(RobotInstance(r_name,
                                              robot_details[r_name]['main_colour'],
@@ -172,6 +174,8 @@ class VisionWrapper:
 
 
     def do_we_have_ball(self, robot_name):
+        return self.is_ball_in_range(robot_name, scale=self.BALL_HOLDING_AREA_SCALE)
+
         # ball = self.get_ball_position()
         # if ball and ball[2]:
         #     for r in self.robots:
@@ -181,37 +185,38 @@ class VisionWrapper:
         #             break
         # return False
 
-        if 'ball' not in self.world_objects:
-            return None
+        # if 'ball' not in self.world_objects:
+        #     return None
+        #
+        # for r in self.robots:
+        #     if r.name == robot_name:
+        #         ball = self.get_ball_position()
+        #         if ball and ball[2]:
+        #             ball_x, ball_y = ball[0], ball[1]
+        #             robot_x, robot_y = r.position
+        #             heading = r.heading
+        #
+        #             # TODO fix these values
+        #
+        #             width = 10
+        #             depth = 10
+        #
+        #             if heading < 90:
+        #                 return robot_x-width < ball_x < robot_x+depth and robot_y-width < ball_y < robot_y+depth
+        #             elif 90 <= heading < 180:
+        #                 return robot_x-depth < ball_x < robot_x+width and robot_y-width < ball_y < robot_y+depth
+        #             elif 180 <= heading < 270:
+        #                 return robot_x-depth < ball_x < robot_x+width and robot_y-30 < ball_y < robot_y+width
+        #             else:
+        #                 return robot_x-width < ball_x < robot_x+depth and robot_y-30 < ball_y < robot_y+width
 
-        for r in self.robots:
-            if r.name == robot_name:
-                ball = self.get_ball_position()
-                if ball and ball[2]:
-                    ball_x, ball_y = ball[0], ball[1]
-                    robot_x, robot_y = r.position
-                    heading = r.heading
-
-                    # TODO fix these values
-
-                    width = 10
-                    depth = 10
-
-                    if heading < 90:
-                        return robot_x-width < ball_x < robot_x+depth and robot_y-width < ball_y < robot_y+depth
-                    elif 90 <= heading < 180:
-                        return robot_x-depth < ball_x < robot_x+width and robot_y-width < ball_y < robot_y+depth
-                    elif 180 <= heading < 270:
-                        return robot_x-depth < ball_x < robot_x+width and robot_y-30 < ball_y < robot_y+width
-                    else:
-                        return robot_x-width < ball_x < robot_x+depth and robot_y-30 < ball_y < robot_y+width
-
-    def is_ball_in_range(self, robot_name):
+    def is_ball_in_range(self, robot_name, scale=1.):
         ball = self.get_ball_position()
+        print ball
         if ball and ball[2]:
             for r in self.robots:
                 if r.name == robot_name:
-                    if r.is_point_in_grabbing_zone(ball[0], ball[1]):
+                    if r.is_point_in_grabbing_zone(ball[0], ball[1], scale=scale):
                         return True
                     break
         return False

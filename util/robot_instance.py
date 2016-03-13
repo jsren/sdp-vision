@@ -109,24 +109,25 @@ class RobotInstance(object):
         return np.median(self.x[:median_size]), np.median(self.y[:median_size]), \
                np.median(self.side_x[:median_size]), np.median(self.side_y[:median_size])
 
-    @property
-    def grabbing_zone(self, median_size=None, auto_median=True):
+
+    def grabbing_zone(self, median_size=None, auto_median=True, scale=1.):
         """
         SLIGHTLY OUTDATED:
         Returns x, y for the bottom left point of the rectangular grabber zone (p0_x) and
         x, y for top right point of the grabber zone.
-        :param median_size: optional. defaults to queue_size
-        :param auto_median: optional. defaults to True, to use automatic median selection.
+        :param median_size:     optional. defaults to queue_size
+        :param auto_median:     optional. defaults to True, to use automatic median selection.
+        :param scale:           scale of the grabbing zone.
         :return: p0_x, p0_y, p1_x, p1_y
         """
         # TODO: check this when changing properties
         heading = self.heading
         x, y = self.position
 
-        center_x = x + (MIDPOINT_TO_BALL_ZONE + BALL_ZONE_HEIGHT * 0.5) * cos(radians(heading))
-        center_y = y + (MIDPOINT_TO_BALL_ZONE + BALL_ZONE_HEIGHT * 0.5) * sin(radians(heading))
+        center_x = x + (MIDPOINT_TO_BALL_ZONE + BALL_ZONE_HEIGHT * 0.5 * scale) * cos(radians(heading))
+        center_y = y + (MIDPOINT_TO_BALL_ZONE + BALL_ZONE_HEIGHT * 0.5 * scale) * sin(radians(heading))
 
-        return (center_x, center_y), (BALL_ZONE_WIDTH, BALL_ZONE_HEIGHT), heading + 90
+        return (center_x, center_y), (BALL_ZONE_WIDTH * scale, BALL_ZONE_HEIGHT * scale), heading + 90
 
 
     @property
@@ -145,15 +146,16 @@ class RobotInstance(object):
         return ball_x, ball_y
 
 
-    def is_point_in_grabbing_zone(self, x, y):
+    def is_point_in_grabbing_zone(self, x, y, scale=1.):
         """
         Checks that the given coordinates are in the hardcoded grabbing zone.
         :param x:
         :param y:
+        :param scale:   scale of the grabbing zone.
         :return: True or False
         """
 
-        (z_x, z_y), (w, h), heading = self.grabbing_zone
+        (z_x, z_y), (w, h), heading = self.grabbing_zone(scale=scale)
         heading = radians(heading - 90)
 
         # Top left
@@ -176,10 +178,37 @@ class RobotInstance(object):
         dax = dx - ax
         day = dy - ay
 
-        if (x - ax) * bax + (y - ay) * bay < 0.0: return False
-        if (x - bx) * bax + (y - by) * bay > 0.0: return False
-        if (x - ax) * dax + (y - ay) * day < 0.0: return False
-        if (x - dx) * dax + (y - dy) * day > 0.0: return False
+        # Could maybe check if a range of values from this coord is in grabbing zone, ball radius 4.2
+
+        # Midpoint
+        # if (x - ax) * bax + (y - ay) * bay < 0.0: return False
+        # if (x - bx) * bax + (y - by) * bay > 0.0: return False
+        # if (x - ax) * dax + (y - ay) * day < 0.0: return False
+        # if (x - dx) * dax + (y - dy) * day > 0.0: return False
+
+         # Top
+        if (x - ax) * bax + (y + 4.2 - ay) * bay < 0.0: return False
+        if (x - bx) * bax + (y + 4.2 - by) * bay > 0.0: return False
+        if (x - ax) * dax + (y + 4.2 - ay) * day < 0.0: return False
+        if (x - dx) * dax + (y + 4.2 - dy) * day > 0.0: return False
+
+         # Bottom
+        if (x - ax) * bax + (y - 4.2 - ay) * bay < 0.0: return False
+        if (x - bx) * bax + (y - 4.2 - by) * bay > 0.0: return False
+        if (x - ax) * dax + (y - 4.2 - ay) * day < 0.0: return False
+        if (x - dx) * dax + (y - 4.2 - dy) * day > 0.0: return False
+
+         # Left
+        if (x - 4.2 - ax) * bax + (y - ay) * bay < 0.0: return False
+        if (x - 4.2 - bx) * bax + (y - by) * bay > 0.0: return False
+        if (x - 4.2 - ax) * dax + (y - ay) * day < 0.0: return False
+        if (x - 4.2 - dx) * dax + (y - dy) * day > 0.0: return False
+
+         # Right
+        if (x + 4.2 - ax) * bax + (y - ay) * bay < 0.0: return False
+        if (x + 4.2 - bx) * bax + (y - by) * bay > 0.0: return False
+        if (x + 4.2 - ax) * dax + (y - ay) * day < 0.0: return False
+        if (x + 4.2 - dx) * dax + (y - dy) * day > 0.0: return False
 
         return True
 
