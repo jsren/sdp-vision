@@ -45,20 +45,21 @@ class VisionLauncher(object):
         :param pc_name: String                      Loads camera and color settings from given PC (BUT NOT SAVE TO) file if its naem is given
         :return:
         """
-        print color_settings
-        OUR_NAME = color_settings + ' + ' + team_colour
+
+
         self.visionwrap = None
         self.vision1 = None
         self.pitch = pitch
-        self.color_settings = our_colour
+        self.color_settings = color_settings
         self._started = False
         self._closed = True
         self._cv = threading.Condition()
         self.launch_gui = launch_gui
         self.pc_name = pc_name
 
-        
+        OUR_NAME = team_colour + ' + ' + our_colour
         assert OUR_NAME in ROBOT_DESCRIPTIONS
+
     def launch_vision(self, robots_on_pitch=list()):
         print "[INFO] Configuring vision"
         self.visionwrap = VisionWrapper(self.pitch, self.color_settings,
