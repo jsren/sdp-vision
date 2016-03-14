@@ -115,148 +115,134 @@ class GUI:
         # self.frame[:, :, 1] = cv2.equalizeHist(self.frame[:, :, 1])
         # self.frame = cv2.cvtColor(self.frame, cv2.COLOR_HSV2BGR);
 
-        cv2.imshow('frame2', self.frame)
+        try:
+            cv2.imshow('frame2', self.frame)
 
-        if self.input_mode == 'color_picker':
-            img = self.frame[np.array(self.p1) - np.array([5, 5]),
-                             np.array(self.p1) + np.array([5, 5])]
+            if self.input_mode == 'color_picker':
+                img = self.frame[np.array(self.p1) - np.array([5, 5]),
+                                 np.array(self.p1) + np.array([5, 5])]
 
-        if self.draw_robots:
-            for r in wrapper.robots:
-                if not r.visible: continue
+            if self.draw_robots:
+                for r in wrapper.robots:
+                    if not r.visible: continue
 
-                clx, cly, x, y = r.coordinates
+                    clx, cly, x, y = r.coordinates
 
-                # Resets the robot if it's not been seen for a while.
-                if r.age > 0:
-                    # Draw robot circles
-                    if not isnan(clx) and not isnan(cly):
+                    # Resets the robot if it's not been seen for a while.
+                    if r.age > 0:
+                        # Draw robot circles
+                        if not isnan(clx) and not isnan(cly):
 
-                        # Draw robot circle
-                        cv2.imshow('frame2', cv2.circle(self.frame, (int(clx), int(cly)),
-                                                        ROBOT_DISTANCE, BGR_COMMON['black'], 2, 0))
+                            # Draw robot circle
+                            cv2.imshow('frame2', cv2.circle(self.frame, (int(clx), int(cly)),
+                                                            ROBOT_DISTANCE, BGR_COMMON['black'], 2, 0))
 
-                        # Only for debugging circle corrector. Comment out afterwards. ALSO THIS CRASHES HORRIBLY SOMETIMES
-                        # due to getting out of bounds when robot is near the edge.
-                        if self.draw_correction:
-                            from robot_tracker import CORRECTION_MAX_DISTANCE, CORRECTION_STEP, CORRECTION_AREA_RADIUS
-                            cv2.imshow('frame2', cv2.circle(self.frame, (int(clx), int(cly)), CORRECTION_AREA_RADIUS,
-                                                            BGR_COMMON['yellow'], 1, 0))
-                            cv2.imshow('frame2', cv2.circle(self.frame, (int(clx), int(cly)), CORRECTION_STEP,
-                                                            BGR_COMMON['green'], 1, 0))
-                            cv2.imshow('frame2', cv2.circle(self.frame, (int(clx), int(cly)), CORRECTION_MAX_DISTANCE,
-                                                            BGR_COMMON['blue'], 1, 0))
+                            # Only for debugging circle corrector. Comment out afterwards. ALSO THIS CRASHES HORRIBLY SOMETIMES
+                            # due to getting out of bounds when robot is near the edge.
+                            if self.draw_correction:
+                                from robot_tracker import CORRECTION_MAX_DISTANCE, CORRECTION_STEP, CORRECTION_AREA_RADIUS
+                                cv2.imshow('frame2', cv2.circle(self.frame, (int(clx), int(cly)), CORRECTION_AREA_RADIUS,
+                                                                BGR_COMMON['yellow'], 1, 0))
+                                cv2.imshow('frame2', cv2.circle(self.frame, (int(clx), int(cly)), CORRECTION_STEP,
+                                                                BGR_COMMON['green'], 1, 0))
+                                cv2.imshow('frame2', cv2.circle(self.frame, (int(clx), int(cly)), CORRECTION_MAX_DISTANCE,
+                                                                BGR_COMMON['blue'], 1, 0))
 
-                        # Draw Names
-                        cv2.imshow('frame2', cv2.putText(self.frame, r.name,
-                                                         (int(clx)-15, int(cly)+40),
-                                                         cv2.FONT_HERSHEY_COMPLEX, 0.45, (100, 150, 200)))
-
-
-                        # Show centroids of found circles (contours)
-                        for val in r.latest_values:
-                            cv2.imshow('frame2', cv2.circle(self.frame, (int(val[0]), int(val[1])), 1,
-                                                        BGR_COMMON['black'], 1, 0))
+                            # Draw Names
+                            cv2.imshow('frame2', cv2.putText(self.frame, r.name,
+                                                             (int(clx)-15, int(cly)+40),
+                                                             cv2.FONT_HERSHEY_COMPLEX, 0.45, (100, 150, 200)))
 
 
-                        # Draw Grabber zone
-                        box = cv2.boxPoints(r.grabbing_zone())
-                        box = np.int32(box)
-                        height, width = self.frame.shape[0:2]
-                        # Ellipse parameters
-                        radius = 100
-                        center = (width / 2, height - 25)
-                        axes = (radius, radius)
-                        angle = 0
-                        startAngle = 180
-                        endAngle = 360
-                        BLACK = (0, 0, 0)
-                        thickness = 10
-
-                        # http://docs.opencv.org/modules/core/doc/drawing_functions.html#ellipse
-                        #cv2.imshow('frame2', cv2.ellipse(self.frame, center, axes, angle, startAngle, endAngle, BLACK, thickness))
-
-                        cv2.imshow('frame2', cv2.drawContours(self.frame, [box], 0, BGR_COMMON['red'], 1))
-
-                        # Draw robot holding area
-                        box = cv2.boxPoints(r.grabbing_zone(scale=wrapper.BALL_HOLDING_AREA_SCALE))
-                        box = np.int32(box)
-                        #cv2.imshow('frame2', cv2.ellipse(self.frame,(200,200),(80,50),0,180,360,(0,0,255),1))
-                        cv2.imshow('frame2', cv2.drawContours(self.frame, [box], 0, BGR_COMMON['green'], 1))
-
-                        #ball = wrapper.world_objects['ball']
-                        # if ball and ball[2]:
-                        #     if r.is_point_in_grabbing_zone(ball[0], ball[1]):
-                        #         print "YYYYEEEEEEEEEEEEEEEEEEESSSSSS"
-                        #     else:
-                        #         print "NO. ;("
-
-                        # if ball and ball[2]:
-                        #     if r.is_point_in_grabbing_zone(ball[0], ball[1], scale=wrapper.BALL_HOLDING_AREA_SCALE):
-                        #         print "YYYYEEEEEEEEEEEEEEEEEEESSSSSS"
-                        #     else:
-                        #         print "NO. ;("
+                            # Show centroids of found circles (contours)
+                            for val in r.latest_values:
+                                cv2.imshow('frame2', cv2.circle(self.frame, (int(val[0]), int(val[1])), 1,
+                                                            BGR_COMMON['black'], 1, 0))
 
 
-                        # Draw heading
-                        if self.draw_direction:
-                            # Write angle in degrees
-                            cv2.imshow('frame2', cv2.putText(self.frame, str(int(r.heading)),
-                                                             (int(clx) - 15, int(cly) + 30),
-                                                         cv2.FONT_HERSHEY_COMPLEX, 0.45, (100, 150, 200)))
+                            # # Draw Grabber zone
+                            # box = cv2.boxPoints(r.grabbing_zone())
+                            # box = np.int32(box)
+                            # height, width = self.frame.shape[0:2]
+                            # # Ellipse parameters
+                            # radius = 100
+                            # center = (width / 2, height - 25)
+                            # axes = (radius, radius)
+                            # angle = 0
+                            # startAngle = 180
+                            # endAngle = 360
+                            # BLACK = (0, 0, 0)
+                            # thickness = 10
+                            #
+                            # # http://docs.opencv.org/modules/core/doc/drawing_functions.html#ellipse
+                            # #cv2.imshow('frame2', cv2.ellipse(self.frame, center, axes, angle, startAngle, endAngle, BLACK, thickness))
 
-                            cv2.imshow('frame2', cv2.line(self.frame, (int(clx), int(cly)),
-                                                                 (int(x), int(y)), BGR_COMMON['red'], 2, 0))
+                            cv2.imshow('frame2', cv2.drawContours(self.frame, [box], 0, BGR_COMMON['red'], 1))
 
+                            # Draw robot holding area
+                            box = cv2.boxPoints(r.grabbing_zone(scale=wrapper.BALL_HOLDING_AREA_SCALE))
+                            box = np.int32(box)
+                            #cv2.imshow('frame2', cv2.ellipse(self.frame,(200,200),(80,50),0,180,360,(0,0,255),1))
+                            cv2.imshow('frame2', cv2.drawContours(self.frame, [box], 0, BGR_COMMON['green'], 1))
 
-                            # Draw heading line
-                            angle = r.heading
-                            new_x = clx + 30 * cos(radians(angle))
-                            new_y = cly + 30 * sin(radians(angle))
-                            cv2.imshow('frame2', cv2.line(self.frame, (int(clx), int(cly)),
-                                                                 (int(new_x), int(new_y)),
-                                                          (200, 150, 50), 3, 0))
+                            #ball = wrapper.world_objects['ball']
+                            # if ball and ball[2]:
+                            #     if r.is_point_in_grabbing_zone(ball[0], ball[1]):
+                            #         print "YYYYEEEEEEEEEEEEEEEEEEESSSSSS"
+                            #     else:
+                            #         print "NO. ;("
 
-
-
-
-        self.counter += 1
-        ball = wrapper.get_ball_position()
-
-        if self.draw_ball and ball and ball[2]:
-            self.x_ball, self.y_ball, self.see_ball = ball
-            color = BGR_COMMON['red']
-            if self.see_ball == 2:
-                color = BGR_COMMON['dark_red']
-            cv2.imshow('frame2', cv2.circle(self.frame, (int(self.x_ball), int(self.y_ball)), 8, color, 2, 0))
-
-            if self.counter % 5 == 0:
-                self.x_ball_prev_prev = self.x_ball_prev
-                self.y_ball_prev_prev = self.y_ball_prev
-                self.x_ball_prev      = self.x_ball
-                self.y_ball_prev      = self.y_ball
-
-            if self.draw_ball_velocity:
-                cv2.imshow('frame2', cv2.arrowedLine(self.frame, (int(self.x_ball_prev_prev), int(self.y_ball_prev_prev)),
-                    (abs(int(self.x_ball+(5*(self.x_ball_prev-self.x_ball_prev_prev)))),
-                        abs(int(self.y_ball+(5*(self.y_ball_prev-self.y_ball_prev_prev))))),
-                                                     (0,255,0), 3, 10))
+                            # if ball and ball[2]:
+                            #     if r.is_point_in_grabbing_zone(ball[0], ball[1], scale=wrapper.BALL_HOLDING_AREA_SCALE):
+                            #         print "YYYYEEEEEEEEEEEEEEEEEEESSSSSS"
+                            #     else:
+                            #         print "NO. ;("
 
 
-    def warp_image(self, frame):
-        # TODO: this might work in gui, but are the blur values saved anywhere?
-        # TODO: implement blur value variations
-        """
-        Creates trackbars and applies frame preprocessing for functions that actually require a frame,
-        instead of setting the video device options
-        :param frame: frame
-        :return: preprocessed frame
-        """
-       # blur = cv2.getTrackbarPos('Gaussian blur', 'frame2')
+                            # Draw heading
+                            if self.draw_direction:
+                                # Write angle in degrees
+                                cv2.imshow('frame2', cv2.putText(self.frame, str(int(r.heading)),
+                                                                 (int(clx) - 15, int(cly) + 30),
+                                                             cv2.FONT_HERSHEY_COMPLEX, 0.45, (100, 150, 200)))
 
-        #if blur >= 1:
-        #    if blur % 2 == 0:
-        #        blur += 1
-        #    frame = cv2.GaussianBlur(frame, (121, 121), 0)
+                                cv2.imshow('frame2', cv2.line(self.frame, (int(clx), int(cly)),
+                                                                     (int(x), int(y)), BGR_COMMON['red'], 2, 0))
 
-        return frame
+
+                                # Draw heading line
+                                angle = r.heading
+                                new_x = clx + 30 * cos(radians(angle))
+                                new_y = cly + 30 * sin(radians(angle))
+                                cv2.imshow('frame2', cv2.line(self.frame, (int(clx), int(cly)),
+                                                                     (int(new_x), int(new_y)),
+                                                              (200, 150, 50), 3, 0))
+
+
+
+
+            self.counter += 1
+            ball = wrapper.get_ball_position()
+
+            if self.draw_ball and ball and ball[2] and isinstance(ball[0], float):
+                self.x_ball, self.y_ball, self.see_ball = ball
+                color = BGR_COMMON['red']
+                if self.see_ball == 2:
+                    color = BGR_COMMON['dark_red']
+                cv2.imshow('frame2', cv2.circle(self.frame, (int(self.x_ball), int(self.y_ball)), 8, color, 2, 0))
+
+                if self.counter % 5 == 0:
+                    self.x_ball_prev_prev = self.x_ball_prev
+                    self.y_ball_prev_prev = self.y_ball_prev
+                    self.x_ball_prev      = self.x_ball
+                    self.y_ball_prev      = self.y_ball
+
+                if self.draw_ball_velocity:
+                    cv2.imshow('frame2', cv2.arrowedLine(self.frame, (int(self.x_ball_prev_prev), int(self.y_ball_prev_prev)),
+                        (abs(int(self.x_ball+(5*(self.x_ball_prev-self.x_ball_prev_prev)))),
+                            abs(int(self.y_ball+(5*(self.y_ball_prev-self.y_ball_prev_prev))))),
+                                                         (0,255,0), 3, 10))
+
+        except:
+            print "Yay, caught something."
+
