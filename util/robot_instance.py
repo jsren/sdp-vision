@@ -145,17 +145,17 @@ class RobotInstance(object):
         """
         # TODO: check this when changing properties
         if zone == "left":
-            heading = (self.heading + 90) % 360
-            h = SIDE_ZONE_HEIGHT
-            w = SIDE_ZONE_WIDTH
-        elif zone == "right":
             heading = (self.heading - 90) % 360
             h = SIDE_ZONE_HEIGHT
             w = SIDE_ZONE_WIDTH
-        elif heading == "bottom":
-            heading = (self.heading + 360) % 360
+        elif zone == "right":
+            heading = (self.heading + 90) % 360
             h = SIDE_ZONE_HEIGHT
             w = SIDE_ZONE_WIDTH
+        elif zone == "bottom":
+            heading = (self.heading + 180) % 360
+            h = BACK_ZONE_HEIGHT
+            w = BACK_ZONE_WIDTH
         x, y = self.position
 
         center_x = x + (MIDPOINT_TO_BALL_ZONE + h * 0.5 * scale) * cos(radians(heading))
@@ -272,6 +272,9 @@ class RobotInstance(object):
         :param scale:       scale of the grabbing zone.
         :return: True or False
         """
+
+        if self.is_point_in_grabbing_zone(x, y):
+            return False
 
         (z_x, z_y), (w, h), heading = self.other_zone(zone, scale=scale)
         heading = radians(heading - 90)

@@ -23,7 +23,7 @@ class Robot(object):
     _has_ball_delegate = None
 
     def __init__(self, name, visible, pos, heading, type=RobotType.UNKNOWN,
-                 has_ball_func=None, ball_in_range_func=None, ball_close_func=None):
+                 has_ball_func=None, ball_in_range_func=None, ball_in_other_func=None):
         self._name     = name
         self._position = pos
         self._heading  = heading
@@ -32,7 +32,7 @@ class Robot(object):
 
         self._has_ball_delegate = has_ball_func
         self._ball_in_range_delegate = ball_in_range_func
-        self._ball_close_delegate = ball_close_func
+        self._ball_in_other_delegate = ball_in_other_func
 
     @property
     def name(self):
@@ -84,13 +84,14 @@ class Robot(object):
         else:
             return None
 
-    @property
-    def ball_close(self):
+
+    def ball_in_other(self, zone):
         """
-        Returns True if balls is close to the robot, but not in the grabbing zone.
+        :param zone:    ["left", "right", "bottom"]
+        Returns True if ball is in the other zone
         """
-        if self._ball_close_delegate is not None:
-            return self._ball_close_delegate(self.name)
+        if self._ball_in_other_delegate is not None:
+            return self._ball_in_other_delegate(self.name, zone)
         else:
             return None
 

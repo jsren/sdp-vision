@@ -169,6 +169,14 @@ class GUI:
                             box = np.int32(box)
                             cv2.imshow('frame2', cv2.drawContours(self.frame, [box], 0, BGR_COMMON['yellow'], 1))
 
+                            box = cv2.boxPoints(r.other_zone("right"))
+                            box = np.int32(box)
+                            cv2.imshow('frame2', cv2.drawContours(self.frame, [box], 0, BGR_COMMON['yellow'], 1))
+
+                            box = cv2.boxPoints(r.other_zone("bottom"))
+                            box = np.int32(box)
+                            cv2.imshow('frame2', cv2.drawContours(self.frame, [box], 0, BGR_COMMON['yellow'], 1))
+
 
                             # Draw heading
                             if self.draw_direction:
