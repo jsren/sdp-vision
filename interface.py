@@ -85,14 +85,33 @@ class Robot(object):
         else:
             return None
 
-
-    def ball_in_other(self, zone):
+    @property
+    def ball_in_left(self):
         """
-        :param zone:    ["left", "right", "bottom"]
-        Returns True if ball is in the other zone
+        Returns True if ball is in the left zone
         """
         if self._ball_in_other_delegate is not None:
-            return self._ball_in_other_delegate(self.name, zone)
+            return self._ball_in_other_delegate(self.name, "left")
+        else:
+            return None
+
+    @property
+    def ball_in_right(self):
+        """
+        Returns True if ball is in the right zone
+        """
+        if self._ball_in_other_delegate is not None:
+            return self._ball_in_other_delegate(self.name, "right")
+        else:
+            return None
+
+    @property
+    def ball_in_bottom(self):
+        """
+        Returns True if ball is in the bottom zone
+        """
+        if self._ball_in_other_delegate is not None:
+            return self._ball_in_other_delegate(self.name, "bottom")
         else:
             return None
 
