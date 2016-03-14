@@ -158,6 +158,10 @@ class VisionInterface(object):
         """
         list_of_goal_coordinates =  self._launcher.get_goal_positions()
         sorted_goal_coordinates = sorted(list_of_goal_coordinates, key=operator.itemgetter(0, 1))
+        left_goal_x = sorted_goal_coordinates[0][0]
+        right_goal_x = sorted_goal_coordinates[2][0]
+        sorted_goal_coordinates[1][0] = left_goal_x
+        sorted_goal_coordinates[3][0] = right_goal_x
         return sorted_goal_coordinates
 
     def get_ball_position(self):
