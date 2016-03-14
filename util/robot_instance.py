@@ -135,26 +135,33 @@ class RobotInstance(object):
         return (center_x, center_y), (BALL_ZONE_WIDTH * scale, BALL_ZONE_HEIGHT * scale), heading + 90
 
 
-    def ball_at_side(self, median_size=None, auto_median=True, scale=1.):
-        # TODO: change to check for left and right zones
-        heading = self.heading
+    def other_zone(self, zone, median_size=None, auto_median=True, scale=1.):
+        """
+        :param zone:            ["left", "right", "bottom"]
+        :param median_size:
+        :param auto_median:
+        :param scale:
+        :return:    (x,y), (w, h), heading
+        """
+        # TODO: check this when changing properties
+        if zone == "left":
+            heading = (self.heading + 90) % 360
+            h = SIDE_ZONE_HEIGHT
+            w = SIDE_ZONE_WIDTH
+        elif zone == "right":
+            heading = (self.heading - 90) % 360
+            h = SIDE_ZONE_HEIGHT
+            w = SIDE_ZONE_WIDTH
+        elif heading == "bottom":
+            heading = (self.heading + 360) % 360
+            h = SIDE_ZONE_HEIGHT
+            w = SIDE_ZONE_WIDTH
         x, y = self.position
 
-        center_x = x + (MIDPOINT_TO_BALL_ZONE + SIDE_ZONE_HEIGHT * 0.5 * scale) * cos(radians(heading))
-        center_y = y + (MIDPOINT_TO_BALL_ZONE + SIDE_ZONE_HEIGHT * 0.5 * scale) * sin(radians(heading))
+        center_x = x + (MIDPOINT_TO_BALL_ZONE + h * 0.5 * scale) * cos(radians(heading))
+        center_y = y + (MIDPOINT_TO_BALL_ZONE + h * 0.5 * scale) * sin(radians(heading))
 
-        return (center_x, center_y), (SIDE_ZONE_WIDTH * scale, SIDE_ZONE_HEIGHT * scale), heading + 90
-
-
-    def ball_behind_robot(self, median_size=None, auto_median=True, scale=1.):
-        # TODO: change to check for zone behind robot
-        heading = self.heading
-        x, y = self.position
-
-        center_x = x + (MIDPOINT_TO_BALL_ZONE + SIDE_ZONE_HEIGHT * 0.5 * scale) * cos(radians(heading))
-        center_y = y + (MIDPOINT_TO_BALL_ZONE + SIDE_ZONE_HEIGHT * 0.5 * scale) * sin(radians(heading))
-
-        return (center_x, center_y), (SIDE_ZONE_WIDTH * scale, SIDE_ZONE_HEIGHT * scale), heading + 90
+        return (center_x, center_y), (w * scale, h * scale), heading + 90
 
 
     @property
@@ -254,6 +261,75 @@ class RobotInstance(object):
             return False
 
         return True
+
+
+    def is_point_in_other_zone(self, x, y, zone, scale=1.):
+        """
+        Checks that the given coordinates are in the side or bottom zone.
+        :param x:
+        :param y:
+        :param zone:        ["left", "right", "bottom"]
+        :param scale:       scale of the grabbing zone.
+        :return: True or False
+        """
+
+        (z_x, z_y), (w, h), heading = self.other_zone(zone, scale=scale)
+        heading = radians(heading - 90)
+
+        # Top left
+        ax = z_x + h/2. * cos(heading) + w/2. * cos(heading - radians(90))
+        ay = z_y + h/2. * sin(heading) + w/2. * sin(heading - radians(90))
+
+        # Top left
+        bx = z_x + h/2. * cos(heading) + w/2. * cos(heading + radians(90))
+        by = z_y + h/2. * sin(heading) + w/2. * sin(heading + radians(90))
+
+        # Bottom right
+        dx = z_x - h/2. * cos(heading) + w/2. * cos(heading - radians(90))
+        dy = z_y - h/2. * sin(heading) + w/2. * sin(heading - radians(90))
+
+        # Pseudo-magically calculate if the point is in the rectangle
+        # http://stackoverflow.com/questions/2752725/finding-whether-a-point-lies-inside-a-rectangle-or-not
+
+        bax = bx - ax
+        bay = by - ay
+        dax = dx - ax
+        day = dy - ay
+
+        # Could maybe check if a range of values from this coord is in grabbing zone, ball radius 4.2
+
+        # Midpoint
+        # if (x - ax) * bax + (y - ay) * bay < 0.0: return False
+        # if (x - bx) * bax + (y - by) * bay > 0.0: return False
+        # if (x - ax) * dax + (y - ay) * day < 0.0: return False
+        # if (x - dx) * dax + (y - dy) * day > 0.0: return False
+
+         # Top
+        if (x - ax) * bax + (y + 4.2 - ay) * bay < 0.0: return False
+        if (x - bx) * bax + (y + 4.2 - by) * bay > 0.0: return False
+        if (x - ax) * dax + (y + 4.2 - ay) * day < 0.0: return False
+        if (x - dx) * dax + (y + 4.2 - dy) * day > 0.0: return False
+
+         # Bottom
+        if (x - ax) * bax + (y - 4.2 - ay) * bay < 0.0: return False
+        if (x - bx) * bax + (y - 4.2 - by) * bay > 0.0: return False
+        if (x - ax) * dax + (y - 4.2 - ay) * day < 0.0: return False
+        if (x - dx) * dax + (y - 4.2 - dy) * day > 0.0: return False
+
+         # Left
+        if (x - 4.2 - ax) * bax + (y - ay) * bay < 0.0: return False
+        if (x - 4.2 - bx) * bax + (y - by) * bay > 0.0: return False
+        if (x - 4.2 - ax) * dax + (y - ay) * day < 0.0: return False
+        if (x - 4.2 - dx) * dax + (y - dy) * day > 0.0: return False
+
+         # Right
+        if (x + 4.2 - ax) * bax + (y - ay) * bay < 0.0: return False
+        if (x + 4.2 - bx) * bax + (y - by) * bay > 0.0: return False
+        if (x + 4.2 - ax) * dax + (y - ay) * day < 0.0: return False
+        if (x + 4.2 - dx) * dax + (y - dy) * day > 0.0: return False
+
+        return True
+
 
     def angle_of_line(self, point1, point2):
         point2 = list(point2-point1)

@@ -194,6 +194,24 @@ class VisionWrapper:
         return False
 
 
+    def is_ball_on_side(self, robot_name, zone, scale=1.):
+        """
+        returns True if ball is in the side or bottom zone.
+        :param robot_name:  robot name
+        :param zone:        ["left", "right", "bottom"]
+        :param scale:       Zone can be scaled, to accommodate for different robots
+        :return: boolean
+        """
+        ball = self.get_ball_position()
+        if ball and ball[2]:
+            for r in self.robots:
+                if r.name == robot_name:
+                    if r.is_point_in_other_zone(ball[0], ball[1], zone, scale=scale):
+                        return True
+                    break
+        return False
+
+
     def is_ball_close_but_not_grabbable(self, robot, scale=1.):
         """
         Is ball close to the robot, but not grabbable

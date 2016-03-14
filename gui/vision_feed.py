@@ -84,38 +84,8 @@ class GUI:
             cv2.fillPoly(self.frame, ball_contour, BGR_COMMON['red'])
             cv2.drawContours(self.frame, ball_contour, -1, BGR_COMMON['black'], 1)
 
-        # Draw frame
-
-
-       # kernel_val = 3
-        #kernel = np.ones((kernel_val,kernel_val),np.uint8)
-        #erode
-        #frame_mod = cv2.erode(self.frame,kernel,iterations = 1)
-
-        # dilate
-        #self.frame = cv2.dilate(self.frame,kernel,iterations = 1)
-
-        # opening == erode -> dilute
-        #self.frame = cv2.morphologyEx(self.frame, cv2.MORPH_OPEN, kernel)
-
-        # closing == dilute -> erode
-        #self.frame = cv2.morphologyEx(self.frame, cv2.MORPH_CLOSE, kernel)
-
-        # morphological gradient == outlines - nothing good
-        # self.frame = cv2.morphologyEx(self.frame, cv2.MORPH_GRADIENT, kernel)
-
-        # top hat == difference between opening and original image - might be useful for kernel values > 9
-        # self.frame = cv2.morphologyEx(self.frame, cv2.MORPH_TOPHAT, kernel)
-
-        # black hat == difference between closing and original image - useless. Just produces lame outlines
-        # self.frame = cv2.morphologyEx(self.frame, cv2.MORPH_BLACKHAT, kernel)
-
-        # Normalisation, this doesn't work. I don't know why. Works on other file...
-        # self.frame = cv2.cvtColor(self.frame, cv2.COLOR_BGR2HSV)
-        # self.frame[:, :, 1] = cv2.equalizeHist(self.frame[:, :, 1])
-        # self.frame = cv2.cvtColor(self.frame, cv2.COLOR_HSV2BGR);
-
         try:
+            # Draw frame
             cv2.imshow('frame2', self.frame)
 
 
@@ -158,7 +128,7 @@ class GUI:
                             # Show centroids of found circles (contours)
                             for val in r.latest_values:
                                 cv2.imshow('frame2', cv2.circle(self.frame, (int(val[0]), int(val[1])), 1,
-                                                            BGR_COMMON['black'], 1, 0))
+                                                                BGR_COMMON['black'], 1, 0))
 
 
                             # Draw Grabber zone
@@ -193,22 +163,29 @@ class GUI:
                             #     else:
                             #         print "NO. ;("
 
+
+                            # Draw other zones
+                            box = cv2.boxPoints(r.other_zone("left"))
+                            box = np.int32(box)
+                            cv2.imshow('frame2', cv2.drawContours(self.frame, [box], 0, BGR_COMMON['yellow'], 1))
+
+
                             # Draw heading
                             if self.draw_direction:
                                 # Write angle in degrees
                                 cv2.imshow('frame2', cv2.putText(self.frame, str(int(r.heading)),
                                                                  (int(clx) - 15, int(cly) + 30),
-                                                             cv2.FONT_HERSHEY_COMPLEX, 0.45, (100, 150, 200)))
+                                                                 cv2.FONT_HERSHEY_COMPLEX, 0.45, (100, 150, 200)))
 
                                 cv2.imshow('frame2', cv2.line(self.frame, (int(clx), int(cly)),
-                                                                     (int(x), int(y)), BGR_COMMON['red'], 2, 0))
+                                                              (int(x), int(y)), BGR_COMMON['red'], 2, 0))
 
                                 # Draw heading line
                                 angle = r.heading
                                 new_x = clx + 30 * cos(radians(angle))
                                 new_y = cly + 30 * sin(radians(angle))
                                 cv2.imshow('frame2', cv2.line(self.frame, (int(clx), int(cly)),
-                                                                     (int(new_x), int(new_y)),
+                                                              (int(new_x), int(new_y)),
                                                               (200, 150, 50), 3, 0))
 
             self.counter += 1
@@ -229,8 +206,8 @@ class GUI:
 
                 if self.draw_ball_velocity:
                     cv2.imshow('frame2', cv2.arrowedLine(self.frame, (int(self.x_ball_prev_prev), int(self.y_ball_prev_prev)),
-                        (abs(int(self.x_ball+(5*(self.x_ball_prev-self.x_ball_prev_prev)))),
-                            abs(int(self.y_ball+(5*(self.y_ball_prev-self.y_ball_prev_prev))))),
+                                                         (abs(int(self.x_ball+(5*(self.x_ball_prev-self.x_ball_prev_prev)))),
+                                                          abs(int(self.y_ball+(5*(self.y_ball_prev-self.y_ball_prev_prev))))),
                                                          (0,255,0), 3, 10))
 
         except:
