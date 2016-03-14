@@ -118,6 +118,7 @@ class GUI:
         try:
             cv2.imshow('frame2', self.frame)
 
+
             if self.input_mode == 'color_picker':
                 img = self.frame[np.array(self.p1) - np.array([5, 5]),
                                  np.array(self.p1) + np.array([5, 5])]
@@ -160,22 +161,22 @@ class GUI:
                                                             BGR_COMMON['black'], 1, 0))
 
 
-                            # # Draw Grabber zone
-                            # box = cv2.boxPoints(r.grabbing_zone())
-                            # box = np.int32(box)
-                            # height, width = self.frame.shape[0:2]
-                            # # Ellipse parameters
-                            # radius = 100
-                            # center = (width / 2, height - 25)
-                            # axes = (radius, radius)
-                            # angle = 0
-                            # startAngle = 180
-                            # endAngle = 360
-                            # BLACK = (0, 0, 0)
-                            # thickness = 10
-                            #
-                            # # http://docs.opencv.org/modules/core/doc/drawing_functions.html#ellipse
-                            # #cv2.imshow('frame2', cv2.ellipse(self.frame, center, axes, angle, startAngle, endAngle, BLACK, thickness))
+                            # Draw Grabber zone
+                            box = cv2.boxPoints(r.grabbing_zone())
+                            box = np.int32(box)
+                            height, width = self.frame.shape[0:2]
+                            # Ellipse parameters
+                            radius = 100
+                            center = (width / 2, height - 25)
+                            axes = (radius, radius)
+                            angle = 0
+                            startAngle = 180
+                            endAngle = 360
+                            BLACK = (0, 0, 0)
+                            thickness = 10
+
+                            # http://docs.opencv.org/modules/core/doc/drawing_functions.html#ellipse
+                            #cv2.imshow('frame2', cv2.ellipse(self.frame, center, axes, angle, startAngle, endAngle, BLACK, thickness))
 
                             cv2.imshow('frame2', cv2.drawContours(self.frame, [box], 0, BGR_COMMON['red'], 1))
 
@@ -185,19 +186,12 @@ class GUI:
                             #cv2.imshow('frame2', cv2.ellipse(self.frame,(200,200),(80,50),0,180,360,(0,0,255),1))
                             cv2.imshow('frame2', cv2.drawContours(self.frame, [box], 0, BGR_COMMON['green'], 1))
 
-                            #ball = wrapper.world_objects['ball']
-                            # if ball and ball[2]:
-                            #     if r.is_point_in_grabbing_zone(ball[0], ball[1]):
-                            #         print "YYYYEEEEEEEEEEEEEEEEEEESSSSSS"
-                            #     else:
-                            #         print "NO. ;("
-
+                            # ball = wrapper.world_objects['ball']
                             # if ball and ball[2]:
                             #     if r.is_point_in_grabbing_zone(ball[0], ball[1], scale=wrapper.BALL_HOLDING_AREA_SCALE):
                             #         print "YYYYEEEEEEEEEEEEEEEEEEESSSSSS"
                             #     else:
                             #         print "NO. ;("
-
 
                             # Draw heading
                             if self.draw_direction:
@@ -209,7 +203,6 @@ class GUI:
                                 cv2.imshow('frame2', cv2.line(self.frame, (int(clx), int(cly)),
                                                                      (int(x), int(y)), BGR_COMMON['red'], 2, 0))
 
-
                                 # Draw heading line
                                 angle = r.heading
                                 new_x = clx + 30 * cos(radians(angle))
@@ -218,13 +211,10 @@ class GUI:
                                                                      (int(new_x), int(new_y)),
                                                               (200, 150, 50), 3, 0))
 
-
-
-
             self.counter += 1
             ball = wrapper.get_ball_position()
 
-            if self.draw_ball and ball and ball[2] and isinstance(ball[0], float):
+            if self.draw_ball and ball and ball[2]:
                 self.x_ball, self.y_ball, self.see_ball = ball
                 color = BGR_COMMON['red']
                 if self.see_ball == 2:
@@ -244,5 +234,4 @@ class GUI:
                                                          (0,255,0), 3, 10))
 
         except:
-            print "Yay, caught something."
-
+            print "Caught some kind of exception while drawing things. Lol.."
