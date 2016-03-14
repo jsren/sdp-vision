@@ -4,6 +4,7 @@
     Team: SDP Team E
 """
 import threading
+import operator
 
 class _RobotType(object):
     UNKNOWN  = 0
@@ -136,7 +137,9 @@ class VisionInterface(object):
         returns [(left goal left corner), (left goal right corner), (right goal left corner), (right goal right corner)]
         :return: [ tuple(x, y), tuple(x, y), tuple(x,y), tuple(x,y) ]
         """
-        return self._launcher.get_goal_positions()
+        list_of_goal_coordinates =  self._launcher.get_goal_positions()
+        sorted_goal_coordinates = sorted(list_of_goal_coordinates, key=operator.itemgetter(0, 1))
+        return sorted_goal_coordinates
 
     def get_ball_position(self):
         """ Gets the current ball position.
