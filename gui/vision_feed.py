@@ -43,14 +43,10 @@ class GUI:
         self.draw_ball          = True
         self.draw_ball_velocity = True
         self.draw_contours      = True
-<<<<<<< HEAD
-        self.ball_positions = ()
-=======
         self.draw_correction    = False  # Correction crashes things sometimes due to getting out of image bounds
 
         self.input_mode = None
         self.p1         = None
->>>>>>> 18921d26d506ae06b127772d62218a716fc6478d
 
         self.see_ball = False
         # create GUI
@@ -88,97 +84,6 @@ class GUI:
             cv2.fillPoly(self.frame, ball_contour, BGR_COMMON['red'])
             cv2.drawContours(self.frame, ball_contour, -1, BGR_COMMON['black'], 1)
 
-<<<<<<< HEAD
-        # Draw frame
-        cv2.imshow('frame2', self.frame)
-
-        if self.draw_robots:
-            for r in wrapper.robots:
-                if not r.visible: continue
-
-                clx, cly, x, y = r.get_coordinates()
-
-                # Resets the robot if it's not been seen for a while.
-                if r.age > 0:
-                    # Draw robot circles
-                    if not isnan(clx) and not isnan(cly):
-
-                        # Draw circle
-                        cv2.imshow('frame2', cv2.circle(self.frame, (int(clx), int(cly)),
-                                                        ROBOT_DISTANCE, BGR_COMMON['black'], 2, 0))
-
-                        # Draw Names
-                        cv2.imshow('frame2', cv2.putText(self.frame, r.name,
-                                                         (int(clx)-15, int(cly)+40),
-                                                         cv2.FONT_HERSHEY_COMPLEX, 0.45, (100, 150, 200)))
-
-
-                        cv2.imshow('frame2', cv2.polylines(self.frame, r.get_other_coordinates(), True,
-                                                           BGR_COMMON['black'], 1))
-
-                        if self.draw_direction:
-                            # Draw angle in degrees
-                            cv2.imshow('frame2', cv2.putText(self.frame, str(int(r.heading)),
-                                                             (int(clx) - 15, int(cly) + 30),
-                                                         cv2.FONT_HERSHEY_COMPLEX, 0.45, (100, 150, 200)))
-
-                            cv2.imshow('frame2', cv2.line(self.frame, (int(clx), int(cly)),
-                                                                 (int(x), int(y)), BGR_COMMON['red'], 3, 0))
-
-                            # Draw line
-                            angle = r.heading
-                            new_x = clx + 30 * cos(radians(angle))
-                            new_y = cly + 30 * sin(radians(angle))
-                            cv2.imshow('frame2', cv2.line(self.frame, (int(clx), int(cly)),
-                                                                 (int(new_x), int(new_y)),
-                                                          (200, 150, 50), 3, 0))
-
-        self.counter += 1
-        if 'ball' in wrapper.world_objects:
-            self.x_ball, self.y_ball = wrapper.world_objects['ball']
-
-            if self.draw_ball:
-                cv2.imshow('frame2', cv2.circle(self.frame, (int(self.x_ball), int(self.y_ball)), 8, (0, 0, 255), 2, 0))
-
-            if self.counter % 5 == 0:
-                self.x_ball_prev_prev = self.x_ball_prev
-                self.y_ball_prev_prev = self.y_ball_prev
-                self.x_ball_prev      = self.x_ball
-                self.y_ball_prev      = self.y_ball
-
-            if self.draw_ball_velocity:
-                cv2.imshow('frame2', cv2.arrowedLine(self.frame, (int(self.x_ball_prev_prev), int(self.y_ball_prev_prev)),
-                    (abs(int(self.x_ball+(5*(self.x_ball_prev-self.x_ball_prev_prev)))),
-                        abs(int(self.y_ball+(5*(self.y_ball_prev-self.y_ball_prev_prev))))),
-                                                     (0,255,0), 3, 10))
-
-        self.ball_positions = (self.x_ball, self.x_ball_prev, self.x_ball_prev_prev, self.y_ball,
-                               self.y_ball_prev, self.y_ball_prev_prev)
-
-
-
-
-    def previous_ball_coords(self):
-        return self.ball_positions
-
-    def warp_image(self, frame):
-        # TODO: this might work in gui, but are the blur values saved anywhere?
-        # TODO: implement blur value variations
-        """
-        Creates trackbars and applies frame preprocessing for functions that actually require a frame,
-        instead of setting the video device options
-        :param frame: frame
-        :return: preprocessed frame
-        """
-       # blur = cv2.getTrackbarPos('Gaussian blur', 'frame2')
-
-        #if blur >= 1:
-        #    if blur % 2 == 0:
-        #        blur += 1
-        #    frame = cv2.GaussianBlur(frame, (121, 121), 0)
-
-        return frame
-=======
         try:
             # Draw frame
             cv2.imshow('frame2', self.frame)
@@ -315,4 +220,3 @@ class GUI:
 
         except:
             print "Caught some kind of exception while drawing things. Lol.."
->>>>>>> 18921d26d506ae06b127772d62218a716fc6478d
