@@ -163,8 +163,8 @@ class VisionInterface(object):
         sorted_goal_coordinates = sorted(list_of_goal_coordinates, key=operator.itemgetter(0, 1))
         left_goal_x = sorted_goal_coordinates[0][0]
         right_goal_x = sorted_goal_coordinates[2][0]
-        sorted_goal_coordinates[1] = (left_goal_x,sorted_goal_coordinates[1][1])
-        sorted_goal_coordinates[3] = (right_goal_x,sorted_goal_coordinates[3][1])
+        sorted_goal_coordinates[1] = (left_goal_x, sorted_goal_coordinates[1][1])
+        sorted_goal_coordinates[3] = (right_goal_x, sorted_goal_coordinates[3][1])
         return sorted_goal_coordinates
 
     def get_ball_position(self):
@@ -182,6 +182,10 @@ class VisionInterface(object):
     @property
     def pitch_dimensions(self):
         return self._launcher.get_pitch_dimensions()
+
+    def get_centre(self):
+        # TODO - return the centre point of the pitch
+        raise NotImplementedError
 
     def close(self):
         self._launcher.close()
