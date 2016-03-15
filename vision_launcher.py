@@ -48,7 +48,6 @@ class VisionLauncher(object):
         self._cv = threading.Condition()
         self.launch_gui = launch_gui
         self.pc_name = pc_name
-
         self.OUR_NAME = team_colour + ' + ' + our_colour
         assert self.OUR_NAME in ROBOT_DESCRIPTIONS
 
@@ -135,7 +134,10 @@ class VisionLauncher(object):
                         int(timeout * 1000)
 
     def get_previous_ball(self):
-        return vision_feed.GUI.previous_ball_coords
+        return vision_feed.GUI.x_ball_prev,vision_feed.GUI.y_ball_prev
+
+    def get_previous_previous_ball(self):
+        return vision_feed.GUI.x_ball_prev_prev,vision_feed.GUI.y_ball_prev_prev
 
     def get_zones(self):
         return tools.get_defense_zones(self.pitch)

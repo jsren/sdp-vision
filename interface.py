@@ -176,6 +176,9 @@ class VisionInterface(object):
     def get_previous_ball(self):
         return self._launcher.get_previous_ball()
 
+    def get_previous_previous_ball(self):
+        return self._launcher.get_previous_previous_ball()
+
     def get_zones(self):
         return self._launcher.get_zones()
 
