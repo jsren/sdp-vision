@@ -6,7 +6,7 @@ from util import time_delta_in_ms
 from interface import RobotType
 import threading
 import numpy as np
-
+from gui import vision_feed
 
 OUR_NAME = "yellow + green"
 
@@ -98,6 +98,9 @@ class VisionLauncher(object):
     def get_goal_positions(self):
         raise NotImplementedError()
 
+    def get_frame_size(self):
+        return self.visionwrap.get_frame_size()
+
     def wait_for_start(self, timeout=None):
         """
         Sleeps the current thread until the vision system is ready
@@ -113,6 +116,12 @@ class VisionLauncher(object):
                 # If timed-out, then the time taken >= timeout value
                 return timeout is None or time_delta_in_ms(start, datetime.now()) < \
                         int(timeout * 1000)
+
+    def get_previous_ball(self):
+        return vision_feed.GUI.previous_ball_coords
+
+    def get_zones(self):
+        return tools.get_defense_zones(self.pitch)
 
     def control_loop(self):
         """

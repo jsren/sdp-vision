@@ -44,6 +44,7 @@ class GUI:
         self.draw_ball          = True
         self.draw_ball_velocity = True
         self.draw_contours      = True
+        self.ball_positions = ()
 
         # create GUI
         # The first numerical value is the starting point for the vision feed
@@ -138,8 +139,14 @@ class GUI:
                         abs(int(self.y_ball+(5*(self.y_ball_prev-self.y_ball_prev_prev))))),
                                                      (0,255,0), 3, 10))
 
+        self.ball_positions = (self.x_ball, self.x_ball_prev, self.x_ball_prev_prev, self.y_ball,
+                               self.y_ball_prev, self.y_ball_prev_prev)
 
 
+
+
+    def previous_ball_coords(self):
+        return self.ball_positions
 
     def warp_image(self, frame):
         # TODO: this might work in gui, but are the blur values saved anywhere?

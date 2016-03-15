@@ -44,7 +44,6 @@ def get_pitch_size(pitch):
 
     return (abs(x1 - x0), abs(y1 - y0))
 
-
 def get_zones(width, height, filename=PATH+'/calibrations/croppings.json', pitch=0):
     calibration = get_croppings(filename, pitch)
     zones_poly = [calibration[key] for key in ['Zone_0', 'Zone_1', 'Zone_2', 'Zone_3']]
@@ -57,6 +56,11 @@ def get_zones(width, height, filename=PATH+'/calibrations/croppings.json', pitch
     mids.sort()
     return [(mids[i], mids[i+1], 0, height) for i in range(4)]
 
+def get_defense_zones(pitch):
+    filename = PATH+'/calibrations/croppings.json'
+    zone_0 = get_croppings(filename, pitch)['Zone_0']
+    zone_1 = get_croppings(filename, pitch)['Zone_1']
+    return zone_0, zone_1
 
 def get_croppings(filename=PATH+'/calibrations/croppings.json', pitch=0):
     croppings = get_json(filename)

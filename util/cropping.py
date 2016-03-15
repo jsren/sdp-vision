@@ -60,8 +60,8 @@ class CroppingUI(object):
         # Get various data about the image from the user
         self.get_pitch_outline()
 
-        self.get_zone('Zone_0', 'draw LEFT Defender')
-        self.get_zone('Zone_1', 'draw LEFT Attacker')
+        self.get_zone('Zone_0', 'draw LEFT Defense Zone')
+        self.get_zone('Zone_1', 'draw RIGHT Defense Zone')
         self.get_zone('Zone_2', 'draw RIGHT Attacker')
         self.get_zone('Zone_3', 'draw RIGHT Defender')
         self.get_zone('Zone_4', 'draw LEFT goal')

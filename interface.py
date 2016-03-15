@@ -108,6 +108,9 @@ class VisionInterface(object):
         t.start()
         return t
 
+    def get_frame_size(self):
+        return self._launcher.get_frame_size()
+
     def get_goal_positions(self):
         """ Gets the positions of the back-centre of the goals.
         :return: [ tuple(x, y), tuple(x, y) ]
@@ -119,6 +122,12 @@ class VisionInterface(object):
         :return: tuple(x, y)
         """
         return self._launcher.get_ball_position()
+
+    def get_previous_ball(self):
+        return self._launcher.get_previous_ball()
+
+    def get_zones(self):
+        return self._launcher.get_zones()
 
     @property
     def pitch_dimensions(self):

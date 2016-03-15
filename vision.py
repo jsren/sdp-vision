@@ -68,12 +68,6 @@ class Vision:
         trackers_out.append(self.circle_tracker)
 
 
-    def _get_zones(self, width, height):
-        return [(val[0], val[1], 0, height)
-                for val in tools.get_zones(width,
-                                           height,
-                                           pitch=self.pitch)]
-
     def perform_locate(self, frame):
         """
         Find objects on the pitch using multiprocessing.

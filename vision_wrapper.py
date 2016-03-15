@@ -9,6 +9,7 @@ from util import RobotInstance
 from vision import Vision, Camera
 from config import Configuration
 from interface import RobotType
+from PIL import Image
 
 
 class VisionWrapper:
@@ -100,15 +101,12 @@ class VisionWrapper:
             Thread(name="Tkinter UI", target=MainWindow.create_and_show,
                    args=[create_windows]).start()
 
-
-
         # Set up preprocessing and postprocessing
         # self.postprocessing = Postprocessing()
         self.preprocessing = Preprocessing()
 
         self.side = our_side
         self.frameQueue = []
-
 
     def get_robots_raw(self):
         # Filter robots that have no position
@@ -124,7 +122,6 @@ class VisionWrapper:
             headings[r.name] = r.heading
         return headings
 
-
     def get_circle_position(self, robot_name):
         for r in self.robots:
             if r.name == robot_name:
@@ -138,6 +135,10 @@ class VisionWrapper:
 
     def get_ball_position(self):
         return self.world_objects.get('ball')
+
+    def get_pitch_dimensions(self):
+        from util.tools import get_pitch_size
+        return get_pitch_size()
 
     def get_robot_direction(self, robot_name):
         return filter(lambda r: r.name == robot_name, self.robots)[0]
@@ -192,6 +193,9 @@ class VisionWrapper:
         """
         return self.world_objects.get('circles')
 
+    def get_frame_size(self):
+        width, height, channels = self.frame.shape
+        return width, height
 
     def update(self):
         """ Processes the current frame. """
