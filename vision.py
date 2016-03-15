@@ -53,7 +53,7 @@ class Vision:
         height, width, channels = frame_shape
 
         # Find the zone division
-        self.zones = self._get_zones(width, height)
+        # self.zones = self._get_zones(width, height)
 
         #
         self.return_circle_contours = return_circle_contours
@@ -200,12 +200,9 @@ class Camera(object):
         else:
             raise Exception("Unable to read from video stream")
 
-
     def fix_radial_distortion(self, frame):
         return cv2.undistort(
             frame, self.c_matrix, self.dist, None, self.nc_matrix)
 
     def get_adjusted_center(self):
         return 320 - self.crop_values[0], 240 - self.crop_values[2]
-
-
