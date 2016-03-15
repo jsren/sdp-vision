@@ -152,8 +152,7 @@ class VisionInterface(object):
         return t
 
     def get_frame_size(self):
-        width, height = self.get_frame_size()
-        return width / 2, height / 2
+        return self._launcher.get_frame_size()
 
     def get_goal_positions(self):
         """ Gets the positions of the back-centre of the goals.
@@ -185,8 +184,8 @@ class VisionInterface(object):
         return self._launcher.get_pitch_dimensions()
 
     def get_centre(self):
-        # TODO - return the centre point of the pitch
-        raise NotImplementedError
+        width, height = self.get_frame_size()
+        return width / 2, height / 2
 
     def close(self):
         self._launcher.close()
