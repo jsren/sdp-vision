@@ -30,6 +30,10 @@ class StatusUI(UserControl):
         self.ball_loc_label = Label(frame, text = "Ball Location ")
         self.ball_loc_label.pack(fill=X, padx=15)
 
+        # Vision latency display
+        self.latency_label = Label(frame, text = "Vision latency ")
+        self.latency_label.pack(fill=X, padx=15)
+
         self.robot_loc_label = Label(frame, text = "Robot Locations ")
         self.robot_loc_label.pack(fill=X, padx=15)
 
@@ -44,11 +48,17 @@ class StatusUI(UserControl):
             image=self.img_ball if var.value else self.img_noball)
 
     def update_vision_values(self, *_):
-        ballpos = (None, None) if self.vision.get_ball_position() is None \
-                else self.vision.get_ball_position()
+        if self.vision.get_ball_position() is None:
+            self.ball_loc_label.configure(text="Ball Location: (  NaN,  NaN)")
+        else:
 
-        self.ball_loc_label.configure(text = "Ball Location: ({:5.2f}, {:5.2f})"
-                                      .format(*ballpos))
+            ball_x, ball_y, _ = self.vision.get_ball_position()
+            self.ball_loc_label.configure(text="Ball Location: ({:5.2f}, {:5.2f})"
+                                      .format(*(ball_x, ball_y)))
+
+        # Display latency
+        self.latency_label.configure(text="Vision latency: {:5.3f} ms"
+                                     .format(self.vision.get_latency_seconds() * 1000))
 
         robot_str = "\n".join(("[%s\t] ({:5.2f}, {:5.2f})"%n).format(*p)
                   for (n, p) in self.vision.get_all_robots().items())

@@ -33,7 +33,8 @@ class Vision:
                  calibration,
                  robots,
                  trackers_out,
-                 return_circle_contours=False):
+                 return_circle_contours=False,
+                 using_matlab=False):
         """
         Initialize the vision system.
 
@@ -44,6 +45,7 @@ class Vision:
 
             [boolean] return_circle_contours - will return circle contours as well as calculated robot locations.
                                                Made for color calibration GUI.
+            [boolean] using_matlab           - will instantiate and use matlab whenever a new frame is obtained
         """
         self.pitch = pitch
         self.frame_center = frame_center
@@ -67,6 +69,10 @@ class Vision:
         trackers_out.append(self.ball_tracker)
         trackers_out.append(self.circle_tracker)
 
+        # TODO:
+        if using_matlab:
+            pass
+
 
     def perform_locate(self, frame):
         """
@@ -83,7 +89,7 @@ class Vision:
 
         objects = dict()
         if 'x' in regular_positions:
-            objects['ball'] = (regular_positions['x'], regular_positions['y'])
+            objects['ball'] = (regular_positions['x'], regular_positions['y'], regular_positions['found'])
         if 'robot_coords' in regular_positions:
             objects['robots'] = regular_positions['robot_coords']
 

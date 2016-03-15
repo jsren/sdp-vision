@@ -9,7 +9,8 @@ from util import RobotInstance
 from vision import Vision, Camera
 from config import Configuration
 from interface import RobotType
-from PIL import Image
+# from PIL import Image
+from time import time
 
 
 class VisionWrapper:
@@ -63,13 +64,20 @@ class VisionWrapper:
         self.gui = None
 
         # Initialize robots
-        self.ball   = []
         self.robots = []
+
+        # Initialize ball states - which robot had the ball previously.
+        self.ball_median_size = 5
+        self.ball_index = 0
+        self.ball_states = [None] * self.ball_median_size
+
+        self.BALL_HOLDING_AREA_SCALE = 0.5
 
         for r_name in robot_details.keys():
             self.robots.append(RobotInstance(r_name,
                                              robot_details[r_name]['main_colour'],
                                              robot_details[r_name]['side_colour'],
+                                             robot_details[r_name]['offset_angle'],
                                              r_name in robots_on_pitch))
 
         # Draw various things on the image
@@ -83,6 +91,11 @@ class VisionWrapper:
             frame_center=center_point, calibration=self.calibration,
             robots=self.robots,
             return_circle_contours=enable_gui, trackers_out=self.trackers)
+
+        # Used for latency calculations
+        self.t0 = time()
+        self.delta_t = 0
+
 
         if self.enable_gui:
             self.gui = GUI(self.pitch, self.color_settings, self.calibration, self)
@@ -134,7 +147,24 @@ class VisionWrapper:
         return robots
 
     def get_ball_position(self):
-        return self.world_objects.get('ball')
+        """
+        :return: Actual ball position or predicted ball position if the robot was near it. Might return None.
+        """
+        # TODO: call methods here to get robot region if new one will be used.
+        if not self.world_objects['ball'][2]:
+            r_name, _ = self._mode(self.ball_states)
+            if r_name:
+                for r in self.robots:
+                    if r.name == r_name:
+                        x, y = r.predicted_ball_pos
+                        self.world_objects['ball'] = (x, y, 2)
+
+        if self.world_objects['ball'][2] and not \
+                (self.world_objects['ball'][0] == 42 and self.world_objects['ball'][1] == 42):
+            return self.world_objects['ball']
+        else:
+            return None
+
 
     def get_pitch_dimensions(self):
         from util.tools import get_pitch_size
@@ -143,25 +173,44 @@ class VisionWrapper:
     def get_robot_direction(self, robot_name):
         return filter(lambda r: r.name == robot_name, self.robots)[0]
 
+
     def do_we_have_ball(self, robot_name):
-        if 'ball' not in self.world_objects: return None
+        return self.is_ball_in_range(robot_name, scale=self.BALL_HOLDING_AREA_SCALE)
 
-        for r in self.robots:
-            if r.name == robot_name:
-                ball_x, ball_y = self.world_objects['ball']
-                robot_x, robot_y = r.position
-                heading = r.heading
 
-                assert heading <= 360
+    def is_ball_in_range(self, robot_name, scale=1.):
+        """
+        returns True if ball is in the grabbing zone.
+        :param robot_name:  robot name
+        :param scale:       Zone can be scaled, to accommodate for different robots
+        :return: boolean
+        """
+        ball = self.get_ball_position()
+        if ball and ball[2]:
+            for r in self.robots:
+                if r.name == robot_name:
+                    if r.is_point_in_grabbing_zone(ball[0], ball[1], scale=scale):
+                        return True
+                    break
+        return False
 
-                if heading < 90:
-                    return robot_x-10 < ball_x < robot_x+30 and robot_y-10 < ball_y < robot_y+30
-                elif heading >= 90 and heading < 180:
-                    return robot_x-30 < ball_x < robot_x+10 and robot_y-10 < ball_y < robot_y+30
-                elif heading >= 180 and heading < 270:
-                    return robot_x-30 < ball_x < robot_x+10 and robot_y-30 < ball_y < robot_y+10
-                else:
-                    return robot_x-10 < ball_x < robot_x+30 and robot_y-30 < ball_y < robot_y+10
+
+    def is_ball_on_other(self, robot_name, zone, scale=1.):
+        """
+        returns True if ball is in the side or bottom zone.
+        :param robot_name:  robot name
+        :param zone:        ["left", "right", "bottom"]
+        :param scale:       Zone can be scaled, to accommodate for different robots
+        :return: boolean
+        """
+        ball = self.get_ball_position()
+        if ball and ball[2]:
+            for r in self.robots:
+                if r.name == robot_name:
+                    if r.is_point_in_other_zone(ball[0], ball[1], zone, scale=scale):
+                        return True
+                    break
+        return False
 
 
     def change_drawing(self, key):
@@ -179,8 +228,9 @@ class VisionWrapper:
             self.gui.draw_ball = not self.gui.draw_ball
         elif key == ord('n'):
             self.gui.draw_contours = not self.gui.draw_contours
-        elif key == ord('j'):
-            self.gui.draw_robot = not self.gui.draw_robot
+        # TODO: this was crashing everything
+        # elif key == ord('j'):
+        #     self.gui.draw_robot = not self.gui.draw_robot
         elif key == ord('i'):
             self.gui.draw_direction = not self.gui.draw_direction
 
@@ -197,6 +247,19 @@ class VisionWrapper:
         width, height, channels = self.frame.shape
         return width, height
 
+    def get_latency_seconds(self):
+        return self.delta_t
+
+
+    def _mode(self, array):
+        """
+        :param array:   some array
+        :return: m, c   the first mode found and the number of occurences
+        """
+        m = max(array, key = array.count)
+        return m, array.count(m)
+
+
     def update(self):
         """ Processes the current frame. """
         self.frame = self.camera.get_frame()
@@ -209,10 +272,7 @@ class VisionWrapper:
             cv2.imshow('bg sub', self.preprocessed['background_sub'])
 
         # Find object positions
-        # model_positions have their y coordinate inverted
-        # TODO: is this still the case?
-        self.world_objects, self.world_contours = \
-            self.vision.perform_locate(self.frame)
+        self.world_objects, self.world_contours = self.vision.perform_locate(self.frame)
 
         # Updates the robot coordinates
         if 'robots' in self.world_objects:
@@ -234,7 +294,17 @@ class VisionWrapper:
                                         else None,
                                     other_circle_coords
                                     ):
+                        # Add new ball state if robot has the ball.
+                        ball = self.get_ball_position()
+                        if ball and ball[2] and robot.is_point_in_grabbing_zone(ball[0], ball[1]):
+                            self.ball_states[self.ball_index] = robot.name
                         break
+            self.ball_index = (self.ball_index + 1) % self.ball_median_size
+
+        # Recalculate the latency time
+        t = time()
+        self.delta_t = t - self.t0
+        self.t0 = t
 
         # Perform GUI update
         if self.enable_gui:

@@ -142,7 +142,7 @@ class Tracker(object):
         return angle
 
     @staticmethod
-    def correct_circle_contour(self, x, y, x0, img, distance, circle_radius, target_color_val, iteration, max_iter=15):
+    def correct_circle_contour(x, y, x0, y0, img, distance, max_distance, circle_radius, target_color_val, iteration, max_iter=15):
         """
         Iteratively corrects a circular contour by checking values around it.
 
@@ -160,42 +160,70 @@ class Tracker(object):
         :return:                        new x, y of a point
         """
 
+        if iteration == max_iter:
+            return x, y
+
         h, s, v = cv2.split(img)
+
+        get_circular_mean = Tracker.get_circular_mean
 
         # Target co-ordinates
         h_mean = get_circular_mean(distance, x, y, h)
         s_mean = get_circular_mean(distance, x, y, s)
         v_mean = get_circular_mean(distance, x, y, v)
+        main_ratio = abs(target_color_val[0]-h_mean) + abs(target_color_val[1]-s_mean) + abs(target_color_val[2]-v_mean)
 
-        top_h_mean = get_circular_mean(distance, x, y+distance, h)
-        top_s_mean = get_circular_mean(distance, x, y+distance, s)
-        top_v_mean = get_circular_mean(distance, x, y+distance, v)
+        ratios = list()
+        newy = y+distance
+        if 0 <= newy < len(h) and (x0-x)**2 + (y0-newy)**2 < max_distance:
+            top_h_mean = get_circular_mean(circle_radius, x, newy, h)
+            top_s_mean = get_circular_mean(circle_radius, x, newy, s)
+            top_v_mean = get_circular_mean(circle_radius, x, newy, v)
+            ratios.append(abs(target_color_val[0]-top_h_mean) + abs(target_color_val[1]-top_s_mean) + abs(target_color_val[2]-top_v_mean))
 
-        bottom_h_mean = get_circular_mean(distance, x, y-distance, h)
-        bottom_s_mean = get_circular_mean(distance, x, y-distance, s)
-        bottom_v_mean = get_circular_mean(distance, x, y-distance, v)
+        newy = y-distance
+        if 0 <= newy < len(h) and (x0-x)**2 + (y0-newy)**2 < max_distance:
+            bottom_h_mean = get_circular_mean(circle_radius, x, newy, h)
+            bottom_s_mean = get_circular_mean(circle_radius, x, newy, s)
+            bottom_v_mean = get_circular_mean(circle_radius, x, newy, v)
+            ratios.append(abs(target_color_val[0]-bottom_h_mean) + abs(target_color_val[1]-bottom_s_mean) + abs(target_color_val[2]-bottom_v_mean))
 
-        left_h_mean = get_circular_mean(distance, x-distance, y, h)
-        left_s_mean = get_circular_mean(distance, x-distance, y, s)
-        left_v_mean = get_circular_mean(distance, x-distance, y, v)
+        newx = x-distance
+        if 0 <= newx < len(h[0]) and (x0-newx)**2 + (y0-y)**2 < max_distance:
+            left_h_mean = get_circular_mean(circle_radius, newx, y, h)
+            left_s_mean = get_circular_mean(circle_radius, newx, y, s)
+            left_v_mean = get_circular_mean(circle_radius, newx, y, v)
+            ratios.append(abs(target_color_val[0]-left_h_mean) + abs(target_color_val[1]-left_s_mean) + abs(target_color_val[2]-left_v_mean))
 
-        right_h_mean = get_circular_mean(distance, x+distance, y, h)
-        right_s_mean = get_circular_mean(distance, x+distance, y, s)
-        right_v_mean = get_circular_mean(distance, x+distance, y, v)
+        newx = x+distance
+        if 0 <= newx < len(h[0]) and (x0-newx)**2 + (y0-y)**2 < max_distance:
+            right_h_mean = get_circular_mean(circle_radius, newx, y, h)
+            right_s_mean = get_circular_mean(circle_radius, newx, y, s)
+            right_v_mean = get_circular_mean(circle_radius, newx, y, v)
+            ratios.append(abs(target_color_val[0]-right_h_mean) + abs(target_color_val[1]-right_s_mean) + abs(target_color_val[2]-right_v_mean))
 
-        means = {
-            'top_mean': abs(h_mean-top_h_mean) + abs(s_mean-top_s_mean) + abs(v_mean-top_v_mean),
-            'bottom_mean': abs(h_mean-bottom_h_mean) + abs(s_mean-bottom_s_mean) + abs(v_mean-bottom_v_mean),
-            'left_mean': abs(h_mean-left_h_mean) + abs(s_mean-left_s_mean) + abs(v_mean-left_v_mean),
-            'right_mean': abs(h_mean-right_h_mean) + abs(s_mean-right_s_mean) + abs(v_mean-right_v_mean)}
-        if max(means, key=means.get()) == "top_mean":
-            return (x, y+distance)
-        elif max(means, key=means.get()) == "bottom_mean":
-            return (x, y-distance)
-        elif max(means, key=means.get()) == "left_mean":
-            return (x-distance, y)
-        elif max(means, key=means.get()) == "right_mean":
-            return (x+distance, y)
+        if ratios:
+            min_new_ratio = min(ratios)
+            i = ratios.index(min_new_ratio)
+            if min_new_ratio < main_ratio:
+                if i in [0,1]:
+                    xn = x
+                elif i == 2:
+                    xn = x-distance
+                else:
+                    xn = x+distance
+
+                if i == 0:
+                    yn = y+distance
+                elif i == 1:
+                    yn = y-distance
+                else:
+                    yn = y
+
+                Tracker.correct_circle_contour(xn, yn, x, y, img, distance, max_distance, circle_radius,
+                                               target_color_val, iteration+1, max_iter=max_iter)
+        return x, y
+
 
 
     @staticmethod
