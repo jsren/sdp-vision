@@ -134,10 +134,10 @@ class VisionLauncher(object):
                         int(timeout * 1000)
 
     def get_previous_ball(self):
-        return vision_feed.GUI.x_ball_prev,vision_feed.GUI.y_ball_prev
+        return self.visionwrap.gui.x_ball_prev, self.visionwrap.gui.y_ball_prev
 
     def get_previous_previous_ball(self):
-        return vision_feed.GUI.x_ball_prev_prev,vision_feed.GUI.y_ball_prev_prev
+        return self.visionwrap.gui.x_ball_prev_prev, self.visionwrap.gui.y_ball_prev_prev
 
     def get_zones(self):
         return tools.get_defense_zones(self.pitch)
