@@ -133,7 +133,7 @@ class VisionInterface(object):
         """
         return [ Robot(r[0], r[1], r[2], r[3], r[4], self._launcher.do_we_have_ball, self._launcher.is_ball_in_range,
                        self._launcher.is_ball_close)
-            for r in self._launcher.get_robots_raw() ]
+            for r in self._launcher.get_robots_raw()]
 
     def wait_for_start(self, timeout=None):
         """ Blocks the current thread until the vision system is ready.

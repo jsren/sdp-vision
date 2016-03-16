@@ -74,12 +74,21 @@ class VisionWrapper:
         self.BALL_HOLDING_AREA_SCALE = 0.5
 
         for r_name in robot_details.keys():
-            self.robots.append(RobotInstance(r_name,
-                                             robot_details[r_name]['main_colour'],
-                                             robot_details[r_name]['side_colour'],
-                                             robot_details[r_name]['offset_angle'],
-                                             robot_details[r_name]['type'],
-                                             r_name in robots_on_pitch))
+            if robot_details[r_name]['main_colour'] != robot_details[our_side]['main_colour']:
+                self.robots.append(RobotInstance(r_name,
+                                                 robot_details[r_name]['main_colour'],
+                                                 robot_details[r_name]['side_colour'],
+                                                 robot_details[r_name]['offset_angle'],
+                                                 'enemy',
+                                                 r_name in robots_on_pitch))
+            else:
+                self.robots.append(RobotInstance(r_name,
+                                                 robot_details[r_name]['main_colour'],
+                                                 robot_details[r_name]['side_colour'],
+                                                 robot_details[r_name]['offset_angle'],
+                                                 'ally',
+                                                 r_name in robots_on_pitch))
+
 
         # Draw various things on the image
         self.draw_direction = True
@@ -190,10 +199,10 @@ class VisionWrapper:
         if ball and ball[2]:
             for r in self.robots:
                 if r.name == robot_name:
-                    if r.types == 'enemy':
-                        if r.is_point_in_grabbing_zone(ball[0], ball[1], scale=scale, Circular=False):
+                    if r.role == 'enemy':
+                        if r.is_point_in_grabbing_zone(ball[0], ball[1], role=r.role, scale=1., circular=False):
                             return True
-                    elif r.is_point_in_grabbing_zone(ball[0], ball[1], scale=scale):
+                    elif r.is_point_in_grabbing_zone(ball[0], ball[1], role=r.role, scale=scale):
                         return True
                     break
         return False
@@ -211,7 +220,7 @@ class VisionWrapper:
         if ball and ball[2]:
             for r in self.robots:
                 if r.name == robot_name:
-                    if r.is_point_in_other_zone(ball[0], ball[1], zone, scale=scale):
+                    if r.is_point_in_other_zone(ball[0], ball[1], zone, role=r.role, scale=scale):
                         return True
                     break
         return False

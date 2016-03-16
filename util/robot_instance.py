@@ -16,13 +16,13 @@ SIDE_ZONE_HEIGHT = 25
 SIDE_ZONE_WIDTH = 40
 BACK_ZONE_HEIGHT = 25
 BACK_ZONE_WIDTH = 40
-ROBOT_WIDTH = 100
-ROBOT_HEIGHT = 100
+ROBOT_WIDTH = 90
+ROBOT_HEIGHT = 90
 
 
 class RobotInstance(object):
 
-    def __init__(self, name, m_color, s_color, offset_angle, types, present=False):
+    def __init__(self, name, m_color, s_color, offset_angle, role, present=False):
         """
         DO NOT USE OTHER CIRCLE COORDINATES FOR CALCULATIONS - THEY'RE NOT IN A QUEUE
         """
@@ -32,8 +32,8 @@ class RobotInstance(object):
         self.main_color = m_color
         self.side_color = s_color
         self.offset_angle = offset_angle  # individual error offset
+        self.role = role
         self.name = name
-        self.types = types
         self.side_x = list()
         self.side_y = list()
         self.age = 0
@@ -118,7 +118,7 @@ class RobotInstance(object):
                np.median(self.side_x[:median_size]), np.median(self.side_y[:median_size])
 
 
-    def grabbing_zone(self, median_size=None, auto_median=True, scale=1.):
+    def grabbing_zone(self, role='unknown', median_size=None, auto_median=True, scale=1.):
         """
         SLIGHTLY OUTDATED:
         Returns x, y for the bottom left point of the rectangular grabber zone (p0_x) and
@@ -132,12 +132,10 @@ class RobotInstance(object):
         heading = self.heading
         x, y = self.position
 
-        if self.types != 'enemy':
+        if role != 'enemy':
             center_x = x + (MIDPOINT_TO_BALL_ZONE + BALL_ZONE_HEIGHT * 0.5 * scale) * cos(radians(heading))
             center_y = y + (MIDPOINT_TO_BALL_ZONE + BALL_ZONE_HEIGHT * 0.5 * scale) * sin(radians(heading))
-
             return (center_x, center_y), (BALL_ZONE_WIDTH * scale, BALL_ZONE_HEIGHT * scale), heading + 90
-
         else:
             return (x, y), (ROBOT_HEIGHT * scale, ROBOT_WIDTH * scale), heading + 90
 
@@ -198,7 +196,7 @@ class RobotInstance(object):
             return False
         return True
 
-    def is_point_in_grabbing_zone(self, x, y, scale=1., circular=True):
+    def is_point_in_grabbing_zone(self, x, y, role='unknown', scale=1., circular=True):
         """
         Checks that the given coordinates are in the hardcoded grabbing zone.
         :param x:
@@ -209,7 +207,7 @@ class RobotInstance(object):
         :return: True or False
         """
 
-        (z_x, z_y), (w, h), heading = self.grabbing_zone(scale=scale)
+        (z_x, z_y), (w, h), heading = self.grabbing_zone(role, scale=scale)
         heading = radians(heading - 90)
 
         # Top left
@@ -270,7 +268,7 @@ class RobotInstance(object):
         return True
 
 
-    def is_point_in_other_zone(self, x, y, zone, scale=1.):
+    def is_point_in_other_zone(self, x, y, zone, role, scale=1.):
         """
         Checks that the given coordinates are in the side or bottom zone.
         :param x:
@@ -280,7 +278,7 @@ class RobotInstance(object):
         :return: True or False
         """
 
-        if self.is_point_in_grabbing_zone(x, y):
+        if self.is_point_in_grabbing_zone(x, y, role):
             return False
 
         (z_x, z_y), (w, h), heading = self.other_zone(zone, scale=scale)
