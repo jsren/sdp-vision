@@ -18,9 +18,9 @@ import os
 
 ROBOT_DESCRIPTIONS = {
     'blue + green'  : {'main_colour': 'blue',   'side_colour': 'green', 'offset_angle': 15},
-    'yellow + green': {'main_colour': 'yellow', 'side_colour': 'green', 'offset_angle': 0 },
-    'blue + pink'   : {'main_colour': 'blue',   'side_colour': 'pink',  'offset_angle': 0 },
-    'yellow + pink' : {'main_colour': 'yellow', 'side_colour': 'pink',  'offset_angle': 0 }
+    'yellow + green': {'main_colour': 'yellow', 'side_colour': 'green', 'offset_angle': 15 },
+    'blue + pink'   : {'main_colour': 'blue',   'side_colour': 'pink',  'offset_angle': 15 },
+    'yellow + pink' : {'main_colour': 'yellow', 'side_colour': 'pink',  'offset_angle': 15 }
 }
 
 class VisionLauncher(object):

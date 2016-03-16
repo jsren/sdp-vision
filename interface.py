@@ -5,6 +5,7 @@
 """
 import threading
 import operator
+import math
 
 class _RobotType(object):
     UNKNOWN  = 0
@@ -50,7 +51,8 @@ class Robot(object):
     @property
     def visible(self):
         """ Gets whether the robot is currently detected. """
-        return self._visible
+        x, y = self.position
+        return not (math.isnan(x) or math.isnan(y))
 
     @property
     def heading(self):
