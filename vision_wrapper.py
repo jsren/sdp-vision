@@ -189,12 +189,9 @@ class VisionWrapper:
         if ball and ball[2]:
             for r in self.robots:
                 if r.name == robot_name:
-                    if r.type == RobotType.ENEMY:
-                        if r.is_point_in_grabbing_zone(ball[0], ball[1], scale=scale*1.5):
-                            return True
-                        elif r.is_point_in_grabbing_zone(ball[0], ball[1], scale=scale):
-                            return True
-                        break
+                    if r.is_point_in_grabbing_zone(ball[0], ball[1], scale=scale):
+                        return True
+                    break
         return False
 
 
