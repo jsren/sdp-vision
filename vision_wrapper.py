@@ -249,7 +249,6 @@ class VisionWrapper:
 
     def get_latency_seconds(self):
         return self.delta_t
-s
 
     def _mode(self, array):
         """
