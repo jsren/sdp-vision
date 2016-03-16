@@ -159,13 +159,10 @@ class VisionInterface(object):
         returns [(left goal left corner), (left goal right corner), (right goal left corner), (right goal right corner)]
         :return: [ tuple(x, y), tuple(x, y), tuple(x,y), tuple(x,y) ]
         """
-        list_of_goal_coordinates =  self._launcher.get_goal_positions()
-        sorted_goal_coordinates = sorted(list_of_goal_coordinates, key=operator.itemgetter(0, 1))
-        left_goal_x = sorted_goal_coordinates[0][0]
-        right_goal_x = sorted_goal_coordinates[2][0]
-        sorted_goal_coordinates[1] = (left_goal_x, sorted_goal_coordinates[1][1])
-        sorted_goal_coordinates[3] = (right_goal_x, sorted_goal_coordinates[3][1])
-        return sorted_goal_coordinates
+        left_goal, right_goal =  self._launcher.get_goal_positions()
+        left_goal[2] = (left_goal[1][0],left_goal[2][1])
+        right_goal[3] = (right_goal[0][0],right_goal[3][1])
+        return [tuple(left_goal[1]), left_goal[2], tuple(right_goal[0]), right_goal[3]]
 
     def get_ball_position(self):
         """ Gets the current ball position.

@@ -107,13 +107,7 @@ class VisionLauncher(object):
         Takes the pitch croppings and estimates the goal corners
         :return: [tuple(x,y),tuple(x,y),tuple(x,y),tuple(x,y)]
         """
-        PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)))
-        filename = PATH+'/calibrations/croppings.json'
-        croppings = tools.get_croppings(filename, self.pitch)['outline']
-        if self.pitch == 1:
-            return [(croppings[0][0] - 50, int(croppings[3][1]/2) - 60), (croppings[0][0] - 50, int(croppings[3][1]/2) + 50), (croppings[1][0] - 60, int(croppings[2][1]/2) - 50), (croppings[1][0] - 60, int(croppings[2][1]/2 + 60))]
-        else:
-            return [(croppings[0][0] - 50, int(croppings[3][1]/2) - 60), (croppings[0][0] - 50, int(croppings[3][1]/2) + 50), (croppings[1][0] - 60, int(croppings[2][1]/2) - 70), (croppings[1][0] - 60, int(croppings[2][1]/2 + 40))]
+        return tools.get_goal_positions(self.pitch)
 
     def get_frame_size(self):
         return self.visionwrap.get_frame_size()

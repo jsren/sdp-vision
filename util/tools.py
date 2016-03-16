@@ -62,6 +62,13 @@ def get_defense_zones(pitch):
     zone_1 = get_croppings(filename, pitch)['Zone_1']
     return zone_0, zone_1
 
+def get_goal_positions(pitch):
+    filename = PATH+'/calibrations/croppings.json'
+    zone_4 = get_croppings(filename, pitch)['Zone_4']
+    zone_5 = get_croppings(filename, pitch)['Zone_5']
+    return zone_4, zone_5
+
+
 def get_croppings(filename=PATH+'/calibrations/croppings.json', pitch=0):
     croppings = get_json(filename)
     return croppings[PITCHES[pitch]]
