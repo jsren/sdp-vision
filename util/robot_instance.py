@@ -16,11 +16,13 @@ SIDE_ZONE_HEIGHT = 25
 SIDE_ZONE_WIDTH = 40
 BACK_ZONE_HEIGHT = 25
 BACK_ZONE_WIDTH = 40
+ROBOT_WIDTH = 100
+ROBOT_HEIGHT = 100
 
 
 class RobotInstance(object):
 
-    def __init__(self, name, m_color, s_color, offset_angle, present=False):
+    def __init__(self, name, m_color, s_color, offset_angle, types, present=False):
         """
         DO NOT USE OTHER CIRCLE COORDINATES FOR CALCULATIONS - THEY'RE NOT IN A QUEUE
         """
@@ -31,6 +33,7 @@ class RobotInstance(object):
         self.side_color = s_color
         self.offset_angle = offset_angle  # individual error offset
         self.name = name
+        self.types = types
         self.side_x = list()
         self.side_y = list()
         self.age = 0
@@ -129,10 +132,14 @@ class RobotInstance(object):
         heading = self.heading
         x, y = self.position
 
-        center_x = x + (MIDPOINT_TO_BALL_ZONE + BALL_ZONE_HEIGHT * 0.5 * scale) * cos(radians(heading))
-        center_y = y + (MIDPOINT_TO_BALL_ZONE + BALL_ZONE_HEIGHT * 0.5 * scale) * sin(radians(heading))
+        if self.types != 'enemy':
+            center_x = x + (MIDPOINT_TO_BALL_ZONE + BALL_ZONE_HEIGHT * 0.5 * scale) * cos(radians(heading))
+            center_y = y + (MIDPOINT_TO_BALL_ZONE + BALL_ZONE_HEIGHT * 0.5 * scale) * sin(radians(heading))
 
-        return (center_x, center_y), (BALL_ZONE_WIDTH * scale, BALL_ZONE_HEIGHT * scale), heading + 90
+            return (center_x, center_y), (BALL_ZONE_WIDTH * scale, BALL_ZONE_HEIGHT * scale), heading + 90
+
+        else:
+            return (x, y), (ROBOT_HEIGHT * scale, ROBOT_WIDTH * scale), heading + 90
 
 
     def other_zone(self, zone, median_size=None, auto_median=True, scale=1.):

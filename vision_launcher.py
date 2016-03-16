@@ -17,10 +17,10 @@ import os
 # }
 
 ROBOT_DESCRIPTIONS = {
-    'blue + green'  : {'main_colour': 'blue',   'side_colour': 'green', 'offset_angle': 15},
-    'yellow + green': {'main_colour': 'yellow', 'side_colour': 'green', 'offset_angle': 0},
-    'blue + pink'   : {'main_colour': 'blue',   'side_colour': 'pink',  'offset_angle': 0},
-    'yellow + pink' : {'main_colour': 'yellow', 'side_colour': 'pink',  'offset_angle': 0}
+    'blue + green'  : {'main_colour': 'blue',   'side_colour': 'green', 'offset_angle': 15, 'type': 'unknown'},
+    'yellow + green': {'main_colour': 'yellow', 'side_colour': 'green', 'offset_angle': 0, 'type': 'unknown'},
+    'blue + pink'   : {'main_colour': 'blue',   'side_colour': 'pink',  'offset_angle': 0, 'type': 'unknown'},
+    'yellow + pink' : {'main_colour': 'yellow', 'side_colour': 'pink',  'offset_angle': 0, 'type': 'unknown'},
 }
 
 class VisionLauncher(object):
@@ -65,11 +65,14 @@ class VisionLauncher(object):
         for robot in listOfRobots:
             if robot[0] == self.OUR_NAME:
                 robot[4] = RobotType.OURS
+                ROBOT_DESCRIPTIONS[robot[0]]['type'] = 'ours'
             elif ROBOT_DESCRIPTIONS[robot[0]]['main_colour'] \
                 == ROBOT_DESCRIPTIONS[self.OUR_NAME]['main_colour']:
                 robot[4] = RobotType.FRIENDLY
+                ROBOT_DESCRIPTIONS[robot[0]]['type'] = 'friendly'
             else:
                 robot[4] = RobotType.ENEMY
+                ROBOT_DESCRIPTIONS[robot[0]]['type'] = 'enemy'
         return [tuple(r) for r in listOfRobots]
 
     def get_robot_midpoint(self, robot_name):

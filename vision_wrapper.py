@@ -78,6 +78,7 @@ class VisionWrapper:
                                              robot_details[r_name]['main_colour'],
                                              robot_details[r_name]['side_colour'],
                                              robot_details[r_name]['offset_angle'],
+                                             robot_details[r_name]['type'],
                                              r_name in robots_on_pitch))
 
         # Draw various things on the image
@@ -189,7 +190,10 @@ class VisionWrapper:
         if ball and ball[2]:
             for r in self.robots:
                 if r.name == robot_name:
-                    if r.is_point_in_grabbing_zone(ball[0], ball[1], scale=scale):
+                    if r.types == 'enemy':
+                        if r.is_point_in_grabbing_zone(ball[0], ball[1], scale=scale, Circular=False):
+                            return True
+                    elif r.is_point_in_grabbing_zone(ball[0], ball[1], scale=scale):
                         return True
                     break
         return False
