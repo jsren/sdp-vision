@@ -244,12 +244,12 @@ class VisionWrapper:
         return self.world_objects.get('circles')
 
     def get_frame_size(self):
-        width, height, channels = self.frame.shape
+        height, width, channels = self.frame.shape
         return width, height
 
     def get_latency_seconds(self):
         return self.delta_t
-
+s
 
     def _mode(self, array):
         """
