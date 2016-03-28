@@ -49,12 +49,18 @@ class GUI:
         self.p1         = None
 
         self.see_ball = False
+
         # create GUI
         # The first numerical value is the starting point for the vision feed
         #cv2.namedWindow('frame2')
 
         # Handle mouse clicks
         cv2.setMouseCallback('frame2', self.on_mouse_event)
+
+        # Allow easy access from outside
+        GUI.instance = self
+        self.random_dots = set()
+
 
 
     def on_mouse_event(self, event, x, y, *_):
@@ -94,6 +100,11 @@ class GUI:
                 img = self.frame[np.array(self.p1) - np.array([5, 5]),
                                  np.array(self.p1) + np.array([5, 5])]
 
+            # Draw random circles, requested from elsewhere
+            for (pos, color) in self.random_dots:
+                cv2.imshow('frame2', cv2.circle(self.frame, pos, 2, BGR_COMMON[color], 2, 0))
+
+            # Draw robot-related stuff
             if self.draw_robots:
                 for r in wrapper.robots:
                     if not r.visible: continue
@@ -235,6 +246,23 @@ class GUI:
                                                          (abs(int(self.x_ball+(5*(self.x_ball_prev-self.x_ball_prev_prev)))),
                                                           abs(int(self.y_ball+(5*(self.y_ball_prev-self.y_ball_prev_prev))))),
                                                          (0,255,0), 3, 10))
+
+        def draw_dot(pos, color):
+            """
+            Adds dot to draw on the vision feed.
+            :param pos: (x, y)
+            :param color: string. color must be present in BGR_COMMON
+            """
+            # noinspection PyShadowingNames
+            pos = (int(pos[0]), int(pos[1]))
+            self.random_dots.add((pos, color))
+
+        def clear_dots():
+            """
+            Clears all the random dots drawn on the vision feed
+            """
+            self.random_dots = set()
+
 
         except:
             print "Caught some kind of exception while drawing things. Lol.."
