@@ -202,8 +202,12 @@ class VisionWrapper:
                     if r.role == 'enemy':
                         if r.is_point_in_grabbing_zone(ball[0], ball[1], role=r.role, scale=1., circular=False):
                             return True
-                    elif r.is_point_in_grabbing_zone(ball[0], ball[1], role=r.role, scale=scale):
-                        return True
+                    elif r.role == 'group9':
+                        if r.is_point_in_grabbing_zone(ball[0], ball[1], role=r.role, scale=1., circular=False):
+                            return True
+                    else:
+                        if r.is_point_in_grabbing_zone(ball[0], ball[1], role=r.role, scale=1., circular=True):
+                            return True
                     break
         return False
 
