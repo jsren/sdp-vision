@@ -247,22 +247,22 @@ class GUI:
                                                           abs(int(self.y_ball+(5*(self.y_ball_prev-self.y_ball_prev_prev))))),
                                                          (0,255,0), 3, 10))
 
-        def draw_dot(pos, color):
-            """
-            Adds dot to draw on the vision feed.
-            :param pos: (x, y)
-            :param color: string. color must be present in BGR_COMMON
-            """
-            # noinspection PyShadowingNames
-            pos = (int(pos[0]), int(pos[1]))
-            self.random_dots.add((pos, color))
-
-        def clear_dots():
-            """
-            Clears all the random dots drawn on the vision feed
-            """
-            self.random_dots = set()
-
-
         except:
             print "Caught some kind of exception while drawing things. Lol.."
+
+
+        #  def draw_dot(pos, color):
+        #     """
+        #     Adds dot to draw on the vision feed.
+        #     :param pos: (x, y)
+        #     :param color: string. color must be present in BGR_COMMON
+        #     """
+        #     # noinspection PyShadowingNames
+        #     pos = (int(pos[0]), int(pos[1]))
+        #     self.random_dots.add((pos, color))
+        #
+        # def clear_dots():
+        #     """
+        #     Clears all the random dots drawn on the vision feed
+        #     """
+        #     self.random_dots = set()
