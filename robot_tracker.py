@@ -229,10 +229,9 @@ class RobotTracker(Tracker):
             Scale(parent, variable=angle_offset_var, to=50, orient=HORIZONTAL,
                   label="Robot Heading Offset", length=280)
 
-
     def on_angle_offset_changed(self, robot, var):
         # TODO
-        print "TODO: change robot angle offset to", var.value
+        # print "TODO: change robot angle offset to", var.value
         # robot.offset_angle = var.value? Or is 'robot' only its name?
         pass
 
