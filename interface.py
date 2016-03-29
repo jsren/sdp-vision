@@ -125,8 +125,7 @@ class VisionInterface(object):
 
     def __init__(self,  team_colour, our_colour, pitch, color_settings, gui=True):
         # Create new vision launcher
-        from vision_launcher import VisionLauncher \
-            as _VisionLauncher
+        from vision_launcher import VisionLauncher as _VisionLauncher
         self._launcher = _VisionLauncher(pitch, color_settings, team_colour, our_colour, gui)
 
     def get_robots(self):
@@ -149,7 +148,10 @@ class VisionInterface(object):
         :return: The vision system main thread.
         """
         t = threading.Thread(name="Vision Thread",
-                             target=self._launcher.launch_vision)
+                             target=self._launcher.launch_vision(["blue + green",
+                                                                  "blue + pink",
+                                                                  "yellow + green",
+                                                                  "yellow + pink"]))
         t.start()
         return t
 
