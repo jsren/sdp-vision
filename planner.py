@@ -112,7 +112,7 @@ def orientRobot(current, target):
     d = target - current
     ser.write("(0,0,"+str(int(d))+")\n")
     time.sleep(1)
-    something = ser.read(4)
+    something = ser.read(4) #https://s3.amazonaws.com/static.carthrottle.com/workspace/uploads/comments/15dca6d3e25e1fc749d05b69aac8e7fc.png
     print something
     #_sim_update_robotrot(d)
 
