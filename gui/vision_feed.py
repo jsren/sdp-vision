@@ -246,12 +246,7 @@ class GUI:
                                                          (abs(int(self.x_ball+(5*(self.x_ball_prev-self.x_ball_prev_prev)))),
                                                           abs(int(self.y_ball+(5*(self.y_ball_prev-self.y_ball_prev_prev))))),
                                                          (0,255,0), 3, 10))
-
-        except:
-            print "Caught some kind of exception while drawing things. Lol.."
-
-
-        #  def draw_dot(pos, color):
+        # def draw_dot(pos, color):
         #     """
         #     Adds dot to draw on the vision feed.
         #     :param pos: (x, y)
@@ -266,3 +261,6 @@ class GUI:
         #     Clears all the random dots drawn on the vision feed
         #     """
         #     self.random_dots = set()
+
+        except:
+            print "Caught some kind of exception while drawing things. Lol.."
