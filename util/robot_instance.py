@@ -103,7 +103,7 @@ class RobotInstance(object):
         if auto_median:
             median_size = self.median_selector(median_size)
         self._latest_angle = np.median(self.angle[:median_size]) % 360
-        return self._latest_angle
+        return self._latest_angle + marker_angle_offset
 
     @property
     def latest_values(self):
@@ -353,7 +353,7 @@ class RobotInstance(object):
         angle = self.angle_of_line(np.array([x, y]),
                                  np.array([sx, sy]))
         # Correct for marker offset
-        return (angle + marker_angle_offset + self.offset_angle + 90) % 360
+        return (angle + self.offset_angle + 90) % 360
 
     def get_other_coordinates(self):
         """

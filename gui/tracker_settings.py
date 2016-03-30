@@ -1,5 +1,7 @@
 from common import *
 
+import util.robot_instance
+
 class TrackerSettingsUI(UserControl):
 
     def __init__(self, trackers, parent=None):
@@ -18,7 +20,8 @@ class TrackerSettingsUI(UserControl):
         frame = LabelFrame(self, text="Manual Adjustment")
         frame.pack(padx=10, pady=10, ipadx=8, ipady=8)
 
-        radjust_var = UserVariable(self, int, 0, self.on_radjust_changed)
+        radjust_var = UserVariable(self, int, int(util.robot_instance.marker_angle_offset),
+                                   self.on_radjust_changed)
 
         Scale(frame, variable=radjust_var, from_=-180, to=180, orient=HORIZONTAL,
               label="Robot Orientation Adjustment", length=300)\
@@ -26,7 +29,7 @@ class TrackerSettingsUI(UserControl):
 
 
     def on_radjust_changed(self, var):
-        print "[INFO] Angle adjust changed to", var.value
+        util.robot_instance.marker_angle_offset = var.value
 
     @staticmethod
     def create_and_show(trackers, parent=None):
