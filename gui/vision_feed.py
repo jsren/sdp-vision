@@ -270,3 +270,6 @@ class GUI:
 
         except Exception, e:
             print "[ERROR] Exception drawing vision feed:", e.message
+
+        # Return frame with overlay drawn
+        return self.frame
