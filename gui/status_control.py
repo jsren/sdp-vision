@@ -27,6 +27,9 @@ class StatusUI(UserControl):
         self.ball_status = Label(frame, image=self.img_noball)
         self.ball_status.pack(fill=X, padx=15)
 
+        self.target_goal_label = Label(frame, text = "Target Goal UKNOWN")
+        self.target_goal_label.pack(fill=X, padx=15)
+
         self.ball_loc_label = Label(frame, text = "Ball Location ")
         self.ball_loc_label.pack(fill=X, padx=15)
 
@@ -48,6 +51,9 @@ class StatusUI(UserControl):
             image=self.img_ball if var.value else self.img_noball)
 
     def update_vision_values(self, *_):
+        if self.vision.target_goal:
+            self.target_goal_label.configure(text="Target Goal: %s"%self.vision.target_goal)
+
         if self.vision.get_ball_position() is None:
             self.ball_loc_label.configure(text="Ball Location: (  NaN,  NaN)")
         else:

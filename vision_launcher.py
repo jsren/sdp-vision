@@ -29,7 +29,7 @@ class VisionLauncher(object):
     Launches the vision wrapper which calibrates the camera based on preset settings, takes care of object tracking
     and can optionally be called to display callibration GUI.
     """
-    def __init__(self, pitch, color_settings, team_colour, our_colour, launch_gui=False, pc_name=None):
+    def __init__(self, pitch, color_settings, team_colour, our_colour, launch_gui=False, pc_name=None, goal=None):
         """
         :param pitch: [0, 1]                        0 is the one, closer to the door.
         :param color_settings: [0, small, 1, big]   0 or small for pitch color settings with small numbers (previously - pitch 0)
@@ -38,7 +38,7 @@ class VisionLauncher(object):
         :param pc_name: String                      Loads camera and color settings from given PC (BUT NOT SAVE TO) file if its naem is given
         :return:
         """
-
+        self.target_goal = goal
         self.visionwrap = None
         self.vision1 = None
         self.pitch = pitch

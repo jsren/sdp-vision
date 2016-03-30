@@ -19,7 +19,7 @@ class VisionWrapper:
 
     """
     def __init__(self, pitch, color_settings, our_side, robot_details,
-                 enable_gui=False, pc_name=None, robots_on_pitch=list()):
+                 enable_gui=False, pc_name=None, robots_on_pitch=list(), goal=None):
         """
         Entry point for the SDP system.
 
@@ -38,7 +38,10 @@ class VisionWrapper:
         pitch = int(pitch)
         assert pitch in [0, 1]
 
+        if goal: assert goal in ["left", "right"]
+
         self.pitch = pitch
+        self.target_goal = goal
         self.color_settings = color_settings
 
         self.calibration = Configuration.read_calibration(
