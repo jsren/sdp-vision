@@ -61,6 +61,7 @@ class UserControl(Frame):
 
     def __init__(self, master=None, title=None):
         self._title = title
+        self.tkmain = None
 
         if master is None:
             master = self.window = Toplevel()
@@ -72,11 +73,14 @@ class UserControl(Frame):
 
         Frame.__init__(self, master)
 
-    def show(self):
+    def show(self, tk=None):
+        self.tkmain = tk
         self.pack()
 
     def close(self):
-        if self.window:
+        if self.tkmain is not None:
+            self.tkmain.close_var.value = True
+        elif self.window:
             self.window.destroy()
         else:
             self.destroy()
@@ -102,12 +106,19 @@ class MainWindow(Tk):
         self.geometry("0x0")
         self._windows = None
 
+        self.close_var = UserVariable(self, bool, False, self.on_close_changed)
+
     def show(self, windows):
         self.update()
         self._windows = windows
         for w in windows:
-            w.show()
+            w.show(self)
         self.mainloop()
+
+    def on_close_changed(self, var):
+        if var.value:
+            self.destroy()
+
 
     @property
     def windows(self):

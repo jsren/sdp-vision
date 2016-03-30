@@ -15,9 +15,23 @@ class TrackerSettingsUI(UserControl):
             except Exception, e:
                 print "[ERROR] [UI]", e
 
+        frame = LabelFrame(self, text="Manual Adjustment")
+        frame.pack(padx=10, pady=10, ipadx=8, ipady=8)
+
+        radjust_var = UserVariable(self, int, 0, self.on_radjust_changed)
+
+        Scale(frame, variable=radjust_var, from_=-180, to=180, orient=HORIZONTAL,
+              label="Robot Orientation Adjustment", length=300)\
+            .pack(anchor=W, padx=5, pady=5)
+
+
+    def on_radjust_changed(self, var):
+        print "[INFO] Angle adjust changed to", var.value
+
     @staticmethod
     def create_and_show(trackers, parent=None):
         TrackerSettingsUI(trackers, parent).show()
+
 
 if __name__ == "__main__":
     TrackerSettingsUI.create_and_show(list())
