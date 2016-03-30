@@ -11,6 +11,13 @@ class StatusUI(UserControl):
 
         self.vision = vision
 
+        if parent is not None:
+            Button(self, text="Detach", command=self.on_detach,
+                   padx=2, pady=2, width=8).pack(anchor=NE)
+        else:
+            Button(self, text="Re-attach", command=self.on_deattach,
+                   padx=2, pady=2, width=8).pack(anchor=NE)
+
         self.img_ball = ImageTk.PhotoImage(Image.open(
             path.join(path.dirname(__file__), "../images/ball.jpg")
         ))
@@ -76,5 +83,11 @@ class StatusUI(UserControl):
         self.robot_hed_label.configure(text="Robot Headings:\n" + heading_str)
 
         self.window.after(300, self.update_vision_values)
+
+    def on_detach(self):
+        self.disintegrate(self.vision)
+
+    def on_deattach(self):
+        self.reintegrate(self.vision)
 
 

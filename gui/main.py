@@ -1,10 +1,5 @@
 from common import *
 
-from calibration import CalibrationUI
-from tracker_settings import TrackerSettingsUI
-from status_control import StatusUI
-from gui_settings import GuiSettingsUI
-
 from Tkinter import *
 from ttk import *
 
@@ -30,4 +25,22 @@ class MainUI(UserControl):
 
         self.tab_host.pack()
 
+        # Store current instance for global access
+        assert MainUI.host is None
+        MainUI.host = self.tab_host
 
+    @staticmethod
+    def get_host():
+        return MainUI.host
+
+    @staticmethod
+    def add_tab(title, usercontrol):
+        MainUI.get_host().add(usercontrol, text=title)
+
+
+MainUI.host = None
+
+from calibration import CalibrationUI
+from tracker_settings import TrackerSettingsUI
+from status_control import StatusUI
+from gui_settings import GuiSettingsUI

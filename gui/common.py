@@ -87,12 +87,15 @@ class UserControl(Frame):
 
     def disintegrate(self, *args, **kwargs):
         self.destroy()
-        self.__class__(*args, **kwargs).show()
+        self.__class__(*args, **kwargs).show(self.tkmain)
 
-    def reintegrate(self, parent, *args, **kwargs):
-        self.destroy()
-        kwargs['parent'] = parent
-        self.__class__(*args, **kwargs).show()
+    def reintegrate(self, *args, **kwargs):
+        self.tkmain = None
+        self.close()
+
+        kwargs['parent'] = MainUI.get_host()
+        ctrl = self.__class__(*args, **kwargs)
+        MainUI.add_tab(self.title, ctrl)
 
     @property
     def title(self):
@@ -129,3 +132,4 @@ class MainWindow(Tk):
         MainWindow().show(get_windows_func())
 
 
+from gui.main import MainUI

@@ -7,9 +7,16 @@ from functools import partial
 
 class GuiSettingsUI(UserControl):
 
-    def __init__(self, vision_wrapper, master=None):
-        UserControl.__init__(self, master, title="GUI Settings")
+    def __init__(self, vision_wrapper, parent=None):
+        UserControl.__init__(self, parent, title="GUI Settings")
         self.vision = vision_wrapper
+
+        if parent is not None:
+            Button(self, text="Detach", command=self.on_detach,
+                   padx=2, pady=2, width=8).pack(anchor=NE)
+        else:
+            Button(self, text="Re-attach", command=self.on_deattach,
+                   padx=2, pady=2, width=8).pack(anchor=NE)
 
         self.show_contours_var = UserVariable(self, int, True, self.on_show_contours_changed, 500)
         self.show_ball_var = UserVariable(self, int, True, self.on_show_ball_changed, 500)
@@ -27,8 +34,8 @@ class GuiSettingsUI(UserControl):
             .pack(side=LEFT, padx=10, pady=10, anchor=N)
         Checkbutton(opts_frame, text="Show Robots", variable=self.show_robots_var)\
             .pack(side=LEFT, padx=10, pady=10, anchor=N)
-        Checkbutton(opts_frame, text="Show Corrections", variable=self.show_correct_var)\
-            .pack(side=LEFT, padx=10, pady=10, anchor=N)
+        # Checkbutton(opts_frame, text="Show Corrections", variable=self.show_correct_var)\
+        #     .pack(side=LEFT, padx=10, pady=10, anchor=N)
         Checkbutton(opts_frame, text="Show Contours", variable=self.show_contours_var)\
             .pack(side=LEFT, padx=10, pady=10, anchor=N)
         Checkbutton(opts_frame, text="Enable Raw Video", variable=self.show_raw_var)\
@@ -108,3 +115,9 @@ class GuiSettingsUI(UserControl):
 
         Configuration.write_video_config(self.vision.video_settings,
                                          self.vision.video_settings.machine_name)
+
+    def on_detach(self):
+        self.disintegrate(self.vision)
+
+    def on_deattach(self):
+        self.reintegrate(self.vision)
