@@ -124,12 +124,18 @@ class GUI:
                             # due to getting out of bounds when robot is near the edge.
                             if self.draw_correction:
                                 from robot_tracker import CORRECTION_MAX_DISTANCE, CORRECTION_STEP, CORRECTION_AREA_RADIUS
-                                cv2.imshow('frame2', cv2.circle(self.frame, (int(clx), int(cly)), CORRECTION_AREA_RADIUS,
-                                                                BGR_COMMON['yellow'], 1, 0))
-                                cv2.imshow('frame2', cv2.circle(self.frame, (int(clx), int(cly)), CORRECTION_STEP,
-                                                                BGR_COMMON['green'], 1, 0))
-                                cv2.imshow('frame2', cv2.circle(self.frame, (int(clx), int(cly)), CORRECTION_MAX_DISTANCE,
-                                                                BGR_COMMON['blue'], 1, 0))
+                                try:
+                                    cv2.imshow('frame2', cv2.circle(self.frame, (int(clx), int(cly)), CORRECTION_AREA_RADIUS,
+                                                                    BGR_COMMON['yellow'], 1, 0))
+                                except: pass
+                                try:
+                                    cv2.imshow('frame2', cv2.circle(self.frame, (int(clx), int(cly)), CORRECTION_STEP,
+                                                                    BGR_COMMON['green'], 1, 0))
+                                except: pass
+                                try:
+                                    cv2.imshow('frame2', cv2.circle(self.frame, (int(clx), int(cly)), CORRECTION_MAX_DISTANCE,
+                                                                    BGR_COMMON['blue'], 1, 0))
+                                except: pass
 
                             # Draw Names
                             cv2.imshow('frame2', cv2.putText(self.frame, r.name,
@@ -262,5 +268,5 @@ class GUI:
         #     """
         #     self.random_dots = set()
 
-        except:
-            print "Caught some kind of exception while drawing things. Lol.."
+        except Exception, e:
+            print "[ERROR] Exception drawing vision feed:", e.message

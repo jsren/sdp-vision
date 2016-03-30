@@ -15,6 +15,7 @@ class GuiSettingsUI(UserControl):
         self.show_ball_var = UserVariable(self, int, True, self.on_show_ball_changed, 500)
         self.show_ballv_var = UserVariable(self, int, True, self.on_show_ballv_changed, 500)
         self.show_robots_var = UserVariable(self, int, True, self.on_show_robots_changed, 500)
+        self.show_correct_var = UserVariable(self, int, False, self.on_show_correct_changed, 500)
         self.show_raw_var = UserVariable(self, int, False, self.on_show_raw_changed, 500)
 
         opts_frame = LabelFrame(self, text="Video Feed Ooptions")
@@ -25,6 +26,8 @@ class GuiSettingsUI(UserControl):
         Checkbutton(opts_frame, text="Show Velocity", variable=self.show_ballv_var)\
             .pack(side=LEFT, padx=10, pady=10, anchor=N)
         Checkbutton(opts_frame, text="Show Robots", variable=self.show_robots_var)\
+            .pack(side=LEFT, padx=10, pady=10, anchor=N)
+        Checkbutton(opts_frame, text="Show Corrections", variable=self.show_correct_var)\
             .pack(side=LEFT, padx=10, pady=10, anchor=N)
         Checkbutton(opts_frame, text="Show Contours", variable=self.show_contours_var)\
             .pack(side=LEFT, padx=10, pady=10, anchor=N)
@@ -79,6 +82,9 @@ class GuiSettingsUI(UserControl):
 
     def on_show_robots_changed(self, var):
         self.vision.gui.draw_robots = bool(var.value)
+
+    def on_show_correct_changed(self, var):
+        self.vision.gui.draw_correction = bool(var.value)
 
     def on_show_raw_changed(self, var):
         self.vision.camera.raw_output_mode = bool(var.value)
