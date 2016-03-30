@@ -1,3 +1,4 @@
+import cv2
 from cv2 import waitKey
 from util import tools
 from datetime import datetime
@@ -40,7 +41,6 @@ class VisionLauncher(object):
         """
         self.target_goal = goal
         self.visionwrap = None
-        self.vision1 = None
         self.pitch = pitch
         self.color_settings = color_settings
         self._started = False
@@ -175,6 +175,20 @@ class VisionLauncher(object):
     def close(self):
         self._closed = True
 
+    def add_dot(self, location, color):
+        self.visionwrap.gui.random_dots.add((location, color))
+
+    def remove_dot(self, location, color=None):
+        if color:
+            self.visionwrap.gui.random_dots = {
+                (loc, col) for (loc, col) in self.visionwrap.gui.random_dots
+                if loc[0] == location[0] and loc[1] == location[1] and col == color
+            }
+        else:
+            self.visionwrap.gui.random_dots = {
+                (loc, col) for (loc, col) in self.visionwrap.gui.random_dots
+                if loc[0] == location[0] and loc[1] == location[1]
+            }
 
 if __name__ == '__main__':
     import argparse
