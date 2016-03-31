@@ -30,7 +30,7 @@ class VisionLauncher(object):
     Launches the vision wrapper which calibrates the camera based on preset settings, takes care of object tracking
     and can optionally be called to display callibration GUI.
     """
-    def __init__(self, pitch, color_settings, team_colour, our_colour, launch_gui=False, pc_name=None, goal=None):
+    def __init__(self, pitch, color_settings, team_color, color_group09, color_group10, launch_gui=False, pc_name=None, goal=None):
         """
         :param pitch: [0, 1]                        0 is the one, closer to the door.
         :param color_settings: [0, small, 1, big]   0 or small for pitch color settings with small numbers (previously - pitch 0)
@@ -48,7 +48,7 @@ class VisionLauncher(object):
         self._cv = threading.Condition()
         self.launch_gui = launch_gui
         self.pc_name = pc_name
-        self.OUR_NAME = team_colour + ' + ' + our_colour
+        self.OUR_NAME = team_color + ' + ' + color_group09
         assert self.OUR_NAME in ROBOT_DESCRIPTIONS
 
     def launch_vision(self, robots_on_pitch=list()):

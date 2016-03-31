@@ -123,10 +123,10 @@ class VisionInterface(object):
 
     _launcher = None
 
-    def __init__(self,  team_colour, our_colour, pitch, color_settings, gui=True):
+    def __init__(self,  team_color, color_group09, color_group10, pitch, color_settings, gui=True):
         # Create new vision launcher
         from vision_launcher import VisionLauncher as _VisionLauncher
-        self._launcher = _VisionLauncher(pitch, color_settings, team_colour, our_colour, gui)
+        self._launcher = _VisionLauncher(pitch, color_settings, team_color, color_group09, color_group10, gui)
 
     def get_robots(self):
         """ Gets the robots currently visible on the pitch.
