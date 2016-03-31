@@ -83,23 +83,19 @@ class VisionWrapper:
         self.BALL_HOLDING_AREA_SCALE = 0.5
 
         for r_name in robot_details.keys():
+            role = 'ally'
             if robot_details[r_name]['main_colour'] != robot_details[our_name]['main_colour']:
-                self.robots.append(RobotInstance(r_name,
-                                                 robot_details[r_name]['main_colour'],
-                                                 robot_details[r_name]['side_colour'],
-                                                 robot_details[r_name]['offset_angle'],
-                                                 'enemy',
-                                                 r_name in robots_on_pitch))
-            else:
-                role = 'ally'
-                if r_name == our_name:
-                    role = 'group9'
-                self.robots.append(RobotInstance(r_name,
-                                                 robot_details[r_name]['main_colour'],
-                                                 robot_details[r_name]['side_colour'],
-                                                 robot_details[r_name]['offset_angle'],
-                                                 role,
-                                                 r_name in robots_on_pitch))
+                role = 'enemy'
+            elif r_name == our_name:
+                role = 'group9'
+
+            print "[WRAPPER] Setting %s to %s." % (r_name, role)
+            self.robots.append(RobotInstance(r_name,
+                                             robot_details[r_name]['main_colour'],
+                                             robot_details[r_name]['side_colour'],
+                                             robot_details[r_name]['offset_angle'],
+                                             role,
+                                             r_name in robots_on_pitch))
 
 
         # Draw various things on the image
