@@ -13,12 +13,18 @@ from interface import RobotType
 from time import time
 
 
+
 class VisionWrapper:
     """
     Class that handles vision
 
     """
-    def __init__(self, pitch, color_settings, our_side, robot_details,
+
+    ENEMY_SCALE = 1.
+    GROUP9_SCALE = .6
+    ALLY_SCALE = 1.
+
+    def __init__(self, pitch, color_settings, our_name, robot_details,
                  enable_gui=False, pc_name=None, robots_on_pitch=list(), goal=None):
         """
         Entry point for the SDP system.
@@ -28,7 +34,7 @@ class VisionWrapper:
             [int or string] color_settings  [0, small, 1, big] - 0 or small for pitch color settings with small numbers (previously - pitch 0)
                                             1 or big - pitch color settings with big numbers (previously - pitch 1)
             [string] colour                 The colour of our teams plates
-            [string] our_side               the side we're on - 'left' or 'right'
+            [string] our_name               our name
             [int] video_port                port number for the camera
 
             [boolean] enable_gui              Does not draw the normal image to leave space for GUI.
@@ -77,7 +83,7 @@ class VisionWrapper:
         self.BALL_HOLDING_AREA_SCALE = 0.5
 
         for r_name in robot_details.keys():
-            if robot_details[r_name]['main_colour'] != robot_details[our_side]['main_colour']:
+            if robot_details[r_name]['main_colour'] != robot_details[our_name]['main_colour']:
                 self.robots.append(RobotInstance(r_name,
                                                  robot_details[r_name]['main_colour'],
                                                  robot_details[r_name]['side_colour'],
@@ -85,11 +91,14 @@ class VisionWrapper:
                                                  'enemy',
                                                  r_name in robots_on_pitch))
             else:
+                role = 'ally'
+                if r_name == our_name:
+                    role = 'group9'
                 self.robots.append(RobotInstance(r_name,
                                                  robot_details[r_name]['main_colour'],
                                                  robot_details[r_name]['side_colour'],
                                                  robot_details[r_name]['offset_angle'],
-                                                 'ally',
+                                                 role,
                                                  r_name in robots_on_pitch))
 
 
@@ -131,7 +140,7 @@ class VisionWrapper:
         # self.postprocessing = Postprocessing()
         self.preprocessing = Preprocessing()
 
-        self.side = our_side
+        self.side = our_name
         self.frameQueue = []
 
         self.video = None
@@ -203,15 +212,15 @@ class VisionWrapper:
         ball = self.get_ball_position()
         if ball and ball[2]:
             for r in self.robots:
-                if r.name == robot_name:
+                if r.name == robot_name and r.visible:
                     if r.role == 'enemy':
-                        if r.is_point_in_grabbing_zone(ball[0], ball[1], role=r.role, scale=1., circular=False):
+                        if r.is_point_in_grabbing_zone(ball[0], ball[1], role=r.role, scale=self.ENEMY_SCALE, circular=False):
                             return True
                     elif r.role == 'group9':
-                        if r.is_point_in_grabbing_zone(ball[0], ball[1], role=r.role, scale=0.6, circular=True):
+                        if r.is_point_in_grabbing_zone(ball[0], ball[1], role=r.role, scale=self.GROUP9_SCALE, circular=True):
                             return True
                     else:
-                        if r.is_point_in_grabbing_zone(ball[0], ball[1], role=r.role, scale=1., circular=False):
+                        if r.is_point_in_grabbing_zone(ball[0], ball[1], role=r.role, scale=self.ALLY_SCALE, circular=False):
                             return True
                     break
         return False
@@ -250,7 +259,7 @@ class VisionWrapper:
             self.gui.draw_ball = not self.gui.draw_ball
         elif key == ord('n'):
             self.gui.draw_contours = not self.gui.draw_contours
-        # TODO: this was crashing everything
+        # THIS WAS CRASHING EVERYTHING
         # elif key == ord('j'):
         #     self.gui.draw_robot = not self.gui.draw_robot
         elif key == ord('i'):
@@ -318,6 +327,12 @@ class VisionWrapper:
                 for robot in self.robots:
                     # Only update robots we've set as being present
                     if not robot.present: continue
+
+                    if self.is_ball_in_range(robot.name):
+                        print "Robot \"%s\" has the ball!!!!!!!!!!! (role: %s)" % (robot.name, robot.role)
+                    else:
+                        print "Robot \"%s\": Nope. (role: %s)" % (robot.name, robot.role)
+
 
                     # Adds the side marker coordinates
                     other_circle_coords = []

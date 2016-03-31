@@ -149,9 +149,17 @@ class GUI:
                                                                 BGR_COMMON['black'], 1, 0))
 
 
+                            scale = 1.
+                            if r.role == 'enemy':
+                                scale = self.wrapper.ENEMY_SCALE
+                            elif r.role == 'ally':
+                                scale = self.wrapper.ALLY_SCALE
+                            elif r.role == 'group9':
+                                scale = self.wrapper.GROUP9_SCALE
+
                             # Draw Grabber zone
                             if r.role == 'enemy':
-                                box = cv2.boxPoints(r.grabbing_zone(role=r.role))
+                                box = cv2.boxPoints(r.grabbing_zone(role=r.role, scale=scale))
                                 box = np.int32(box)
                                 height, width = self.frame.shape[0:2]
                                 # Ellipse parameters
@@ -165,7 +173,7 @@ class GUI:
                                 thickness = 10
 
                             else:
-                                box = cv2.boxPoints(r.grabbing_zone())
+                                box = cv2.boxPoints(r.grabbing_zone(role=r.role, scale=scale))
                                 box = np.int32(box)
                                 height, width = self.frame.shape[0:2]
                                 # Ellipse parameters
@@ -186,10 +194,10 @@ class GUI:
                             cv2.imshow('frame2', cv2.drawContours(self.frame, [box], 0, BGR_COMMON['red'], 1))
 
                             # Draw robot holding area
-                            box = cv2.boxPoints(r.grabbing_zone(scale=wrapper.BALL_HOLDING_AREA_SCALE))
-                            box = np.int32(box)
-                            #cv2.imshow('frame2', cv2.ellipse(self.frame,(200,200),(80,50),0,180,360,(0,0,255),1))
-                            cv2.imshow('frame2', cv2.drawContours(self.frame, [box], 0, BGR_COMMON['green'], 1))
+                            # box = cv2.boxPoints(r.grabbing_zone(scale=wrapper.BALL_HOLDING_AREA_SCALE))
+                            # box = np.int32(box)
+                            # #cv2.imshow('frame2', cv2.ellipse(self.frame,(200,200),(80,50),0,180,360,(0,0,255),1))
+                            # cv2.imshow('frame2', cv2.drawContours(self.frame, [box], 0, BGR_COMMON['green'], 1))
 
                             # ball = wrapper.world_objects['ball']
                             # if ball and ball[2]:
