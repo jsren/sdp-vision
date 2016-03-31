@@ -1,6 +1,6 @@
 from common import *
 
-import util.robot_instance
+from ..util import robot_instance
 
 class TrackerSettingsUI(UserControl):
 
@@ -30,7 +30,7 @@ class TrackerSettingsUI(UserControl):
         frame = LabelFrame(self, text="Manual Adjustment")
         frame.pack(padx=10, pady=10, ipadx=8, ipady=8)
 
-        radjust_var = UserVariable(self, int, int(util.robot_instance.marker_angle_offset),
+        radjust_var = UserVariable(self, int, int(robot_instance.marker_angle_offset),
                                    self.on_radjust_changed)
 
         Scale(frame, variable=radjust_var, from_=-180, to=180, orient=HORIZONTAL,
@@ -39,7 +39,7 @@ class TrackerSettingsUI(UserControl):
 
 
     def on_radjust_changed(self, var):
-        util.robot_instance.marker_angle_offset = var.value
+        robot_instance.marker_angle_offset = var.value
 
     def on_detach(self):
         self.disintegrate(self._trackers)

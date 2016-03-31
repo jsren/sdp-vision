@@ -132,4 +132,4 @@ class MainWindow(Tk):
         MainWindow().show(get_windows_func())
 
 
-from gui.main import MainUI
+from main import MainUI

@@ -1,6 +1,6 @@
 from common import *
 from Tkinter import *
-from config import Configuration
+from ..config import Configuration
 
 from functools import partial
 

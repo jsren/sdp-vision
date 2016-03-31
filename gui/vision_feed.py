@@ -9,10 +9,10 @@ try:
 except:
     pass
 
-from colors import *
-from config import Configuration
 from math import radians, cos, sin, isnan
-from robot_tracker import ROBOT_DISTANCE
+from ..colors import *
+from ..config import Configuration
+from ..robot_tracker import ROBOT_DISTANCE
 
 from Tkinter import *
 
@@ -123,7 +123,7 @@ class GUI:
                             # Only for debugging circle corrector. Comment out afterwards. ALSO THIS CRASHES HORRIBLY SOMETIMES
                             # due to getting out of bounds when robot is near the edge.
                             if self.draw_correction:
-                                from robot_tracker import CORRECTION_MAX_DISTANCE, CORRECTION_STEP, CORRECTION_AREA_RADIUS
+                                from ..robot_tracker import CORRECTION_MAX_DISTANCE, CORRECTION_STEP, CORRECTION_AREA_RADIUS
                                 try:
                                     cv2.imshow('frame2', cv2.circle(self.frame, (int(clx), int(cly)), CORRECTION_AREA_RADIUS,
                                                                     BGR_COMMON['yellow'], 1, 0))

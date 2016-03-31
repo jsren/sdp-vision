@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/sdp-vision.iml" filepath="$PROJECT_DIR$/.idea/sdp-vision.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/vision.iml" filepath="$PROJECT_DIR$/.idea/vision.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/vision.iml" filepath="$PROJECT_DIR$/.idea/vision.iml" />
     </modules>
   </component>
 </project>

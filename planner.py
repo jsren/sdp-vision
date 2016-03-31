@@ -333,7 +333,7 @@ class Planner:
        required_robot_position_y = ((opponent2_pos[1] - opponent1_pos[1])/(opponent2_pos[0] - opponent1_pos[0]))*(our_robot_pos[0] - opponent1_pos[0]) + opponent1_pos[1]
        #TODO:RECHECK PIXELS
        #moving_distance = (required_robot_position_y - our_robot_pos[1])*(220.0/379)
-       moving_distance = px_to_cm(np.array((0,required_robot_position_y)) - np.array((0,our_robot_pos[1])))[1]
+       moving_distance = self.px_to_cm(np.array((0,required_robot_position_y)) - np.array((0,our_robot_pos[1])))[1]
        ser.write("(" + str(int(moving_distance)) + ",0,0)\n")
 
     def begin_task7(self):
