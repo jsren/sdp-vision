@@ -73,10 +73,10 @@ class StatusUI(UserControl):
         self.latency_label.configure(text="Vision latency: {:5.3f} ms"
                                      .format(self.vision.get_latency_seconds() * 1000))
 
-        robot_str = "\n".join(("[%s\t] ({:5.2f}, {:5.2f})"%n).format(*p)
+        robot_str = "\n".join(("[%s]\t ({:5.2f}, {:5.2f})"%n).format(*p)
                   for (n, p) in self.vision.get_all_robots().items())
 
-        heading_str = "\n".join((u"[{0:s}\t] {{:5.2f}}°".format(n)).format(p)
+        heading_str = "\n".join((u"[{0:s}]\t {{:5.2f}}°".format(n)).format(p)
                     for (n, p) in self.vision.get_robot_headings().items())
 
         self.robot_loc_label.configure(text="Robot Positions:\n" + robot_str)
