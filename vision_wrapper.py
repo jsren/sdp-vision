@@ -328,12 +328,6 @@ class VisionWrapper:
                     # Only update robots we've set as being present
                     if not robot.present: continue
 
-                    if self.is_ball_in_range(robot.name):
-                        print "Robot \"%s\" has the ball!!!!!!!!!!! (role: %s)" % (robot.name, robot.role)
-                    else:
-                        print "Robot \"%s\": Nope. (role: %s)" % (robot.name, robot.role)
-
-
                     # Adds the side marker coordinates
                     other_circle_coords = []
                     for marker in topplate.markers[1:]:
