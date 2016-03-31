@@ -162,6 +162,9 @@ class Camera(object):
 
         self._raw_output = False
 
+        self.video = None
+
+
     @property
     def raw_output_mode(self):
         return self._raw_output

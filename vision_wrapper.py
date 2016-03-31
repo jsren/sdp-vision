@@ -134,6 +134,8 @@ class VisionWrapper:
         self.side = our_side
         self.frameQueue = []
 
+        self.video = None
+
     def get_robots_raw(self):
         # Filter robots that have no position
         return [[r.name, r.visible, r.position, r.heading, RobotType.UNKNOWN]
@@ -279,6 +281,23 @@ class VisionWrapper:
         return m, array.count(m)
 
 
+    def start_video(self, title):
+        if self.video is not None:
+            try:
+                self.video.release()
+            except Exception, e:
+                print "[WARNING] Error releasing previous video:", e
+        self.video = cv2.VideoWriter('recordings/' + "test" + '.mpeg', -1, int(self.camera.capture.get(cv2.CAP_PROP_FPS)),
+                                     (int(self.camera.capture.get(3)), int(self.camera.capture.get(4))))
+
+    def end_video(self):
+        try:
+            self.video.release()
+        except Exception, e:
+            print "[WARNING] Error releasing previous video:", e
+        finally:
+            self.video = None
+
     def update(self):
         """ Processes the current frame. """
         self.frame = self.camera.get_frame()
@@ -325,9 +344,17 @@ class VisionWrapper:
         self.delta_t = t - self.t0
         self.t0 = t
 
+        video_frame = self.frame
+
         # Perform GUI update
         if self.enable_gui:
-            self.gui.update(self)
+            video_frame = self.gui.update(self)
+
+        # Now write frame to video, if enabled
+        if self.video is not None:
+            self.video.write(video_frame)
+
+
 
 
 

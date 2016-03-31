@@ -180,6 +180,12 @@ class VisionInterface(object):
     def get_zones(self):
         return self._launcher.get_zones()
 
+    def add_dot(self, location, color):
+        return self._launcher.add_dot(location, color)
+
+    def remove_dot(self, location, color=None):
+        return self._launcher.remove_dot(location, color)
+
     @property
     def pitch_dimensions(self):
         return self._launcher.get_pitch_dimensions()

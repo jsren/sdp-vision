@@ -25,7 +25,7 @@ class GuiSettingsUI(UserControl):
         self.show_correct_var = UserVariable(self, int, False, self.on_show_correct_changed, 500)
         self.show_raw_var = UserVariable(self, int, False, self.on_show_raw_changed, 500)
 
-        opts_frame = LabelFrame(self, text="Video Feed Ooptions")
+        opts_frame = LabelFrame(self, text="Video Feed Options")
         opts_frame.pack()
 
         Checkbutton(opts_frame, text="Show Ball", variable=self.show_ball_var)\
@@ -76,6 +76,28 @@ class GuiSettingsUI(UserControl):
 
         self.reload_config()
 
+        self.is_recording = False
+
+        video_frame = LabelFrame(self, text="Record Video")
+
+        self.vid_start_btn = Button(video_frame, text="Begin Record", command=self.on_begin_record,
+               padx=10, pady=10, width=15)
+        self.vid_start_btn.pack(side=LEFT)
+
+        self.vid_end_btn = Button(video_frame, text="End Record", command=self.on_end_record,
+               padx=10, pady=10, width=15)
+        self.vid_end_btn.pack(side=LEFT)
+
+        self.title_var = UserVariable(self, str, self._get_default_title())
+        self.video_entry = Entry(video_frame, textvariable=self.title_var, width=30)
+        self.video_entry.pack(padx=10, pady=10)
+
+        video_frame.pack(padx=5, ipadx=5, pady=5, ipady=5)
+
+
+    def _get_default_title(self):
+        from time import localtime, strftime
+        return strftime("%Y_%m_%d %H:%M:%S", localtime())
 
 
     def on_show_contours_changed(self, var):
@@ -121,3 +143,27 @@ class GuiSettingsUI(UserControl):
 
     def on_deattach(self):
         self.reintegrate(self.vision)
+
+    def on_begin_record(self, *args):
+        self.video_entry['state']   = DISABLED
+        self.vid_start_btn['state'] = DISABLED
+        self.vid_end_btn['state']   = NORMAL
+
+        self.vision.start_video(self.title_var.value)
+
+    def on_end_record(self, *args):
+        self.vision.end_video()
+
+        self.title_var.value = self._get_default_title()
+
+        self.vid_end_btn['state']   = DISABLED
+        self.video_entry['state']   = NORMAL
+        self.vid_start_btn['state'] = NORMAL
+
+
+
+
+
+
+
+
