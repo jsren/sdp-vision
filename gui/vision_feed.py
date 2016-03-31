@@ -45,17 +45,14 @@ class GUI:
         self.draw_contours      = True
         self.draw_correction    = False  # Correction crashes things sometimes due to getting out of image bounds
 
-        self.input_mode = None
-        self.p1         = None
+        self.input_mode = 'measure'
+        self.p1, self.p2 = None, None
 
         self.see_ball = False
 
         # create GUI
         # The first numerical value is the starting point for the vision feed
         #cv2.namedWindow('frame2')
-
-        # Handle mouse clicks
-        cv2.setMouseCallback('frame2', self.on_mouse_event)
 
         # Allow easy access from outside
         GUI.instance = self
@@ -64,17 +61,25 @@ class GUI:
 
 
     def on_mouse_event(self, event, x, y, *_):
-        if self.input_mode == 'color_picker':
-            self.p1 = (x, y)
         if event == cv2.EVENT_LBUTTONDOWN:
+            if self.input_mode == 'color_picker':
+                self.p1 = (x, y)
+                print "Colour:", self.frame[y, x], "@", (x, y)
             if self.input_mode == 'measure':
-                if self.p1 is not None:
+                if self.p1 is None:
+                    self.p1 = (x, y)
+                elif self.p2 is None:
                     self.p2 = (x, y)
-
-        print "Colour:", self.frame[x, y], "@", (x, y)
+                    print "Measure: (%d, %d)" %(self.p2[0] - self.p1[0],
+                                                self.p2[1] - self.p1[1])
+                else:
+                    self.p1 = (x, y)
+                    self.p2 = None
 
 
     def update(self, wrapper):
+        # Handle mouse events
+        cv2.setMouseCallback('frame2', self.on_mouse_event)
 
         try:
             self.frame = wrapper.frame
@@ -95,10 +100,11 @@ class GUI:
             # Draw frame
             cv2.imshow('frame2', self.frame)
 
-
-            if self.input_mode == 'color_picker':
-                img = self.frame[np.array(self.p1) - np.array([5, 5]),
-                                 np.array(self.p1) + np.array([5, 5])]
+            # TODO: Dunno what this does?
+            # if False and self.input_mode == 'color_picker' and self.p1:
+            #     img = self.frame[np.array(self.p1) - np.array([5, 5]),
+            #                      np.array(self.p1) + np.array([5, 5])]
+            #     print img
 
             # Draw random circles, requested from elsewhere
             for (pos, color) in self.random_dots:
@@ -260,24 +266,10 @@ class GUI:
                                                          (abs(int(self.x_ball+(5*(self.x_ball_prev-self.x_ball_prev_prev)))),
                                                           abs(int(self.y_ball+(5*(self.y_ball_prev-self.y_ball_prev_prev))))),
                                                          (0,255,0), 3, 10))
-        # def draw_dot(pos, color):
-        #     """
-        #     Adds dot to draw on the vision feed.
-        #     :param pos: (x, y)
-        #     :param color: string. color must be present in BGR_COMMON
-        #     """
-        #     # noinspection PyShadowingNames
-        #     pos = (int(pos[0]), int(pos[1]))
-        #     self.random_dots.add((pos, color))
-        #
-        # def clear_dots():
-        #     """
-        #     Clears all the random dots drawn on the vision feed
-        #     """
-        #     self.random_dots = set()
 
-        except Exception, e:
-            print "[ERROR] Exception drawing vision feed:", e.message
+        #except Exception, e:
+        #    print "[ERROR] Exception drawing vision feed:", e.message
+        finally: pass
 
         # Return frame with overlay drawn
         return self.frame

@@ -99,8 +99,6 @@ class CalibrationUI(UserControl):
         Button(self.button_frame, text="Quit", command=self.close,
                 padx=10, pady=10, width=15).pack(side=RIGHT)
 
-
-
         Label(self.text_frame, text="Press 'q' to quit").pack(side=LEFT)
 
         # Perform initial update
