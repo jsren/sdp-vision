@@ -68,6 +68,7 @@ class UserControl(Frame):
             master.wm_title(title)
             master.resizable(0, 0)
             master.bind("<Key-q>", lambda e: self.close())
+            master.protocol("WM_DELETE_WINDOW", self.close)
         else:
             self.window = master._nametowidget(master.winfo_parent())
 
