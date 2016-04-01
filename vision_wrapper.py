@@ -21,7 +21,7 @@ class VisionWrapper:
     """
 
     ENEMY_SCALE = 1.
-    GROUP9_SCALE = 1.3
+    GROUP9_SCALE = 1.
     ALLY_SCALE = 1.
 
     def __init__(self, pitch, color_settings, our_name, robot_details,
@@ -80,7 +80,7 @@ class VisionWrapper:
         self.ball_index = 0
         self.ball_states = [None] * self.ball_median_size
 
-        self.BALL_HOLDING_AREA_SCALE = 0.5
+        self.BALL_HOLDING_AREA_SCALE = 0.1
 
         for r_name in robot_details.keys():
             role = 'ally'
