@@ -42,7 +42,8 @@ class UserVariable(Variable, object):
 
     @value.setter
     def value(self, value):
-        assert isinstance(value, self.type)
+        if not isinstance(value, self.type):
+            value = self.type(value)
         self._value   = value
         self._changed = True
 

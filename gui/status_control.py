@@ -19,47 +19,27 @@ class StatusUI(UserControl):
             Button(self, text="Re-attach", command=self.on_deattach,
                    padx=2, pady=2, width=8).pack(anchor=NE)
 
-        self.img_ball = ImageTk.PhotoImage(Image.open(
-            path.join(path.dirname(__file__), "../images/ball.jpg")
-        ))
-        self.img_noball = ImageTk.PhotoImage(Image.open(
-            path.join(path.dirname(__file__), "../images/no_ball.jpg")
-        ))
-
-        self.ball_status_var = UserVariable(self.window, bool, False,
-                                    self.on_ball_status_changed, 500)
-
         self.frame = Frame(self)
         self.frame.pack(padx=10, pady=10, ipadx=8, ipady=8)
 
-        self.ball_status = Label(self.frame, image=self.img_noball)
-        self.ball_status.pack(fill=X, padx=15)
-
-        self.target_goal_label = Label(self.frame, text = "Target Goal UKNOWN")
-        self.target_goal_label.pack(fill=X, padx=15)
-
         self.ball_loc_label = Label(self.frame, text = "Ball Location ")
-        self.ball_loc_label.pack(fill=X, padx=15)
+        self.ball_loc_label.pack(padx=15)
 
         # Vision latency display
         self.latency_label = Label(self.frame, text = "Vision latency ")
-        self.latency_label.pack(fill=X, padx=15)
+        self.latency_label.pack(padx=15)
 
         self.robot_loc_label = Label(self.frame, text = "Robot Locations ")
-        self.robot_loc_label.pack(fill=X, padx=15)
+        self.robot_loc_label.pack(padx=15)
 
         self.robot_hed_label = Label(self.frame, text = "Robot Headings ")
-        self.robot_hed_label.pack(fill=X, padx=15)
+        self.robot_hed_label.pack(padx=15)
 
         self.window.after(300, self.update_vision_values)
         self.window.after(600, self.update_variables)
 
         StatusUI.instance = self
 
-
-    def on_ball_status_changed(self, var):
-        self.ball_status.configure(
-            image=self.img_ball if var.value else self.img_noball)
 
     def update_vision_values(self, *_):
         if self.vision.target_goal:
@@ -109,20 +89,22 @@ class StatusUI(UserControl):
                 var = UserVariable(self, type, initial_value, self._update_label, 200)
 
                 base_label = label + ': '
-                lbl = Label(self.frame, text=base_label)
-                lbl.pack(fill=X, padx=15)
+                lbl = Label(self.frame, text=base_label + str(initial_value))
+                lbl.pack(padx=15)
                 lbl.base_label = base_label
                 var.label = lbl
 
                 self.user_vars[label] = (var, None, True)
+        self.window.after(600, self.update_variables)
 
     @staticmethod
     def add_variable(label, type, initial_value=None):
-        assert label not in StatusUI.instance.user_vars
-        StatusUI.instance.user_vars[label] = (type, initial_value, False)
+        if label not in StatusUI.instance.user_vars:
+            StatusUI.instance.user_vars[label] = (type, initial_value, False)
 
     @staticmethod
     def update_variable(label, value):
-        StatusUI.instance.user_vars[label][0].value = value
+        if StatusUI.instance.user_vars[label][2]:
+            StatusUI.instance.user_vars[label][0].value = value
 
 StatusUI.instance = None
