@@ -21,7 +21,7 @@ class VisionWrapper:
     """
 
     ENEMY_SCALE = 1.
-    GROUP9_SCALE = .8
+    GROUP9_SCALE = 1.3
     ALLY_SCALE = 1.
 
     def __init__(self, pitch, color_settings, our_name, robot_details,
@@ -213,7 +213,7 @@ class VisionWrapper:
                         if r.is_point_in_grabbing_zone(ball[0], ball[1], role=r.role, scale=self.ENEMY_SCALE, circular=False):
                             return True
                     elif r.role == 'group9':
-                        if r.is_point_in_grabbing_zone(ball[0], ball[1], role=r.role, scale=self.GROUP9_SCALE, circular=True):
+                        if r.is_point_in_grabbing_zone(ball[0], ball[1], role=r.role, scale=self.GROUP9_SCALE, circular=False):
                             return True
                     else:
                         if r.is_point_in_grabbing_zone(ball[0], ball[1], role=r.role, scale=self.ALLY_SCALE, circular=False):
