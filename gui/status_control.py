@@ -109,20 +109,22 @@ class StatusUI(UserControl):
                 var = UserVariable(self, type, initial_value, self._update_label, 200)
 
                 base_label = label + ': '
-                lbl = Label(self.frame, text=base_label)
+                lbl = Label(self.frame, text=base_label + str(initial_value))
                 lbl.pack(fill=X, padx=15)
                 lbl.base_label = base_label
                 var.label = lbl
 
                 self.user_vars[label] = (var, None, True)
+        self.window.after(600, self.update_variables)
 
     @staticmethod
     def add_variable(label, type, initial_value=None):
-        assert label not in StatusUI.instance.user_vars
-        StatusUI.instance.user_vars[label] = (type, initial_value, False)
+        if label not in StatusUI.instance.user_vars:
+            StatusUI.instance.user_vars[label] = (type, initial_value, False)
 
     @staticmethod
     def update_variable(label, value):
-        StatusUI.instance.user_vars[label][0].value = value
+        if StatusUI.instance.user_vars[label][2]:
+            StatusUI.instance.user_vars[label][0].value = value
 
 StatusUI.instance = None
