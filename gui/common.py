@@ -111,6 +111,9 @@ class MainWindow(Tk):
 
         self.close_var = UserVariable(self, bool, False, self.on_close_changed)
 
+        assert MainWindow.instance is None
+        MainWindow.instance = self
+
     def show(self, windows):
         self.update()
         self._windows = windows
@@ -122,6 +125,12 @@ class MainWindow(Tk):
         if var.value:
             self.destroy()
 
+    @staticmethod
+    def close_instance():
+        if MainWindow.instance is None:
+            print "[WARN] No MainWindow to close!"
+        else:
+            MainWindow.instance.close_var.value = True
 
     @property
     def windows(self):
@@ -131,5 +140,6 @@ class MainWindow(Tk):
     def create_and_show(get_windows_func):
         MainWindow().show(get_windows_func())
 
+MainWindow.instance = None
 
 from main import MainUI

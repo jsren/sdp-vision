@@ -163,7 +163,10 @@ class VisionLauncher(object):
                     with self._cv:
                         self._cv.notifyAll()
         finally:
-            # TODO - close the tk window here?
+            # Close TK UI
+            print "[VISION] Closing TK GUI"
+            from gui.common import MainWindow
+            MainWindow.close_instance()
 
             print "[VISION] Releasing camera"
             self.visionwrap.camera.stop_capture()
