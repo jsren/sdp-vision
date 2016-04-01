@@ -187,6 +187,12 @@ class VisionInterface(object):
     def remove_dot(self, location, color=None):
         return self._launcher.remove_dot(location, color)
 
+    def create_gui_variable(self, label, type, initial_value=None):
+        return self._launcher.create_gui_variable(label, type, initial_value)
+
+    def update_gui_variable(self, label, value):
+        return self._launcher.update_gui_variable(label, value)
+
     @property
     def pitch_dimensions(self):
         return self._launcher.get_pitch_dimensions()

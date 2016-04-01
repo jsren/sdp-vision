@@ -10,6 +10,8 @@ import numpy as np
 from gui import vision_feed
 import os
 
+from gui.status_control import StatusUI
+
 # Dont think we need this
 
 # goals = {
@@ -192,6 +194,13 @@ class VisionLauncher(object):
                 (loc, col) for (loc, col) in self.visionwrap.gui.random_dots
                 if loc[0] == location[0] and loc[1] == location[1]
             }
+
+    def create_gui_variable(self, label, type, initial_value=None):
+        return StatusUI.add_variable(label, type, initial_value)
+
+    def update_gui_variable(self, label, value):
+        return StatusUI.update_variable(label, value)
+
 
 if __name__ == '__main__':
     import argparse
