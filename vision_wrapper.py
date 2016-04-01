@@ -21,7 +21,7 @@ class VisionWrapper:
     """
 
     ENEMY_SCALE = 1.
-    GROUP9_SCALE = .6
+    GROUP9_SCALE = .8
     ALLY_SCALE = 1.
 
     def __init__(self, pitch, color_settings, our_name, robot_details,
