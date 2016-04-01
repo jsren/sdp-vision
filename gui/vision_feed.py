@@ -79,7 +79,7 @@ class GUI:
 
     def update(self, wrapper):
         # Handle mouse events
-        cv2.setMouseCallback('frame2', self.on_mouse_event)
+        #cv2.setMouseCallback('frame2', self.on_mouse_event)
 
         try:
             self.frame = wrapper.frame
